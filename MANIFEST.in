@@ -1,0 +1,7 @@
+include LICENSE
+
+global-exclude *.py[co]
+
+graft flask_demo
+graft tests
+graft webauthn/trusted_attestation_roots
