@@ -44,6 +44,9 @@ setup(
         'Programming Language :: Python'
     ],
     install_requires=[
-        'cbor2>=4.0.1'
+        'cbor2>=4.0.1',
+        'cryptography>=2.0.3',
+        'pyOpenSSL>=16.0.0',
+        'six>=1.11.0'
     ]
 )
