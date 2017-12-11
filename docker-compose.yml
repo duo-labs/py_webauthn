@@ -1,0 +1,10 @@
+version: '2'
+services:
+  app:
+    build: .
+    ports:
+    - "5000:5000"
+    container_name: py_webauthn
+    volumes:
+        - ./webauthn:/app/webauthn:ro
+        - ./flask_demo:/app/flask_demo:ro
