@@ -19,37 +19,37 @@ make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
 Creating a `WebAuthnUser` object. Used during the assertion (login) process:
 ```python
 webauthn_user = webauthn.WebAuthnUser(
-	user.id,
-	user.username,
-	user.display_name,
-	user.icon_url,
-	user.credential_id,
-	user.pub_key,
-	user.sign_count,
-	user.rp_id)
+    user.id,
+    user.username,
+    user.display_name,
+    user.icon_url,
+    user.credential_id,
+    user.pub_key,
+    user.sign_count,
+    user.rp_id)
 ```
 
 Generating assertion options, (to be passed to `navigator.credentials.get`):
 ```python
 webauthn_assertion_options = webauthn.WebAuthnAssertionOptions(
-	webauthn_user,
-	challenge)
+    webauthn_user,
+    challenge)
 ```
 
 Verifying a registration response, (result of `navigator.credentials.create`):
 ```python
 webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(
-	RP_ID,
-	ORIGIN,
-	registration_response,
-	challenge,
-	trust_anchor_dir,
-	trusted_attestation_cert_required)
+    RP_ID,
+    ORIGIN,
+    registration_response,
+    challenge,
+    trust_anchor_dir,
+    trusted_attestation_cert_required)
 
 try:
-	webauthn_credential = webauthn_registration_response.verify()
+    webauthn_credential = webauthn_registration_response.verify()
 except Exception as e:
-	return jsonify({'fail': 'Registration failed. Error: {}'.format(e)})
+    return jsonify({'fail': 'Registration failed. Error: {}'.format(e)})
 
 # Create User
 ```
@@ -57,26 +57,26 @@ except Exception as e:
 Verifying an assertion response, (result of `navigator.credentials.get`):
 ```python
 webauthn_user = webauthn.WebAuthnUser(
-	user.ukey,
-	user.username,
-	user.display_name,
-	user.icon_url,
-	user.credential_id,
-	user.pub_key,
-	user.sign_count,
-	user.rp_id)
+    user.ukey,
+    user.username,
+    user.display_name,
+    user.icon_url,
+    user.credential_id,
+    user.pub_key,
+    user.sign_count,
+    user.rp_id)
 
 webauthn_assertion_response = webauthn.WebAuthnAssertionResponse(
-	webauthn_user,
-	assertion_response,
-	challenge,
-	origin,
-	uv_required=False)  # User Verification
+    webauthn_user,
+    assertion_response,
+    challenge,
+    origin,
+    uv_required=False)  # User Verification
 
 try:
-	sign_count = webauthn_assertion_response.verify()
+    sign_count = webauthn_assertion_response.verify()
 except Exception as e:
-	return jsonify({'fail': 'Assertion failed. Error: {}'.format(e)})
+    return jsonify({'fail': 'Assertion failed. Error: {}'.format(e)})
 
 # Update counter.
 user.sign_count = sign_count
