@@ -5,7 +5,7 @@ PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registra
 # Usage
 
 Generating credential options, (to be passed to `navigator.credentials.create`):
-```
+```python
 make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
     challenge,
     rp_name,
@@ -17,7 +17,7 @@ make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
 ```
 
 Creating a `WebAuthnUser` object. Used during the assertion (login) process:
-```
+```python
 webauthn_user = webauthn.WebAuthnUser(
 	user.id,
 	user.username,
@@ -30,14 +30,14 @@ webauthn_user = webauthn.WebAuthnUser(
 ```
 
 Generating assertion options, (to be passed to `navigator.credentials.get`):
-```
+```python
 webauthn_assertion_options = webauthn.WebAuthnAssertionOptions(
 	webauthn_user,
 	challenge)
 ```
 
 Verifying a registration response, (result of `navigator.credentials.create`):
-```
+```python
 webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(
 	RP_ID,
 	ORIGIN,
@@ -55,7 +55,7 @@ except Exception as e:
 ```
 
 Verifying an assertion response, (result of `navigator.credentials.get`):
-```
+```python
 webauthn_user = webauthn.WebAuthnUser(
 	user.ukey,
 	user.username,
