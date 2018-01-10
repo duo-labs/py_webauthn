@@ -345,15 +345,15 @@ class WebAuthnRegistrationResponse(object):
         cpk = cbor2.loads(credential_pub_key)
 
         # Credential public key parameter names via the COSE_Key spec (for ES256).
-        alg = 3
-        x = -2
-        y = -3
+        alg_key = 3
+        x_key = -2
+        y_key = -3
 
-        if alg not in cpk:
+        if alg_key not in cpk:
             raise RegistrationRejectedException(
                 "Credential public key missing required algorithm parameter.")
 
-        required_keys = {alg, x, y}
+        required_keys = {alg_key, x_key, y_key}
         cpk_keys = cpk.keys()
 
         if not set(cpk_keys).issuperset(required_keys):
@@ -369,7 +369,7 @@ class WebAuthnRegistrationResponse(object):
 
         # For now we are only supporting ES256 as an algorithm.
         ES256 = -7
-        if cpk[alg] != ES256:
+        if cpk[alg_key] != ES256:
             raise RegistrationRejectedException("Unsupported algorithm.")
 
         # Generate the claimed to-be-signed data as specified in
@@ -384,8 +384,8 @@ class WebAuthnRegistrationResponse(object):
         pem_public_key = crypto.dump_publickey(
             crypto.FILETYPE_PEM, x509_attestation_cert.get_pubkey())
         signature = att_stmt['sig']
-        x = long(cpk[-2].encode('hex'), 16)
-        y = long(cpk[-3].encode('hex'), 16)
+        x = long(cpk[x_key].encode('hex'), 16)
+        y = long(cpk[y_key].encode('hex'), 16)
         user_ec = EllipticCurvePublicNumbers(
             x, y,
             SECP256R1()).public_key(
