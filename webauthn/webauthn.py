@@ -330,19 +330,35 @@ class WebAuthnRegistrationResponse(object):
         b64_cred_id = _webauthn_b64_encode(cred_id)
         credential_pub_key = attestation_data[18 + credential_id_len:]
 
-        # The credential public key encoded in COSE_Key format, as
-        # defined in Section 7 of [RFC8152]. The encoded credential
-        # public key MUST contain the "alg" parameter and MUST NOT
-        # contain any other optional parameters. The "alg" parameter
-        # MUST contain a COSEAlgorithmIdentifier value.
-        cpk = cbor2.loads(credential_pub_key)
-        if 'alg' not in cpk:
-            raise RegistrationRejectedException(
-                "Credential public key missing required 'alg' parameter.")
+        # The [=credential public key=] encoded in COSE_Key format, as
+        # defined in Section 7 of [[#RFC8152]], using the
+        # [=CTAP canonical CBOR encoding form=].
 
-        if sorted(cpk.keys()) != ['alg', 'x', 'y']:
+        # The COSE_Key-encoded [=credential public key=] MUST contain the optional "alg"
+        # parameter and MUST NOT contain any other optional parameters
+        # The "alg" parameter MUST contain a {{COSEAlgorithmIdentifier}} value.
+
+        # The encoded [=credential public key=] MUST also contain any additional
+        # required parameters stipulated by the relevant key type specification,
+        # i.e., required for the key type "kty" and algorithm "alg"
+        # (see Section 8 of[[RFC8152]]).
+        cpk = cbor2.loads(credential_pub_key)
+
+        # Credential public key parameter names via the COSE_Key spec (for ES256).
+        alg_key = 3
+        x_key = -2
+        y_key = -3
+
+        if alg_key not in cpk:
             raise RegistrationRejectedException(
-                'Credential public key must not contain any optional parameters.')
+                "Credential public key missing required algorithm parameter.")
+
+        required_keys = {alg_key, x_key, y_key}
+        cpk_keys = cpk.keys()
+
+        if not set(cpk_keys).issuperset(required_keys):
+            raise RegistrationRejectedException(
+                'Credential public key must match COSE_Key spec.')
 
         # A COSEAlgorithmIdentifier's value is a number identifying
         # a cryptographic algorithm. The algorithm identifiers SHOULD
@@ -350,8 +366,11 @@ class WebAuthnRegistrationResponse(object):
         # [IANA-COSE-ALGS-REG], for instance, -7 for "ES256" and -257
         # for "RS256".
         # https://www.iana.org/assignments/cose/cose.xhtml#algorithms
-        if cpk['alg'] not in ('ES256', 'RS256'):
-            raise RegistrationRejectedException("Unsupported 'alg' type.")
+
+        # For now we are only supporting ES256 as an algorithm.
+        ES256 = -7
+        if cpk[alg_key] != ES256:
+            raise RegistrationRejectedException("Unsupported algorithm.")
 
         # Generate the claimed to-be-signed data as specified in
         # [FIDO-U2F-Message-Formats] section 4.3, with the application
@@ -365,8 +384,8 @@ class WebAuthnRegistrationResponse(object):
         pem_public_key = crypto.dump_publickey(
             crypto.FILETYPE_PEM, x509_attestation_cert.get_pubkey())
         signature = att_stmt['sig']
-        x = long(cpk['x'].encode('hex'), 16)
-        y = long(cpk['y'].encode('hex'), 16)
+        x = long(cpk[x_key].encode('hex'), 16)
+        y = long(cpk[y_key].encode('hex'), 16)
         user_ec = EllipticCurvePublicNumbers(
             x, y,
             SECP256R1()).public_key(
