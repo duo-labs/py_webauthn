@@ -14,7 +14,7 @@
             {% endif %}
         {% endwith %}
         {% if current_user.is_authenticated %}
-        <p>Logged in as {{ current_user.username|safe }} | <a href="{{ url_for('logout') }}">Logout</a></p>
+        <p>Logged in as {{ current_user.username }} | <a href="{{ url_for('logout') }}">Logout</a></p>
         {% else %}
             <h2>Register</h2>
             <form name="register" method="get">
