@@ -44,7 +44,9 @@ webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(
     registration_response,
     challenge,
     trust_anchor_dir,
-    trusted_attestation_cert_required)
+    trusted_attestation_cert_required,
+    self_attestation_permitted,
+    none_attestation_permitted)
 
 try:
     webauthn_credential = webauthn_registration_response.verify()
@@ -100,8 +102,19 @@ To run the [Flask][1] demo with [Docker][5]:
 2. `docker-compose up -d`
 3. Go to [http://localhost:5000][4] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
+# Note
+
+Currently, PyWebAuthn does not support performing the following optional verifications.
+
+* [Token Binding ID][6]
+* [Client Extensions][7]
+* [Authenticator Extensions][8]
+
 [1]: https://www.w3.org/TR/webauthn/
 [2]: https://www.mozilla.org/en-US/firefox/channel/desktop/
 [3]: http://flask.pocoo.org/
 [4]: http://localhost:5000
 [5]: https://www.docker.com/
+[6]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
+[7]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-clientextensions
+[8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-authenticatorextensions

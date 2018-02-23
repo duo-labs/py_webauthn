@@ -25,6 +25,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(
     os.path.join(
         os.path.dirname(os.path.abspath(__name__)), 'webauthn.db'))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 sk = os.environ.get('FLASK_SECRET_KEY')
 app.secret_key = sk if sk else os.urandom(40)
 db.init_app(app)
@@ -147,6 +148,8 @@ def verify_credential_info():
     registration_response = request.form
     trust_anchor_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), TRUST_ANCHOR_DIR)
     trusted_attestation_cert_required = True
+    self_attestation_permitted = False
+    none_attestation_permitted = True
 
     webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(
         RP_ID,
@@ -154,7 +157,9 @@ def verify_credential_info():
         registration_response,
         challenge,
         trust_anchor_dir,
-        trusted_attestation_cert_required)
+        trusted_attestation_cert_required,
+        self_attestation_permitted,
+        none_attestation_permitted)
 
     try:
         webauthn_credential = webauthn_registration_response.verify()
