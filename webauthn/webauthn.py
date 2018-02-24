@@ -217,29 +217,19 @@ class WebAuthnRegistrationResponse(object):
         self.challenge = challenge
         self.trust_anchor_dir = trust_anchor_dir
         self.trusted_attestation_cert_required = trusted_attestation_cert_required
+
+        # With self attestation, the credential public key is
+        # also used as the attestation public key.
         self.self_attestation_permitted = self_attestation_permitted
+
+        # `none` AttestationConveyancePreference
+        # Replace potentially uniquely identifying information
+        # (such as AAGUID and attestation certificates) in the
+        # attested credential data and attestation statement,
+        # respectively, with blinded versions of the same data.
+        # **Note**: If True, authenticator attestation will not
+        #           be performed.
         self.none_attestation_permitted = none_attestation_permitted
-
-    @property
-    def _self_attestation_permitted(self):
-        '''With self attestation, the credential public key is
-        also used as the attestation public key.
-        '''
-        return self.self_attestation_permitted
-
-    @property
-    def _none_attestation_permitted(self):
-        '''`none` AttestationConveyancePreference
-
-        Replace potentially uniquely identifying information
-        (such as AAGUID and attestation certificates) in the
-        attested credential data and attestation statement,
-        respectively, with blinded versions of the same data.
-
-        **Note**: If True, authenticator attestation will not
-                  be performed.
-        '''
-        return self.none_attestation_permitted
 
     def verify(self):
         try:
@@ -495,7 +485,7 @@ class WebAuthnRegistrationResponse(object):
                 #       public key correctly chains up to an acceptable root
                 #       certificate.
                 if attestation_type == AT_SELF_ATTESTATION:
-                    if not self._self_attestation_permitted:
+                    if not self.self_attestation_permitted:
                         raise RegistrationRejectedException('Self attestation is not permitted.')
                 elif attestation_type == AT_PRIVACY_CA:
                     raise NotImplementedError(
@@ -537,7 +527,7 @@ class WebAuthnRegistrationResponse(object):
             elif fmt == 'none':
                 # `none` - indicates that the Relying Party is not interested in
                 # authenticator attestation.
-                if not self._none_attestation_permitted:
+                if not self.none_attestation_permitted:
                     raise RegistrationRejectedException('Authenticator attestation is required.')
             else:
                 raise RegistrationRejectedException('Invalid format.')
