@@ -2,6 +2,10 @@
 
 PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registration and assertion. Currently, WebAuthn is only supported in [Firefox Nightly][2].
 
+# Installation
+
+`pip install webauthn`
+
 # Usage
 
 Generating credential options, (to be passed to `navigator.credentials.create`):
