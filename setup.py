@@ -38,6 +38,7 @@ setup(
     url='https://github.com/duo-labs/py_webauthn',
     download_url='https://github.com/duo-labs/py_webauthn/archive/'
                  '{}.tar.gz'.format(VERSION),
+    license='BSD',
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

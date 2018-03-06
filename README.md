@@ -1,6 +1,9 @@
 # PyWebAuthn
 
-PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registration and assertion. Currently, WebAuthn is only supported in [Firefox Nightly][2].
+[![PyPI](https://img.shields.io/pypi/v/webauthn.svg)](https://pypi.python.org/pypi/webauthn)
+[![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/duo-labs/py_webauthn/master/LICENSE)
+
+PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registration and assertion. Currently, WebAuthn is only supported in [Firefox Nightly][2] and [Chrome Canary][3].
 
 # Installation
 
@@ -90,35 +93,36 @@ user.sign_count = sign_count
 
 # Flask Demo
 
-There is a [Flask][3] demo available in the `flask_demo` directory. Follow these steps to run the Flask web app:
+There is a [Flask][4] demo available in the `flask_demo` directory. Follow these steps to run the Flask web app:
 
 1. `cd flask_demo`
 2. `pip install -r requirements.txt`
 3. `python app.py`
-4. Go to [http://localhost:5000][4] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+4. Go to [http://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 5. Profit?
 
 # Flask Demo (Docker)
 
-To run the [Flask][1] demo with [Docker][5]:
+To run the [Flask][4] demo with [Docker][6]:
 
 1. Install Docker.
 2. `docker-compose up -d`
-3. Go to [http://localhost:5000][4] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+3. Go to [http://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
 # Note
 
 Currently, PyWebAuthn does not support performing the following optional verifications.
 
-* [Token Binding ID][6]
-* [Client Extensions][7]
-* [Authenticator Extensions][8]
+* [Token Binding ID][7]
+* [Client Extensions][8]
+* [Authenticator Extensions][9]
 
 [1]: https://www.w3.org/TR/webauthn/
 [2]: https://www.mozilla.org/en-US/firefox/channel/desktop/
-[3]: http://flask.pocoo.org/
-[4]: http://localhost:5000
-[5]: https://www.docker.com/
-[6]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
-[7]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-clientextensions
-[8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-authenticatorextensions
+[3]: https://www.google.com/chrome/browser/canary.html
+[4]: http://flask.pocoo.org/
+[5]: http://localhost:5000
+[6]: https://www.docker.com/
+[7]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
+[8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-clientextensions
+[9]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-authenticatorextensions
