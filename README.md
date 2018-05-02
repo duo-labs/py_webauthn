@@ -98,7 +98,7 @@ There is a [Flask][4] demo available in the `flask_demo` directory. Follow these
 1. `cd flask_demo`
 2. `pip install -r requirements.txt`
 3. `python app.py`
-4. Go to [http://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+4. Go to [https://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 5. Profit?
 
 # Flask Demo (Docker)
@@ -107,7 +107,7 @@ To run the [Flask][4] demo with [Docker][6]:
 
 1. Install Docker.
 2. `docker-compose up -d`
-3. Go to [http://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+3. Go to [https://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
 # Note
 
@@ -121,7 +121,7 @@ Currently, PyWebAuthn does not support performing the following optional verific
 [2]: https://www.mozilla.org/en-US/firefox/channel/desktop/
 [3]: https://www.google.com/chrome/browser/canary.html
 [4]: http://flask.pocoo.org/
-[5]: http://localhost:5000
+[5]: https://localhost:5000
 [6]: https://www.docker.com/
 [7]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
 [8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-clientextensions
