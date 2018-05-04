@@ -32,8 +32,8 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-ORIGIN = 'http://localhost:5000'
 RP_ID = 'localhost'
+ORIGIN = 'https://localhost:5000'
 
 # Trust anchors (trusted attestation roots) should be
 # placed in TRUST_ANCHOR_DIR.
@@ -241,4 +241,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', ssl_context='adhoc', debug=True)
