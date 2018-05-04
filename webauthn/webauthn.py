@@ -2,10 +2,10 @@ import base64
 import hashlib
 import json
 import os
-import six
 import struct
 
 import cbor2
+import six
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
@@ -13,8 +13,8 @@ from cryptography.hazmat.primitives.asymmetric.ec import (
     EllipticCurvePublicNumbers)
 from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1
 from cryptography.hazmat.primitives.hashes import SHA256
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.exceptions import InvalidSignature
+from cryptography.x509 import load_der_x509_certificate
 from OpenSSL import crypto
 
 
@@ -425,9 +425,8 @@ class WebAuthnRegistrationResponse(object):
                 # user public key parameter set to the claimed credential
                 # public key.
                 cert = att_stmt.get('x5c')[0]
-                x509_attestation_cert = crypto.load_certificate(crypto.FILETYPE_ASN1, cert)
-                pem_public_key = crypto.dump_publickey(
-                    crypto.FILETYPE_PEM, x509_attestation_cert.get_pubkey())
+                x509_attestation_cert = load_der_x509_certificate(cert, default_backend())
+                public_key = x509_attestation_cert.public_key()
                 signature = att_stmt['sig']
                 bytes_to_sign = ''.join([
                     '\0',
@@ -443,9 +442,8 @@ class WebAuthnRegistrationResponse(object):
                 # public key certified in the attestation certificate. The relying
                 # party should also verify that the attestation certificate was
                 # issued by a trusted certification authority.
-                pk = load_pem_public_key(pem_public_key, backend=default_backend())
                 try:
-                    pk.verify(signature, bytes_to_sign, ECDSA(SHA256()))
+                    public_key.verify(signature, bytes_to_sign, ECDSA(SHA256()))
                 except InvalidSignature:
                     raise RegistrationRejectedException('Invalid signature received.')
 
