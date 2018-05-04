@@ -7,13 +7,12 @@ import struct
 import cbor2
 import six
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePublicNumbers)
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicNumbers
 from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1
 from cryptography.hazmat.primitives.hashes import SHA256
-from cryptography.exceptions import InvalidSignature
 from cryptography.x509 import load_der_x509_certificate
 from OpenSSL import crypto
 
@@ -537,7 +536,7 @@ class WebAuthnRegistrationResponse(object):
                 self.rp_id,
                 self.origin,
                 b64_cred_id,
-                base64.b64encode(encoded_user_pub_key),
+                _webauthn_b64_encode(encoded_user_pub_key),
                 sign_count)
 
             return credential
@@ -639,7 +638,7 @@ class WebAuthnAssertionResponse(object):
             # that sig is a valid signature over the binary concatenation
             # of aData and hash.
             decoded_user_pub_key = _decode_public_key(
-                base64.b64decode(self.webauthn_user.public_key))
+                _webauthn_b64_decode(self.webauthn_user.public_key))
             user_pubkey = decoded_user_pub_key.public_key(backend=default_backend())
             bytes_to_sign = ''.join([
                 decoded_a_data,
