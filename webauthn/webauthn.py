@@ -889,9 +889,7 @@ def _get_client_data_hash(client_data, decoded_client_data):
 
     hash_alg = client_data.get('hashAlgorithm')
 
-    if not hash_alg:
-        return ''
-    if hash_alg == 'SHA-256':
+    if not hash_alg or hash_alg == 'SHA-256':
         return hashlib.sha256(decoded_client_data).digest()
     elif hash_alg == 'SHA-512':
         return hashlib.sha512(decoded_client_data).digest()
