@@ -26,12 +26,14 @@ function registerNewCredential(newCredential) {
         newCredential.response.clientDataJSON);
     let rawId = new Uint8Array(
         newCredential.rawId);
+    let registrationClientExtensions = newCredential.getClientExtensionResults();
     $.post('/verify_credential_info', {
         id: newCredential.id,
         rawId: b64enc(rawId),
         type: newCredential.type,
         attObj: b64enc(attObj),
         clientData: b64enc(clientDataJSON),
+        registrationClientExtensions: JSON.stringify(registrationClientExtensions)
     }).done(function(response){
         window.location = '/';
         console.log(response);
@@ -43,6 +45,7 @@ function verifyAssertion(assertedCredential) {
     let clientDataJSON = new Uint8Array(assertedCredential.response.clientDataJSON);
     let rawId = new Uint8Array(assertedCredential.rawId);
     let sig = new Uint8Array(assertedCredential.response.signature);
+    let assertionClientExtensions = assertedCredential.getClientExtensionResults();
     $.post('/verify_assertion', {
         id: assertedCredential.id,
         rawId: b64enc(rawId),
@@ -50,6 +53,7 @@ function verifyAssertion(assertedCredential) {
         authData: b64RawEnc(authData),
         clientData: b64RawEnc(clientDataJSON),
         signature: hexEncode(sig),
+        assertionClientExtensions: JSON.stringify(assertionClientExtensions)
     }).done(function(response){
         window.location = '/';
         console.log(response);

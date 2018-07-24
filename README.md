@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/webauthn.svg)](https://pypi.python.org/pypi/webauthn)
 [![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/duo-labs/py_webauthn/master/LICENSE)
 
-PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registration and assertion. Currently, WebAuthn is only supported in [Firefox Nightly][2] and [Chrome Canary][3].
+PyWebAuthn is a Python module which can be used to handle [WebAuthn][1] registration and assertion. Currently, WebAuthn is supported in [Firefox][2], [Chrome][3], and [Edge][4].
 
 # Installation
 
@@ -53,7 +53,8 @@ webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(
     trust_anchor_dir,
     trusted_attestation_cert_required,
     self_attestation_permitted,
-    none_attestation_permitted)
+    none_attestation_permitted,
+    uv_required=False)  # User Verification
 
 try:
     webauthn_credential = webauthn_registration_response.verify()
@@ -93,36 +94,35 @@ user.sign_count = sign_count
 
 # Flask Demo
 
-There is a [Flask][4] demo available in the `flask_demo` directory. Follow these steps to run the Flask web app:
+There is a [Flask][5] demo available in the `flask_demo` directory. Follow these steps to run the Flask web app:
 
 1. `cd flask_demo`
 2. `pip install -r requirements.txt`
 3. `python app.py`
-4. Go to [https://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+4. Go to [https://localhost:5000][6] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 5. Profit?
 
 # Flask Demo (Docker)
 
-To run the [Flask][4] demo with [Docker][6]:
+To run the [Flask][5] demo with [Docker][7]:
 
 1. Install Docker.
 2. `docker-compose up -d`
-3. Go to [https://localhost:5000][5] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+3. Go to [https://localhost:5000][6] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
 # Note
 
-Currently, PyWebAuthn does not support performing the following optional verifications.
+Currently, PyWebAuthn does not support performing the following verifications.
 
-* [Token Binding ID][7]
-* [Client Extensions][8]
+* [Token Binding ID][8]
 * [Authenticator Extensions][9]
 
 [1]: https://www.w3.org/TR/webauthn/
-[2]: https://www.mozilla.org/en-US/firefox/channel/desktop/
-[3]: https://www.google.com/chrome/browser/canary.html
-[4]: http://flask.pocoo.org/
-[5]: https://localhost:5000
-[6]: https://www.docker.com/
-[7]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
-[8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-clientextensions
+[2]: https://www.mozilla.org/en-US/firefox/new/
+[3]: https://www.google.com/chrome/
+[4]: https://www.microsoft.com/en-us/windows/microsoft-edge
+[5]: http://flask.pocoo.org/
+[6]: https://localhost:5000
+[7]: https://www.docker.com/
+[8]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-tokenbindingid
 [9]: https://www.w3.org/TR/webauthn/#dom-collectedclientdata-authenticatorextensions
