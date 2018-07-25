@@ -159,16 +159,28 @@ def verify_credential_info():
         trust_anchor_dir,
         trusted_attestation_cert_required,
         self_attestation_permitted,
-        none_attestation_permitted)
+        none_attestation_permitted,
+        uv_required=False)  # User Verification
 
     try:
         webauthn_credential = webauthn_registration_response.verify()
     except Exception as e:
         return jsonify({'fail': 'Registration failed. Error: {}'.format(e)})
 
+    # Step 17.
+    #
+    # Check that the credentialId is not yet registered to any other user.
+    # If registration is requested for a credential that is already registered
+    # to a different user, the Relying Party SHOULD fail this registration
+    # ceremony, or it MAY decide to accept the registration, e.g. while deleting
+    # the older registration.
+    credential_id_exists = User.query.filter_by(
+        credential_id=webauthn_credential.credential_id).first()
+    if credential_id_exists:
+        return make_response(jsonify({'fail': 'Credential ID already exists.'}), 401)
+
     existing_user = User.query.filter_by(
         username=username).first()
-
     if not existing_user:
         user = User(
             ukey=ukey,
