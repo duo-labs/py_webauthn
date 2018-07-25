@@ -555,7 +555,7 @@ class WebAuthnRegistrationResponse(object):
             # https://www.w3.org/TR/webauthn/#authenticator-data
             flags = struct.unpack('!B', auth_data[32])[0]
 
-            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x01):
+            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
                 raise RegistrationRejectedException('Malformed request received.')
 
             # Step 11.
@@ -839,7 +839,7 @@ class WebAuthnAssertionResponse(object):
             # https://www.w3.org/TR/webauthn/#authenticator-data
             flags = struct.unpack('!B', decoded_a_data[32])[0]
 
-            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x01):
+            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
                 raise AuthenticationRejectedException('Malformed request received.')
 
             # Step 13.
