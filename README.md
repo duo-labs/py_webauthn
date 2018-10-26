@@ -98,9 +98,10 @@ There is a [Flask][5] demo available in the `flask_demo` directory. Follow these
 
 1. `cd flask_demo`
 2. `pip install -r requirements.txt`
-3. `python app.py`
-4. Go to [https://localhost:5000][6] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
-5. Profit?
+3. `python create_db.py`
+4. `python app.py`
+5. Go to [https://localhost:5000][6] in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
+6. Profit?
 
 # Flask Demo (Docker)
 

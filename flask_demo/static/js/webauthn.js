@@ -62,10 +62,15 @@ const didClickRegister = async (e) => {
 
     // post the transformed credential data to the server for validation
     // and storing the public key
+    let assertionValidationResponse;
     try {
-        await postNewAssertionToServer(newAssertionForServer);
+        assertionValidationResponse = await postNewAssertionToServer(newAssertionForServer);
     } catch (err) {
         console.error("Server validation of credential failed.", err);
+    }
+
+    if (assertionValidationResponse.fail) {
+        return console.error("Assertion validation failed:", assertionValidationResponse)
     }
     
     // reload the page after a successful result
