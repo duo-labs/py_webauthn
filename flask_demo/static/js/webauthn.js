@@ -38,6 +38,10 @@ const didClickRegister = async (e) => {
     // post the data to the server to generate the PublicKeyCredentialCreateOptions
     const credentialCreateOptionsFromServer = await getCredentialCreateOptionsFromServer(formData);
 
+    if (credentialCreateOptionsFromServer.fail) {
+        return console.error("Failed to generate credential request options:", credentialCreateOptionsFromServer)
+    }
+
     // convert certain members of the PublicKeyCredentialCreateOptions into
     // byte arrays as expected by the spec.
     const publicKeyCredentialCreateOptions = transformCredentialCreateOptions(credentialCreateOptionsFromServer);
