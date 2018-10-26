@@ -102,7 +102,7 @@ def webauthn_begin_activate():
 
 @app.route('/webauthn_begin_assertion', methods=['POST'])
 def webauthn_begin_assertion():
-    username = request.form.get('username')
+    username = request.form.get('login_username')
 
     if not util.validate_username(username):
         return make_response(jsonify({'fail': 'Invalid username.'}), 401)

@@ -19,116 +19,20 @@ function hexEncode(buf) {
                 .join("");
 }
 
-function registerNewCredential(newCredential) {
-    let attObj = new Uint8Array(
-        newCredential.response.attestationObject);
-    let clientDataJSON = new Uint8Array(
-        newCredential.response.clientDataJSON);
-    let rawId = new Uint8Array(
-        newCredential.rawId);
-    let registrationClientExtensions = newCredential.getClientExtensionResults();
-    $.post('/verify_credential_info', {
-        id: newCredential.id,
-        rawId: b64enc(rawId),
-        type: newCredential.type,
-        attObj: b64enc(attObj),
-        clientData: b64enc(clientDataJSON),
-        registrationClientExtensions: JSON.stringify(registrationClientExtensions)
-    }).done(function(response){
-        window.location = '/';
-        console.log(response);
-    });
-}
 
-function verifyAssertion(assertedCredential) {
-    let authData = new Uint8Array(assertedCredential.response.authenticatorData);
-    let clientDataJSON = new Uint8Array(assertedCredential.response.clientDataJSON);
-    let rawId = new Uint8Array(assertedCredential.rawId);
-    let sig = new Uint8Array(assertedCredential.response.signature);
-    let assertionClientExtensions = assertedCredential.getClientExtensionResults();
-    $.post('/verify_assertion', {
-        id: assertedCredential.id,
-        rawId: b64enc(rawId),
-        type: assertedCredential.type,
-        authData: b64RawEnc(authData),
-        clientData: b64RawEnc(clientDataJSON),
-        signature: hexEncode(sig),
-        assertionClientExtensions: JSON.stringify(assertionClientExtensions)
-    }).done(function(response){
-        window.location = '/';
-        console.log(response);
-    });
-}
+/**
+ * REGISTRATION FUNCTIONS
+ */
 
-const getCredentialCreateOptionsFromServer = async (formData) => {
-    const response = await fetch(
-        "/webauthn_begin_activate",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const body = await response.json();
-    return body;
-}
-
-const transformCredentialCreateOptions = (credentialCreateOptionsFromServer) => {
-    let {challenge, user} = credentialCreateOptionsFromServer;
-    user.id = Uint8Array.from(
-        atob(credentialCreateOptionsFromServer.user.id), c => c.charCodeAt(0));
-
-    challenge = Uint8Array.from(
-        atob(credentialCreateOptionsFromServer.challenge), c => c.charCodeAt(0));
-    
-    const transformedCredentialCreateOptions = Object.assign(
-            {}, credentialCreateOptionsFromServer,
-            {challenge, user});
-
-    return transformedCredentialCreateOptions;
-}
-
-const transformNewCredentialForServer = (newCredential) => {
-    const attObj = new Uint8Array(
-        newCredential.response.attestationObject);
-    const clientDataJSON = new Uint8Array(
-        newCredential.response.clientDataJSON);
-    const rawId = new Uint8Array(
-        newCredential.rawId);
-    
-        const registrationClientExtensions = newCredential.getClientExtensionResults();
-
-    return {
-        id: newCredential.id,
-        rawId: b64enc(rawId),
-        type: newCredential.type,
-        attObj: b64enc(attObj),
-        clientData: b64enc(clientDataJSON),
-        registrationClientExtensions: JSON.stringify(registrationClientExtensions)
-    }
-}
-
-const postNewCredentialToServer = async (credentialDataForServer) => {
-    const formData = new FormData();
-    Object.entries(credentialDataForServer).forEach(([key, value]) => {
-        formData.set(key, value);
-    })
-    
-    const response = await fetch(
-        "/verify_credential_info", {
-        method: "POST",
-        body: formData
-    });
-
-    const body = await response.text()
-    return body;
-}
-
+/**
+ * Callback after the registration form is submitted.
+ * @param {Event} e 
+ */
 const didClickRegister = async (e) => {
     e.preventDefault();
 
     // gather the data in the form
-    const form = document.querySelector('form');
+    const form = document.querySelector('#register-form');
     const formData = new FormData(form);
 
     // post the data to the server to generate the PublicKeyCredentialCreateOptions
@@ -145,81 +49,253 @@ const didClickRegister = async (e) => {
             publicKey: publicKeyCredentialCreateOptions
         });
     } catch (err) {
-        console.log("Error creating credential.")
-        console.log(err);
+        console.error("Error creating credential.", err)
     }
 
     // we now have a new credential! We now need to encode the byte arrays
     // in the credential into strings, for posting to our server.
-    const credentialDataForServer = transformNewCredentialForServer(credential);
+    const newAssertionForServer = transformNewAssertionForServer(credential);
 
-    const serverValidationResult = await postNewCredentialToServer(credentialDataForServer);
-    debugger;
+    // post the transformed credential data to the server for validation
+    // and storing the public key
+    try {
+        await postNewAssertionToServer(newAssertionForServer);
+    } catch (err) {
+        console.error("Server validation of credential failed.", err);
+    }
+    
+    // reload the page after a successful result
+    window.location.reload();
 }
+
+/**
+ * Get PublicKeyCredentialRequestOptions for this user from the server
+ * formData of the registration form
+ * @param {FormData} formData 
+ */
+const getCredentialRequestOptionsFromServer = async (formData) => {
+    const response = await fetch(
+        "/webauthn_begin_assertion",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const body = await response.json();
+    return body;
+}
+
+const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) => {
+    let {challenge, allowCredentials} = credentialRequestOptionsFromServer;
+
+    challenge = Uint8Array.from(
+        atob(challenge), c => c.charCodeAt(0));
+
+    allowCredentials = allowCredentials.map(credentialDescriptor => {
+        let {id} = credentialDescriptor;
+        id = id.replace(/\_/g, "/").replace(/\-/g, "+");
+        id = Uint8Array.from(atob(id), c => c.charCodeAt(0));
+        return Object.assign({}, credentialDescriptor, {id});
+    });
+
+    const transformedCredentialRequestOptions = Object.assign(
+        {},
+        credentialRequestOptionsFromServer,
+        {challenge, allowCredentials});
+
+    return transformedCredentialRequestOptions;
+};
+
+
+/**
+ * Get PublicKeyCredentialRequestOptions for this user from the server
+ * formData of the registration form
+ * @param {FormData} formData 
+ */
+const getCredentialCreateOptionsFromServer = async (formData) => {
+    const response = await fetch(
+        "/webauthn_begin_activate",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const body = await response.json();
+    return body;
+}
+
+/**
+ * Transforms items in the credentialCreateOptions generated on the server
+ * into byte arrays expected by the navigator.credentials.create() call
+ * @param {Object} credentialCreateOptionsFromServer 
+ */
+const transformCredentialCreateOptions = (credentialCreateOptionsFromServer) => {
+    let {challenge, user} = credentialCreateOptionsFromServer;
+    user.id = Uint8Array.from(
+        atob(credentialCreateOptionsFromServer.user.id), c => c.charCodeAt(0));
+
+    challenge = Uint8Array.from(
+        atob(credentialCreateOptionsFromServer.challenge), c => c.charCodeAt(0));
+    
+    const transformedCredentialCreateOptions = Object.assign(
+            {}, credentialCreateOptionsFromServer,
+            {challenge, user});
+
+    return transformedCredentialCreateOptions;
+}
+
+
+
+/**
+ * AUTHENTICATION FUNCTIONS
+ */
+
+
+/**
+ * Callback executed after submitting login form
+ * @param {Event} e 
+ */
+const didClickLogin = async (e) => {
+    e.preventDefault();
+    // gather the data in the form
+    const form = document.querySelector('#login-form');
+    const formData = new FormData(form);
+
+    // post the login data to the server to retrieve the PublicKeyCredentialRequestOptions
+    let credentialCreateOptionsFromServer;
+    try {
+        credentialRequestOptionsFromServer = await getCredentialRequestOptionsFromServer(formData);
+    } catch (err) {
+        console.error("Error when getting request options from server:", err)
+        return;
+    }
+
+    // convert certain members of the PublicKeyCredentialRequestOptions into
+    // byte arrays as expected by the spec.    
+    const transformedCredentialRequestOptions = transformCredentialRequestOptions(
+        credentialRequestOptionsFromServer);
+
+    // request the authenticator to create an assertion signature using the
+    // credential private key
+    let assertion;
+    try {
+        assertion = await navigator.credentials.get({
+            publicKey: transformedCredentialRequestOptions,
+        });
+    } catch (err) {
+        return console.error("Error when creating credential: ", err);
+    }
+
+    // we now have an authentication assertion! encode the byte arrays contained
+    // in the assertion data as strings for posting to the server
+    const transformedAssertionForServer = transformAssertionForServer(assertion);
+
+    // post the assertion to the server for verification.
+    let response;
+    try {
+        response = await postAssertionToServer(transformedAssertionForServer);
+    } catch (err) {
+        return console.error("Error when validating assertion on server:", err);
+    }
+
+    if (response.fail) {
+        return console.error("Error when validating assertion on server:", response);
+    }
+
+    window.location.reload();
+};
+
+/**
+ * Transforms the binary data in the credential into base64 strings
+ * for posting to the server.
+ * @param {PublicKeyCredential} newAssertion 
+ */
+const transformNewAssertionForServer = (newAssertion) => {
+    const attObj = new Uint8Array(
+        newAssertion.response.attestationObject);
+    const clientDataJSON = new Uint8Array(
+        newAssertion.response.clientDataJSON);
+    const rawId = new Uint8Array(
+        newAssertion.rawId);
+    
+    const registrationClientExtensions = newAssertion.getClientExtensionResults();
+
+    return {
+        id: newAssertion.id,
+        rawId: b64enc(rawId),
+        type: newAssertion.type,
+        attObj: b64enc(attObj),
+        clientData: b64enc(clientDataJSON),
+        registrationClientExtensions: JSON.stringify(registrationClientExtensions)
+    }
+}
+
+/**
+ * Posts the new credential data to the server for validation and storage.
+ * @param {Object} credentialDataForServer 
+ */
+const postNewAssertionToServer = async (credentialDataForServer) => {
+    const formData = new FormData();
+    Object.entries(credentialDataForServer).forEach(([key, value]) => {
+        formData.set(key, value);
+    });
+    
+    const response = await fetch(
+        "/verify_credential_info", {
+        method: "POST",
+        body: formData
+    });
+
+    const body = await response.text()
+    return body;
+}
+
+/**
+ * Encodes the binary data in the assertion into strings for posting to the server.
+ * @param {PublicKeyCredential} newAssertion 
+ */
+const transformAssertionForServer = (newAssertion) => {
+    const authData = new Uint8Array(newAssertion.response.authenticatorData);
+    const clientDataJSON = new Uint8Array(newAssertion.response.clientDataJSON);
+    const rawId = new Uint8Array(newAssertion.rawId);
+    const sig = new Uint8Array(newAssertion.response.signature);
+    const assertionClientExtensions = newAssertion.getClientExtensionResults();
+
+    return {
+        id: newAssertion.id,
+        rawId: b64enc(rawId),
+        type: newAssertion.type,
+        authData: b64RawEnc(authData),
+        clientData: b64RawEnc(clientDataJSON),
+        signature: hexEncode(sig),
+        assertionClientExtensions: JSON.stringify(assertionClientExtensions)
+    };
+};
+
+/**
+ * Post the assertion to the server for validation and logging the user in. 
+ * @param {Object} assertionDataForServer 
+ */
+const postAssertionToServer = async (assertionDataForServer) => {
+    const formData = new FormData();
+    Object.entries(assertionDataForServer).forEach(([key, value]) => {
+        formData.set(key, value);
+    });
+    
+    const response = await fetch(
+        "/verify_assertion", {
+        method: "POST",
+        body: formData
+    });
+
+    const body = await response.text()
+    return body;
+}
+
 
 document.addEventListener("DOMContentLoaded", e => {
     document.querySelector('#register').addEventListener('click', didClickRegister);
-})
-
-$(document).ready(function() {
-    // // if (!PublicKeyCredential) { console.log("Browser not WebAuthn compatible."); }
-
-    // $("#register").click(function(e) {
-    //     e.preventDefault();
-    //     var username = $('input[name="register_username"]').val();
-    //     var displayName = $('input[name="register_display_name"]').val();
-    //     $.post("/webauthn_begin_activate", {
-    //         username: username,
-    //         displayName: displayName
-    //     }).done(function(makeCredentialOptions) {
-    //         // Turn the challenge back into the accepted format
-    //         makeCredentialOptions.challenge = Uint8Array.from(
-    //             atob(makeCredentialOptions.challenge), c => c.charCodeAt(0));
-    //         // Turn the user ID back into the accepted format
-    //         makeCredentialOptions.user.id = Uint8Array.from(
-    //             atob(makeCredentialOptions.user.id), c => c.charCodeAt(0));
-    //         navigator.credentials.create({ publicKey: makeCredentialOptions })
-    //             .then(function(newCredentialInfo) {
-    //                 console.log(newCredentialInfo);
-    //                 // Send new credential info to server for
-    //                 // verification and registration.
-    //                 registerNewCredential(newCredentialInfo);
-    //             }).catch(function(err) {
-    //                 // No acceptable authenticator or user refused
-    //                 // consent. Handle appropriately.
-    //                 console.log("Error creating credential.");
-    //                 console.log(err);
-    //             });
-    //     });
-    // });
-
-    $("#login").click(function(e) {
-        e.preventDefault();
-        var username = $('input[name="login_username"]').val();
-        $.post("/webauthn_begin_assertion", {
-            username: username
-        }).done(function(assertionOptions) {
-            console.log(assertionOptions);
-            // Turn the challenge back into the accepted format
-            assertionOptions.challenge = Uint8Array.from(
-                atob(assertionOptions.challenge), c => c.charCodeAt(0));
-            assertionOptions.allowCredentials.forEach(function(listItem) {
-                var fixedId = listItem.id.replace(
-                    /\_/g, "/").replace(/\-/g, "+");
-                listItem.id = Uint8Array.from(
-                    atob(fixedId), c => c.charCodeAt(0));
-            });
-            navigator.credentials.get({ publicKey: assertionOptions })
-                .then(function(assertionInfo) {
-                    console.log(assertionInfo);
-                    // Send assertion to server for verification.
-                    verifyAssertion(assertionInfo);
-                }).catch(function(err) {
-                    // No acceptable authenticator or user refused
-                    // consent. Handle appropriately.
-                    console.log("Error during assertion.");
-                    console.log(err);
-                });
-        });
-    });
+    document.querySelector('#login').addEventListener('click', didClickLogin);
 });
