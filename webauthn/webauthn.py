@@ -516,8 +516,10 @@ class WebAuthnRegistrationResponse(object):
             # obtained. If Token Binding was used on that TLS connection, also verify
             # that C.tokenBinding.id matches the base64url encoding of the Token
             # Binding ID for the connection.
-            if not _verify_token_binding_id(c):
-                raise RegistrationRejectedException('Unable to verify token binding ID.')
+
+            # XXX: Chrome does not currently supply token binding in the clientDataJSON
+            # if not _verify_token_binding_id(c):
+            #    raise RegistrationRejectedException('Unable to verify token binding ID.')
 
             # Step 7.
             #
@@ -819,8 +821,10 @@ class WebAuthnAssertionResponse(object):
             # used on that TLS connection, also verify that
             # C.tokenBinding.id matches the base64url encoding of the
             # Token Binding ID for the connection.
-            if not _verify_token_binding_id(c):
-                raise AuthenticationRejectedException('Unable to verify token binding ID.')
+
+            # XXX: Chrome does not currently supply token binding in the clientDataJSON
+            # if not _verify_token_binding_id(c):
+            #     raise AuthenticationRejectedException('Unable to verify token binding ID.')
 
             # Step 11.
             #
