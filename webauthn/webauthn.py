@@ -96,8 +96,7 @@ class WebAuthnMakeCredentialOptions(object):
             'user': {
                 'id': self.user_id,
                 'name': self.username,
-                'displayName': self.display_name,
-                'icon': self.icon_url
+                'displayName': self.display_name
             },
             'pubKeyCredParams': [
                 {
@@ -119,6 +118,9 @@ class WebAuthnMakeCredentialOptions(object):
                 'webauthn.loc': True
             }
         }
+        
+        if self.icon_url:
+            registration_dict['user']['icon'] = self.icon_url
 
         return registration_dict
 
