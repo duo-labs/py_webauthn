@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 
 import base64
@@ -10,11 +12,13 @@ import sys
 import cbor2
 import six
 
+from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicNumbers
-from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    ECDSA, EllipticCurvePublicNumbers, SECP256R1)
+from cryptography.hazmat.primitives.asymmetric.padding import MGF1, PKCS1v15, PSS
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.x509 import load_der_x509_certificate
 from OpenSSL import crypto
@@ -35,11 +39,20 @@ SUPPORTED_ATTESTATION_TYPES = (
     AT_SELF_ATTESTATION
 )
 
-# Only supporting 'fido-u2f' and 'none' attestation formats for now.
+AT_FMT_FIDO_U2F = 'fido-u2f'
+AT_FMT_PACKED = 'packed'
+AT_FMT_NONE = 'none'
+
+# Only supporting 'fido-u2f', 'packed', and 'none' attestation formats for now.
 SUPPORTED_ATTESTATION_FORMATS = (
-    'fido-u2f',
-    'none',
+    AT_FMT_FIDO_U2F,
+    AT_FMT_PACKED,
+    AT_FMT_NONE
 )
+
+COSE_ALG_ES256 = -7
+COSE_ALG_PS256 = -37
+COSE_ALG_RS256 = -257
 
 # Trust anchors (trusted attestation roots directory).
 DEFAULT_TRUST_ANCHOR_DIR = 'trusted_attestation_roots'
@@ -57,6 +70,10 @@ EXPECTED_CLIENT_EXTENSIONS = {
 # Expected authenticator extensions
 EXPECTED_AUTHENTICATOR_EXTENSIONS = {
 }
+
+
+class COSEKeyException(Exception):
+    pass
 
 
 class AuthenticationRejectedException(Exception):
@@ -100,11 +117,15 @@ class WebAuthnMakeCredentialOptions(object):
             },
             'pubKeyCredParams': [
                 {
-                    'alg': 'ES256',
+                    'alg': COSE_ALG_ES256,
                     'type': 'public-key',
                 },
                 {
-                    'alg': -7,
+                    'alg': COSE_ALG_RS256,
+                    'type': 'public-key',
+                },
+                {
+                    'alg': COSE_ALG_PS256,
                     'type': 'public-key',
                 }
             ],
@@ -275,7 +296,14 @@ class WebAuthnRegistrationResponse(object):
         also be able to build the attestation certificate chain if the client did not
         provide this chain in the attestation information.
         '''
-        if fmt == 'fido-u2f':
+
+        attestation_data = auth_data[37:]
+        aaguid = attestation_data[:16]
+        credential_id_len = struct.unpack('!H', attestation_data[16:18])[0]
+        cred_id = attestation_data[18:18 + credential_id_len]
+        credential_pub_key = attestation_data[18 + credential_id_len:]
+
+        if fmt == AT_FMT_FIDO_U2F:
             # Step 1.
             #
             # Verify that attStmt is valid CBOR conforming to the syntax
@@ -302,11 +330,6 @@ class WebAuthnRegistrationResponse(object):
             # Extract the claimed rpIdHash from authenticatorData, and the
             # claimed credentialId and credentialPublicKey from
             # authenticatorData.attestedCredentialData.
-            attestation_data = auth_data[37:]
-            aaguid = attestation_data[:16]
-            credential_id_len = struct.unpack('!H', attestation_data[16:18])[0]
-            cred_id = attestation_data[18:18 + credential_id_len]
-            credential_pub_key = attestation_data[18 + credential_id_len:]
 
             # The credential public key encoded in COSE_Key format, as defined in Section 7
             # of [RFC8152], using the CTAP2 canonical CBOR encoding form. The COSE_Key-encoded
@@ -316,69 +339,13 @@ class WebAuthnRegistrationResponse(object):
             # contain any additional required parameters stipulated by the relevant key type
             # specification, i.e., required for the key type "kty" and algorithm "alg" (see
             # Section 8 of [RFC8152]).
-            cpk = cbor2.loads(credential_pub_key)
+            try:
+                public_key_alg, credential_public_key = _load_cose_public_key(
+                    credential_pub_key)
+            except COSEKeyException as e:
+                raise RegistrationRejectedException(str(e))
 
-            # Credential public key parameter names via the COSE_Key spec (for ES256).
-            alg_key = 3
-            x_key = -2
-            y_key = -3
-
-            if alg_key not in cpk:
-                raise RegistrationRejectedException(
-                    "Credential public key missing required algorithm parameter.")
-
-            required_keys = {alg_key, x_key, y_key}
-            cpk_keys = cpk.keys()
-
-            if not set(cpk_keys).issuperset(required_keys):
-                raise RegistrationRejectedException(
-                    'Credential public key must match COSE_Key spec.')
-
-            # A COSEAlgorithmIdentifier's value is a number identifying
-            # a cryptographic algorithm. The algorithm identifiers SHOULD
-            # be values registered in the IANA COSE Algorithms registry
-            # [IANA-COSE-ALGS-REG], for instance, -7 for "ES256" and -257
-            # for "RS256".
-            # https://www.iana.org/assignments/cose/cose.xhtml#algorithms
-
-            # For now we are only supporting ES256 as an algorithm.
-            ES256 = -7
-            if cpk[alg_key] != ES256:
-                raise RegistrationRejectedException('Unsupported algorithm.')
-
-            # Step 4.
-            #
-            # Convert the COSE_KEY formatted credentialPublicKey (see Section 7
-            # of [RFC8152]) to CTAP1/U2F public Key format [FIDO-CTAP].
-
-            # Let publicKeyU2F represent the result of the conversion operation
-            # and set its first byte to 0x04. Note: This signifies uncompressed
-            # ECC key format.
-            public_key_u2f = ''  # 0x04 byte prepended in `_encode_public_key` function.
-
-            # Extract the value corresponding to the "-2" key (representing x coordinate)
-            # from credentialPublicKey, confirm its size to be of 32 bytes and concatenate
-            # it with publicKeyU2F. If size differs or "-2" key is not found, terminate
-            # this algorithm and return an appropriate error.
-            x = cpk[x_key].encode('hex')
-            if len(x) != 64:
-                raise RegistrationRejectedException('Bad public key.')
-            x_long = long(x, 16)
-
-            # Extract the value corresponding to the "-3" key (representing y coordinate)
-            # from credentialPublicKey, confirm its size to be of 32 bytes and concatenate
-            # it with publicKeyU2F. If size differs or "-3" key is not found, terminate
-            # this algorithm and return an appropriate error.
-            y = cpk[y_key].encode('hex')
-            if len(y) != 64:
-                raise RegistrationRejectedException('Bad public key.')
-            y_long = long(y, 16)
-
-            user_ec = EllipticCurvePublicNumbers(
-                x_long, y_long,
-                SECP256R1()).public_key(
-                    backend=default_backend())
-            public_key_u2f = _encode_public_key(user_ec)
+            public_key_u2f = _encode_public_key(credential_public_key)
 
             # Step 5.
             #
@@ -386,6 +353,7 @@ class WebAuthnRegistrationResponse(object):
             # clientDataHash || credentialId || publicKeyU2F) (see Section 4.3
             # of [FIDO-U2F-Message-Formats]).
             auth_data_rp_id_hash = _get_auth_data_rp_id_hash(auth_data)
+            alg = att_stmt['alg']
             signature = att_stmt['sig']
             verification_data = ''.join([
                 '\0',
@@ -399,9 +367,12 @@ class WebAuthnRegistrationResponse(object):
             # Verify the sig using verificationData and certificate public
             # key per [SEC1].
             try:
-                certificate_public_key.verify(signature, verification_data, ECDSA(SHA256()))
+                _verify_signature(
+                    credential_public_key, alg, verification_data, signature)
             except InvalidSignature:
                 raise RegistrationRejectedException('Invalid signature received.')
+            except NotImplementedError:
+                raise RegistrationRejectedException('Unsupported algorithm.')
 
             # Step 7.
             #
@@ -409,63 +380,189 @@ class WebAuthnRegistrationResponse(object):
             # attestation trust path set to x5c.
             attestation_type = AT_BASIC
             trust_path = [x509_att_cert]
-            return (attestation_type, trust_path, public_key_u2f, cred_id)
-        elif fmt == 'none':
+            return (attestation_type, trust_path, credential_pub_key, cred_id)
+        elif fmt == AT_FMT_PACKED:
+            attestation_syntaxes = {
+                AT_BASIC: set(['alg', 'x5c', 'sig']),
+                AT_ECDAA: set(['alg', 'sig', 'ecdaaKeyId']),
+                AT_SELF_ATTESTATION: set(['alg', 'sig'])
+            }
+
+            # Step 1.
+            #
+            # Verify that attStmt is valid CBOR conforming to the syntax
+            # defined above and perform CBOR decoding on it to extract the
+            # contained fields.
+            if set(att_stmt.keys()) not in attestation_syntaxes.values():
+                raise RegistrationRejectedException(
+                    'Attestation statement must be a valid CBOR object.')
+
+            alg = att_stmt['alg']
+            signature = att_stmt['sig']
+            verification_data = ''.join([auth_data, client_data_hash])
+
+            if 'x5c' in att_stmt:
+                # Step 2.
+                #
+                # If x5c is present, this indicates that the attestation
+                # type is not ECDAA. In this case:
+                att_cert = att_stmt['x5c'][0]
+                x509_att_cert = load_der_x509_certificate(
+                    att_cert, default_backend())
+                certificate_public_key = x509_att_cert.public_key()
+
+                #   * Verify that sig is a valid signature over the
+                #     concatenation of authenticatorData and clientDataHash
+                #     using the attestation public key in attestnCert with
+                #     the algorithm specified in alg.
+                try:
+                    _verify_signature(
+                        certificate_public_key, alg, verification_data, signature)
+                except InvalidSignature:
+                    raise RegistrationRejectedException(
+                        'Invalid signature received.')
+                except NotImplementedError:
+                    raise RegistrationRejectedException('Unsupported algorithm.')
+
+                #   * Verify that attestnCert meets the requirements in
+                #     §8.2.1 Packed attestation statement certificate
+                #     requirements.
+
+                # The attestation certificate MUST have the following
+                # fields/extensions:
+                #   * Version MUST be set to 3 (which is indicated by an
+                #     ASN.1 INTEGER with value 2).
+                if x509_att_cert.version != x509.Version.v3:
+                    raise RegistrationRejectedException(
+                        'Invalid attestation certificate version.')
+
+                #   * Subject field MUST be set to:
+                subject = x509_att_cert.subject
+                COUNTRY_NAME = x509.NameOID.COUNTRY_NAME
+                ORGANIZATION_NAME = x509.NameOID.ORGANIZATION_NAME
+                ORG_UNIT_NAME = x509.NameOID.ORGANIZATIONAL_UNIT_NAME
+                COMMON_NAME = x509.NameOID.COMMON_NAME
+
+                #     * Subject-C: ISO 3166 code specifying the country
+                #                  where the Authenticator vendor is
+                #                  incorporated
+                if not subject.get_attributes_for_oid(COUNTRY_NAME):
+                    raise RegistrationRejectedException(
+                        'Attestation certificate must have subject-C.')
+
+                #     * Subject-O: Legal name of the Authenticator vendor
+                if not subject.get_attributes_for_oid(ORGANIZATION_NAME):
+                    raise RegistrationRejectedException(
+                        'Attestation certificate must have subject-O.')
+
+                #     * Subject-OU: Literal string
+                #                   “Authenticator Attestation”
+                ou = subject.get_attributes_for_oid(ORG_UNIT_NAME)
+                if not ou or ou[0].value != 'Authenticator Attestation':
+                    raise RegistrationRejectedException(
+                        "Attestation certificate must have subject-OU set to "
+                        "'Authenticator Attestation'.")
+
+                #     * Subject-CN: A UTF8String of the vendor’s choosing
+                if not subject.get_attributes_for_oid(COMMON_NAME):
+                    raise RegistrationRejectedException(
+                        'Attestation certificate must have subject-CN.')
+
+                extensions = x509_att_cert.extensions
+
+                #   * If the related attestation root certificate is used
+                #     for multiple authenticator models, the Extension OID
+                #     1.3.6.1.4.1.45724.1.1.4 (id-fido-gen-ce-aaguid) MUST
+                #     be present, containing the AAGUID as a 16-byte OCTET
+                #     STRING. The extension MUST NOT be marked as critical.
+                try:
+                    oid = x509.ObjectIdentifier('1.3.6.1.4.1.45724.1.1.4')
+                    aaguid_ext = extensions.get_extension_for_oid(oid)
+                    if aaguid_ext.value.value[2:] != aaguid:
+                        raise RegistrationRejectedException(
+                            'Attestation certificate AAGUID must match '
+                            'authenticator data.')
+                    if aaguid_ext.critical:
+                        raise RegistrationRejectedException(
+                            "Attestation certificate's "
+                            "'id-fido-gen-ce-aaguid' extension must not be "
+                            "marked critical.")
+                except x509.ExtensionNotFound:
+                    pass  # Optional extension
+
+                #   * The Basic Constraints extension MUST have the CA
+                #     component set to false.
+                bc_extension = extensions.get_extension_for_class(
+                    x509.BasicConstraints)
+                if not bc_extension or bc_extension.value.ca:
+                    raise RegistrationRejectedException(
+                        'Attestation certificate must have Basic Constraints '
+                        'extension with CA=false.')
+
+                #   * If successful, return attestation type Basic and
+                #     attestation trust path x5c.
+                attestation_type = AT_BASIC
+                trust_path = [x509_att_cert]
+            elif 'ecdaaKeyId' in att_stmt:
+                # Step 3.
+                #
+                # If ecdaaKeyId is present, then the attestation type is
+                # ECDAA. In this case:
+                #   * Verify that sig is a valid signature over the
+                #     concatenation of authenticatorData and clientDataHash
+                #     using ECDAA-Verify with ECDAA-Issuer public key
+                #     identified by ecdaaKeyId (see  [FIDOEcdaaAlgorithm]).
+                #   * If successful, return attestation type ECDAA and
+                #     attestation trust path ecdaaKeyId.
+                raise RegistrationRejectedException(
+                    'ECDAA attestation type is not currently supported.')
+            else:
+                # Step 4.
+                #
+                # If neither x5c nor ecdaaKeyId is present, self
+                # attestation is in use.
+                #   * Validate that alg matches the algorithm of the
+                #     credentialPublicKey in authenticatorData.
+                try:
+                    public_key_alg, credential_public_key = _load_cose_public_key(
+                        credential_pub_key)
+                except COSEKeyException as e:
+                    raise RegistrationRejectedException(str(e))
+
+                if public_key_alg != alg:
+                    raise RegistrationRejectedException(
+                        'Public key algorithm does not match.')
+
+                #   * Verify that sig is a valid signature over the
+                #     concatenation of authenticatorData and clientDataHash
+                #     using the credential public key with alg.
+                try:
+                    _verify_signature(
+                        credential_public_key, alg, verification_data, signature)
+                except InvalidSignature:
+                    raise RegistrationRejectedException(
+                        'Invalid signature received.')
+                except NotImplementedError:
+                    raise RegistrationRejectedException('Unsupported algorithm.')
+
+                #   * If successful, return attestation type Self and empty
+                #     attestation trust path.
+                attestation_type = AT_SELF_ATTESTATION
+                trust_path = []
+
+            return (attestation_type, trust_path, credential_pub_key, cred_id)
+        elif fmt == AT_FMT_NONE:
             # `none` - indicates that the Relying Party is not interested in
             # authenticator attestation.
             if not self.none_attestation_permitted:
                 raise RegistrationRejectedException('Authenticator attestation is required.')
-
-            attestation_data = auth_data[37:]
-            credential_id_len = struct.unpack('!H', attestation_data[16:18])[0]
-            cred_id = attestation_data[18:18 + credential_id_len]
-            credential_pub_key = attestation_data[18 + credential_id_len:]
-
-            cpk = cbor2.loads(credential_pub_key)
-
-            alg_key = 3
-            x_key = -2
-            y_key = -3
-
-            if alg_key not in cpk:
-                raise RegistrationRejectedException(
-                    "Credential public key missing required algorithm parameter.")
-
-            required_keys = {alg_key, x_key, y_key}
-            cpk_keys = cpk.keys()
-
-            if not set(cpk_keys).issuperset(required_keys):
-                raise RegistrationRejectedException(
-                    'Credential public key must match COSE_Key spec.')
-
-            public_key_u2f = ''
-
-            x = cpk[x_key].encode('hex')
-            if len(x) != 64:
-                raise RegistrationRejectedException('Bad public key.')
-            x_long = long(x, 16)
-
-            y = cpk[y_key].encode('hex')
-            if len(y) != 64:
-                raise RegistrationRejectedException('Bad public key.')
-            y_long = long(y, 16)
-
-            ES256 = -7
-            if cpk[alg_key] != ES256:
-                raise RegistrationRejectedException('Unsupported algorithm.')
-
-            user_ec = EllipticCurvePublicNumbers(
-                x_long, y_long,
-                SECP256R1()).public_key(
-                    backend=default_backend())
-            public_key_u2f = _encode_public_key(user_ec)
 
             # Step 1.
             #
             # Return attestation type None with an empty trust path.
             attestation_type = AT_NONE
             trust_path = []
-            return (attestation_type, trust_path, public_key_u2f, cred_id)
+            return (attestation_type, trust_path, credential_pub_key, cred_id)
         else:
             raise RegistrationRejectedException('Invalid format.')
 
@@ -485,10 +582,7 @@ class WebAuthnRegistrationResponse(object):
             decoded_cd = _webauthn_b64_decode(json_text)
             c = json.loads(decoded_cd)
 
-            credential_id = self.registration_response.get('id')
-            raw_id = self.registration_response.get('rawId')
             attestation_object = self.registration_response.get('attObj')
-            credential_type = self.registration_response.get('type')
 
             # Step 3.
             #
@@ -585,11 +679,12 @@ class WebAuthnRegistrationResponse(object):
             # extensions are in use.
             registration_client_extensions = self.registration_response.get(
                 'registrationClientExtensions')
-            rce = json.loads(registration_client_extensions)
-            if not _verify_client_extensions(rce):
-                raise RegistrationRejectedException('Unable to verify client extensions.')
-            if not _verify_authenticator_extensions(c):
-                raise RegistrationRejectedException('Unable to verify authenticator extensions.')
+            if registration_client_extensions:
+                rce = json.loads(registration_client_extensions)
+                if not _verify_client_extensions(rce):
+                    raise RegistrationRejectedException('Unable to verify client extensions.')
+                if not _verify_authenticator_extensions(c):
+                    raise RegistrationRejectedException('Unable to verify authenticator extensions.')
 
             # Step 13.
             #
@@ -764,9 +859,8 @@ class WebAuthnAssertionResponse(object):
                 raise AuthenticationRejectedException('Invalid user type.')
 
             credential_public_key = self.webauthn_user.public_key
-            decoded_user_pub_key = _decode_public_key(
+            public_key_alg, user_pubkey = _load_cose_public_key(
                 _webauthn_b64_decode(credential_public_key))
-            user_pubkey = decoded_user_pub_key.public_key(backend=default_backend())
 
             # Step 4.
             #
@@ -870,11 +964,12 @@ class WebAuthnAssertionResponse(object):
             # extensions are in use.
             assertion_client_extensions = self.assertion_response.get(
                 'assertionClientExtensions')
-            ace = json.loads(assertion_client_extensions)
-            if not _verify_client_extensions(ace):
-                raise AuthenticationRejectedException('Unable to verify client extensions.')
-            if not _verify_authenticator_extensions(c):
-                raise AuthenticationRejectedException('Unable to verify authenticator extensions.')
+            if assertion_client_extensions:
+                ace = json.loads(assertion_client_extensions)
+                if not _verify_client_extensions(ace):
+                    raise AuthenticationRejectedException('Unable to verify client extensions.')
+                if not _verify_authenticator_extensions(c):
+                    raise AuthenticationRejectedException('Unable to verify authenticator extensions.')
 
             # Step 15.
             #
@@ -887,13 +982,14 @@ class WebAuthnAssertionResponse(object):
             # Using the credential public key looked up in step 3, verify
             # that sig is a valid signature over the binary concatenation
             # of aData and hash.
-            bytes_to_sign = ''.join([
-                decoded_a_data,
-                client_data_hash])
+            bytes_to_verify = ''.join([decoded_a_data, client_data_hash])
+
             try:
-                user_pubkey.verify(sig, bytes_to_sign, ECDSA(SHA256()))
+                _verify_signature(user_pubkey, public_key_alg, bytes_to_verify, sig)
             except InvalidSignature:
                 raise AuthenticationRejectedException('Invalid signature received.')
+            except NotImplementedError:
+                raise AuthenticationRejectedException('Unsupported algorithm.')
 
             # Step 17.
             #
@@ -946,28 +1042,57 @@ def _encode_public_key(public_key):
     return '\x04' + '{:064x}{:064x}'.format(numbers.x, numbers.y).decode('hex')
 
 
-def _decode_public_key(key_bytes):
-    '''Decode a packed SECP256r1 public key into an EllipticCurvePublicKey
-    '''
+def _load_cose_public_key(key_bytes):
+    ALG_KEY = 3
 
-    # Parsing this structure by hand, following SEC1, section 2.3.4
-    # An alternative is to hack on the OpenSSL CFFI bindings so we
-    # can call EC_POINT_oct2point on the contents of key_bytes. Please
-    # believe me when I say that this is much simpler - mainly because
-    # we can make assumptions about /exactly/ which EC curve we're
-    # using!)
-    if key_bytes[0] != '\x04':
-        raise AuthenticationRejectedException('XXX bad public key.')
+    cose_public_key = cbor2.loads(key_bytes)
 
-    # x and y coordinates are each 32-bytes long, encoded as big-endian binary
-    # strings. Without calling unsupported C API functions (i.e.
-    # _PyLong_FromByteArray), converting to hex-encoding and then parsing
-    # seems to be the simplest way to make these into python big-integers.
-    curve = SECP256R1()
-    x = long(key_bytes[1:33].encode('hex'), 16)
-    y = long(key_bytes[33:].encode('hex'), 16)
+    if ALG_KEY not in cose_public_key:
+        raise COSEKeyException('Public key missing required algorithm parameter.')
 
-    return EllipticCurvePublicNumbers(x, y, curve)
+    alg = cose_public_key[ALG_KEY]
+
+    if alg == COSE_ALG_ES256:
+        X_KEY = -2
+        Y_KEY = -3
+
+        required_keys = {ALG_KEY, X_KEY, Y_KEY}
+
+        if not set(cose_public_key.keys()).issuperset(required_keys):
+            raise COSEKeyException('Public key must match COSE_Key spec.')
+
+        x = cose_public_key[X_KEY].encode('hex')
+        y = cose_public_key[Y_KEY].encode('hex')
+
+        if len(x) != 64 or len(y) != 64:
+            raise COSEKeyException('Bad public key.')
+
+        x = long(x, 16)
+        y = long(y, 16)
+
+        return alg, EllipticCurvePublicNumbers(
+            x, y, SECP256R1()).public_key(backend=default_backend())
+    elif alg in (COSE_ALG_PS256, COSE_ALG_RS256):
+        E_KEY = -2
+        N_KEY = -1
+
+        required_keys = {ALG_KEY, E_KEY, N_KEY}
+
+        if not set(cose_public_key.keys()).issuperset(required_keys):
+            raise COSEKeyException('Public key must match COSE_Key spec.')
+
+        e = cose_public_key[E_KEY].encode('hex')
+        n = cose_public_key[N_KEY].encode('hex')
+
+        if len(e) != 512 or len(n) != 6:
+            raise COSEKeyException('Bad public key.')
+
+        e = long(e, 16)
+        n = long(n, 16)
+
+        return alg, RSAPublicNumbers(e, n).public_key(backend=default_backend())
+    else:
+        raise COSEKeyException('Unsupported algorithm.')
 
 
 def _webauthn_b64_decode(encoded):
@@ -1121,14 +1246,11 @@ def _verify_rp_id_hash(auth_data_rp_id_hash, rp_id):
 
 def _verify_attestation_statement_format(fmt):
     # TODO: Handle other attestation statement formats.
-    '''Verify the attestation statement format.
-
-    Currently only supporting 'fido-u2f'
-    and 'none' attestation statement formats.
-    '''
+    '''Verify the attestation statement format.'''
     if not isinstance(fmt, six.string_types):
         return False
-    return fmt == 'none' or fmt == 'fido-u2f'
+
+    return fmt in SUPPORTED_ATTESTATION_FORMATS
 
 
 def _get_auth_data_rp_id_hash(auth_data):
@@ -1152,3 +1274,15 @@ def _validate_credential_id(credential_id):
         return False
 
     return True
+
+
+def _verify_signature(public_key, alg, data, signature):
+    if alg == COSE_ALG_ES256:
+        public_key.verify(signature, data, ECDSA(SHA256()))
+    elif alg == COSE_ALG_RS256:
+        public_key.verify(signature, data, PKCS1v15(), SHA256())
+    elif alg == COSE_ALG_PS256:
+        padding = PSS(mgf=MGF1(SHA256()), salt_length=PSS.MAX_LENGTH)
+        public_key.verify(signature, data, padding, SHA256())
+    else:
+        raise NotImplementedError()
