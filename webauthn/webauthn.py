@@ -101,7 +101,7 @@ class WebAuthnMakeCredentialOptions(object):
             },
             'pubKeyCredParams': [
                 {
-                    'alg': 'ES256',
+                    'alg': -257,
                     'type': 'public-key',
                 },
                 {
