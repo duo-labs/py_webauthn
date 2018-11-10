@@ -7,11 +7,14 @@ import os
 import struct
 import sys
 
+from builtins import bytes
+
 import cbor2
 import six
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import constant_time
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicNumbers
 from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1
@@ -1058,7 +1061,9 @@ def _verify_challenge(received_challenge, sent_challenge):
         return False
     if not sent_challenge:
         return False
-    if sent_challenge != received_challenge:
+    if not constant_time.bytes_eq(
+            bytes(sent_challenge, encoding='utf-8'),
+            bytes(received_challenge, encoding='utf-8')):
         return False
 
     return True
@@ -1116,7 +1121,9 @@ def _verify_authenticator_extensions(client_data):
 def _verify_rp_id_hash(auth_data_rp_id_hash, rp_id):
     rp_id_hash = hashlib.sha256(rp_id).digest()
 
-    return auth_data_rp_id_hash == rp_id_hash
+    return constant_time.bytes_eq(
+        bytes(auth_data_rp_id_hash, encoding='utf-8'),
+        bytes(rp_id_hash, encoding='utf-8'))
 
 
 def _verify_attestation_statement_format(fmt):
