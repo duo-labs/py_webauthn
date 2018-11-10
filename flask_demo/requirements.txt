@@ -4,6 +4,7 @@ Flask==1.0.2
 Flask-Login==0.4.0
 Flask-SQLAlchemy==2.1
 Flask-WTF==0.14.2
+future==0.17.1
 pyOpenSSL==17.5.0
 six==1.11.0
 SQLAlchemy==1.0.13
