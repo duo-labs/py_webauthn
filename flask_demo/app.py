@@ -1,4 +1,5 @@
 import os
+import sys
 
 from flask import Flask
 from flask import flash
@@ -20,11 +21,9 @@ from db import db
 from context import webauthn
 from models import User
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(
-    os.path.join(
-        os.path.dirname(os.path.abspath(__name__)), 'webauthn.db'))
+    os.path.join(os.path.dirname(os.path.abspath(__name__)), 'webauthn.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 sk = os.environ.get('FLASK_SECRET_KEY')
 app.secret_key = sk if sk else os.urandom(40)
@@ -89,12 +88,7 @@ def webauthn_begin_activate():
     session['register_ukey'] = ukey
 
     make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
-        challenge,
-        rp_name,
-        RP_ID,
-        ukey,
-        username,
-        display_name,
+        challenge, rp_name, RP_ID, ukey, username, display_name,
         'https://example.com')
 
     return jsonify(make_credential_options.registration_dict)
@@ -122,18 +116,11 @@ def webauthn_begin_assertion():
     session['challenge'] = challenge
 
     webauthn_user = webauthn.WebAuthnUser(
-        user.ukey,
-        user.username,
-        user.display_name,
-        user.icon_url,
-        user.credential_id,
-        user.pub_key,
-        user.sign_count,
-        user.rp_id)
+        user.ukey, user.username, user.display_name, user.icon_url,
+        user.credential_id, user.pub_key, user.sign_count, user.rp_id)
 
     webauthn_assertion_options = webauthn.WebAuthnAssertionOptions(
-        webauthn_user,
-        challenge)
+        webauthn_user, challenge)
 
     return jsonify(webauthn_assertion_options.assertion_dict)
 
@@ -146,7 +133,8 @@ def verify_credential_info():
     ukey = session['register_ukey']
 
     registration_response = request.form
-    trust_anchor_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), TRUST_ANCHOR_DIR)
+    trust_anchor_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), TRUST_ANCHOR_DIR)
     trusted_attestation_cert_required = True
     self_attestation_permitted = False
     none_attestation_permitted = True
@@ -165,6 +153,7 @@ def verify_credential_info():
     try:
         webauthn_credential = webauthn_registration_response.verify()
     except Exception as e:
+        raise
         return jsonify({'fail': 'Registration failed. Error: {}'.format(e)})
 
     # Step 17.
@@ -177,11 +166,16 @@ def verify_credential_info():
     credential_id_exists = User.query.filter_by(
         credential_id=webauthn_credential.credential_id).first()
     if credential_id_exists:
-        return make_response(jsonify({'fail': 'Credential ID already exists.'}), 401)
+        return make_response(
+            jsonify({
+                'fail': 'Credential ID already exists.'
+            }), 401)
 
-    existing_user = User.query.filter_by(
-        username=username).first()
+    existing_user = User.query.filter_by(username=username).first()
     if not existing_user:
+        if sys.version_info >= (3, 0):
+            webauthn_credential.credential_id = str(
+                webauthn_credential.credential_id, "utf-8")
         user = User(
             ukey=ukey,
             username=username,
@@ -212,14 +206,8 @@ def verify_assertion():
         return make_response(jsonify({'fail': 'User does not exist.'}), 401)
 
     webauthn_user = webauthn.WebAuthnUser(
-        user.ukey,
-        user.username,
-        user.display_name,
-        user.icon_url,
-        user.credential_id,
-        user.pub_key,
-        user.sign_count,
-        user.rp_id)
+        user.ukey, user.username, user.display_name, user.icon_url,
+        user.credential_id, user.pub_key, user.sign_count, user.rp_id)
 
     webauthn_assertion_response = webauthn.WebAuthnAssertionResponse(
         webauthn_user,
@@ -231,6 +219,7 @@ def verify_assertion():
     try:
         sign_count = webauthn_assertion_response.verify()
     except Exception as e:
+        raise
         return jsonify({'fail': 'Assertion failed. Error: {}'.format(e)})
 
     # Update counter.
@@ -241,7 +230,8 @@ def verify_assertion():
     login_user(user)
 
     return jsonify({
-        'success': 'Successfully authenticated as {}'.format(user.username)
+        'success':
+        'Successfully authenticated as {}'.format(user.username)
     })
 
 
