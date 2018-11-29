@@ -353,7 +353,7 @@ class WebAuthnRegistrationResponse(object):
             # clientDataHash || credentialId || publicKeyU2F) (see Section 4.3
             # of [FIDO-U2F-Message-Formats]).
             auth_data_rp_id_hash = _get_auth_data_rp_id_hash(auth_data)
-            alg = att_stmt['alg']
+            alg = COSE_ALG_ES256
             signature = att_stmt['sig']
             verification_data = ''.join([
                 '\0',
@@ -368,7 +368,7 @@ class WebAuthnRegistrationResponse(object):
             # key per [SEC1].
             try:
                 _verify_signature(
-                    credential_public_key, alg, verification_data, signature)
+                    certificate_public_key, alg, verification_data, signature)
             except InvalidSignature:
                 raise RegistrationRejectedException('Invalid signature received.')
             except NotImplementedError:
