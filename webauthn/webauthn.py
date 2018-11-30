@@ -147,9 +147,6 @@ class WebAuthnMakeCredentialOptions(object):
         if self.icon_url:
             registration_dict['user']['icon'] = self.icon_url
 
-        if self.icon_url:
-            registration_dict['user']['icon'] = self.icon_url
-
         return registration_dict
 
     @property
