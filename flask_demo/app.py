@@ -153,7 +153,6 @@ def verify_credential_info():
     try:
         webauthn_credential = webauthn_registration_response.verify()
     except Exception as e:
-        raise
         return jsonify({'fail': 'Registration failed. Error: {}'.format(e)})
 
     # Step 17.
@@ -219,7 +218,6 @@ def verify_assertion():
     try:
         sign_count = webauthn_assertion_response.verify()
     except Exception as e:
-        raise
         return jsonify({'fail': 'Assertion failed. Error: {}'.format(e)})
 
     # Update counter.

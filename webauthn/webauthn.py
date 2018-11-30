@@ -543,8 +543,6 @@ class WebAuthnRegistrationResponse(object):
             # Let JSONtext be the result of running UTF-8 decode on the value of
             # response.clientDataJSON.
 
-            #json_text = self.registration_response.get('clientData',
-            #                                           '').decode('utf-8')
             json_text = self.registration_response.get('clientData', '')
             if sys.version_info < (3, 0):  # if python2
                 json_text = json_text.decode('utf-8')
@@ -789,7 +787,6 @@ class WebAuthnRegistrationResponse(object):
             return credential
 
         except Exception as e:
-            raise
             raise RegistrationRejectedException(
                 'Registration rejected. Error: {}.'.format(e))
 
@@ -1026,7 +1023,6 @@ class WebAuthnAssertionResponse(object):
             return sign_count
 
         except Exception as e:
-            raise
             raise AuthenticationRejectedException(
                 'Authentication rejected. Error: {}.'.format(e))
 
