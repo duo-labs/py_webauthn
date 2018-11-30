@@ -615,7 +615,8 @@ class WebAuthnRegistrationResponse(object):
             # Verify that the RP ID hash in authData is indeed the
             # SHA-256 hash of the RP ID expected by the RP.
             auth_data_rp_id_hash = _get_auth_data_rp_id_hash(auth_data)
-            # NOTE: in python3, auth_data_rp_id_hash will be bytes, which is expected in _verify_rp_id_hash()
+            # NOTE: In Python 3, `auth_data_rp_id_hash` will be bytes,
+            # which is expected in `_verify_rp_id_hash()`.
             if not _verify_rp_id_hash(auth_data_rp_id_hash, self.rp_id):
                 raise RegistrationRejectedException(
                     'Unable to verify RP ID hash.')
@@ -1079,14 +1080,11 @@ def _load_cose_public_key(key_bytes):
         if not set(cose_public_key.keys()).issuperset(required_keys):
             raise COSEKeyException('Public key must match COSE_Key spec.')
 
-        e = cose_public_key[E_KEY].encode('hex')
-        n = cose_public_key[N_KEY].encode('hex')
-
-        if len(e) != 512 or len(n) != 6:
+        if len(cose_public_key[E_KEY]) != 256 or len(cose_public_key[N_KEY]) != 3:
             raise COSEKeyException('Bad public key.')
 
-        e = long(e, 16)
-        n = long(n, 16)
+        e = int(codecs.encode(cose_public_key[E_KEY], 'hex'), 16)
+        n = int(codecs.encode(cose_public_key[N_KEY], 'hex'), 16)
 
         return alg, RSAPublicNumbers(e,
                                      n).public_key(backend=default_backend())
@@ -1102,8 +1100,8 @@ def _webauthn_b64_decode(encoded):
         # Ensure that this is encoded as ascii, not unicode.
         encoded = encoded.encode('ascii')
     else:
-        if type(encoded) == type(b''):
-            encoded = str(encoded, "utf-8")
+        if isinstance(encoded, bytes):
+            encoded = str(encoded, 'utf-8')
     # Add '=' until length is a multiple of 4 bytes, then decode.
     padding_len = (-len(encoded) % 4)
     encoded += '=' * padding_len
