@@ -19,6 +19,13 @@ function hexEncode(buf) {
                 .join("");
 }
 
+async function fetch_json(url, options) {
+    const response = await fetch(url, options);
+    const body = await response.json();
+    if (body.fail)
+        throw body.fail;
+    return body;
+}
 
 /**
  * REGISTRATION FUNCTIONS
@@ -36,9 +43,10 @@ const didClickRegister = async (e) => {
     const formData = new FormData(form);
 
     // post the data to the server to generate the PublicKeyCredentialCreateOptions
-    const credentialCreateOptionsFromServer = await getCredentialCreateOptionsFromServer(formData);
-
-    if (credentialCreateOptionsFromServer.fail) {
+    let credentialCreateOptionsFromServer;
+    try {
+        credentialCreateOptionsFromServer = await getCredentialCreateOptionsFromServer(formData);
+    } catch (err) {
         return console.error("Failed to generate credential request options:", credentialCreateOptionsFromServer)
     }
 
@@ -53,7 +61,7 @@ const didClickRegister = async (e) => {
             publicKey: publicKeyCredentialCreateOptions
         });
     } catch (err) {
-        console.error("Error creating credential.", err)
+        return console.error("Error creating credential:", err);
     }
 
     // we now have a new credential! We now need to encode the byte arrays
@@ -66,11 +74,7 @@ const didClickRegister = async (e) => {
     try {
         assertionValidationResponse = await postNewAssertionToServer(newAssertionForServer);
     } catch (err) {
-        console.error("Server validation of credential failed.", err);
-    }
-
-    if (assertionValidationResponse.fail) {
-        return console.error("Assertion validation failed:", assertionValidationResponse)
+        return console.error("Server validation of credential failed:", err);
     }
     
     // reload the page after a successful result
@@ -83,16 +87,13 @@ const didClickRegister = async (e) => {
  * @param {FormData} formData 
  */
 const getCredentialRequestOptionsFromServer = async (formData) => {
-    const response = await fetch(
+    return await fetch_json(
         "/webauthn_begin_assertion",
         {
             method: "POST",
             body: formData
         }
     );
-
-    const body = await response.json();
-    return body;
 }
 
 const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) => {
@@ -123,16 +124,13 @@ const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) =
  * @param {FormData} formData 
  */
 const getCredentialCreateOptionsFromServer = async (formData) => {
-    const response = await fetch(
+    return await fetch_json(
         "/webauthn_begin_activate",
         {
             method: "POST",
             body: formData
         }
     );
-
-    const body = await response.json();
-    return body;
 }
 
 /**
@@ -177,8 +175,7 @@ const didClickLogin = async (e) => {
     try {
         credentialRequestOptionsFromServer = await getCredentialRequestOptionsFromServer(formData);
     } catch (err) {
-        console.error("Error when getting request options from server:", err)
-        return;
+        return console.error("Error when getting request options from server:", err);
     }
 
     // convert certain members of the PublicKeyCredentialRequestOptions into
@@ -194,7 +191,7 @@ const didClickLogin = async (e) => {
             publicKey: transformedCredentialRequestOptions,
         });
     } catch (err) {
-        return console.error("Error when creating credential: ", err);
+        return console.error("Error when creating credential:", err);
     }
 
     // we now have an authentication assertion! encode the byte arrays contained
@@ -207,10 +204,6 @@ const didClickLogin = async (e) => {
         response = await postAssertionToServer(transformedAssertionForServer);
     } catch (err) {
         return console.error("Error when validating assertion on server:", err);
-    }
-
-    if (response.fail) {
-        return console.error("Error when validating assertion on server:", response);
     }
 
     window.location.reload();
@@ -238,7 +231,7 @@ const transformNewAssertionForServer = (newAssertion) => {
         attObj: b64enc(attObj),
         clientData: b64enc(clientDataJSON),
         registrationClientExtensions: JSON.stringify(registrationClientExtensions)
-    }
+    };
 }
 
 /**
@@ -251,14 +244,11 @@ const postNewAssertionToServer = async (credentialDataForServer) => {
         formData.set(key, value);
     });
     
-    const response = await fetch(
+    return await fetch_json(
         "/verify_credential_info", {
         method: "POST",
         body: formData
     });
-
-    const body = await response.text()
-    return body;
 }
 
 /**
@@ -293,14 +283,11 @@ const postAssertionToServer = async (assertionDataForServer) => {
         formData.set(key, value);
     });
     
-    const response = await fetch(
+    return await fetch_json(
         "/verify_assertion", {
         method: "POST",
         body: formData
     });
-
-    const body = await response.text()
-    return body;
 }
 
 
