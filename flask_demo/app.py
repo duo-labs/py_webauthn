@@ -136,7 +136,7 @@ def verify_credential_info():
     trust_anchor_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), TRUST_ANCHOR_DIR)
     trusted_attestation_cert_required = True
-    self_attestation_permitted = False
+    self_attestation_permitted = True
     none_attestation_permitted = True
 
     webauthn_registration_response = webauthn.WebAuthnRegistrationResponse(

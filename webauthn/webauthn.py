@@ -154,7 +154,7 @@ class WebAuthnAssertionOptions(object):
         acceptable_credential = {
             'type': 'public-key',
             'id': self.webauthn_user.credential_id,
-            'transports': ['usb', 'nfc', 'ble']
+            'transports': ['usb', 'nfc', 'ble', 'internal']
         }
 
         assertion_dict = {
