@@ -553,7 +553,11 @@ class WebAuthnRegistrationResponse(object):
             # creation, be the result of running an implementation-specific JSON
             # parser on JSONtext.
             decoded_cd = _webauthn_b64_decode(json_text)
-            c = json.loads(decoded_cd)
+
+            if sys.version_info < (3, 0):  # if python2
+                c = json.loads(decoded_cd.decode('utf-8'))
+            else:
+                c = json.loads(decoded_cd)
 
             attestation_object = self.registration_response.get('attObj')
 
@@ -871,7 +875,11 @@ class WebAuthnAssertionResponse(object):
             # be the result of running an implementation-specific JSON
             # parser on JSONtext.
             decoded_cd = _webauthn_b64_decode(json_text)
-            c = json.loads(decoded_cd)
+
+            if sys.version_info < (3, 0):  # if python2
+                c = json.loads(decoded_cd.decode('utf-8'))
+            else:
+                c = json.loads(decoded_cd)
 
             # Step 7.
             #
