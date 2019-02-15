@@ -48,6 +48,7 @@ setup(
         'cbor2>=4.0.1',
         'cryptography>=2.3.1',
         'pyOpenSSL>=16.0.0',
-        'six>=1.11.0'
+        'six>=1.11.0',
+        'future>=0.17.1',
     ]
 )
