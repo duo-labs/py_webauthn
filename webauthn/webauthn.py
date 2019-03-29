@@ -627,24 +627,22 @@ class WebAuthnRegistrationResponse(object):
 
             # Step 10.
             #
-            # If user verification is required for this registration,
-            # verify that the User Verified bit of the flags in authData
+            # Verify that the User Present bit of the flags in authData
             # is set.
 
             # Authenticator data flags.
             # https://www.w3.org/TR/webauthn/#authenticator-data
             flags = struct.unpack('!B', auth_data[32:33])[0]
 
-            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
+            if (flags & const.USER_PRESENT) != 0x01:
                 raise RegistrationRejectedException(
                     'Malformed request received.')
 
             # Step 11.
             #
-            # If user verification is not required for this registration,
-            # verify that the User Present bit of the flags in authData
-            # is set.
-            if (not self.uv_required and (flags & const.USER_PRESENT) != 0x01):
+            # If user verification is required for this registration, verify
+            # that the User Verified bit of the flags in authData is set.
+            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
                 raise RegistrationRejectedException(
                     'Malformed request received.')
 
@@ -931,23 +929,23 @@ class WebAuthnAssertionResponse(object):
 
             # Step 12.
             #
-            # If user verification is required for this assertion, verify
-            # that the User Verified bit of the flags in aData is set.
+            # Verify that the User Present bit of the flags in authData
+            # is set.
 
             # Authenticator data flags.
             # https://www.w3.org/TR/webauthn/#authenticator-data
             flags = struct.unpack('!B', decoded_a_data[32:33])[0]
 
-            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
+            if (flags & const.USER_PRESENT) != 0x01:
                 raise AuthenticationRejectedException(
                     'Malformed request received.')
 
             # Step 13.
             #
-            # If user verification is not required for this assertion, verify
-            # that the User Present bit of the flags in aData is set.
-            if (not self.uv_required and (flags & const.USER_PRESENT) != 0x01):
-                raise AuthenticationRejectedException(
+            # If user verification is required for this assertion, verify that
+            # the User Verified bit of the flags in authData is set.
+            if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
+                raise RegistrationRejectedException(
                     'Malformed request received.')
 
             # Step 14.
