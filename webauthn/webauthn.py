@@ -740,6 +740,8 @@ class WebAuthnRegistrationResponse(object):
                             trust_path, trust_anchors):
                         raise RegistrationRejectedException(
                             'Untrusted attestation certificate.')
+            elif attestation_type == AT_NONE:
+                pass
             else:
                 raise RegistrationRejectedException(
                     'Unknown attestation type.')
