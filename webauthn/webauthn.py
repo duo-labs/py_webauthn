@@ -175,8 +175,20 @@ class WebAuthnAssertionOptions(object):
 
 
 class WebAuthnUser(object):
-    def __init__(self, user_id, username, display_name, icon_url,
-                 credential_id, public_key, sign_count, rp_id):
+    def __init__(self, *args, **kwargs):
+        if len(args) == 8:
+            user_id, username, display_name, icon_url, \
+                credential_id, public_key, sign_count, rp_id = args
+        else:
+            user_id = kwargs.get("user_id", None)
+            username = kwargs.get("username", None)
+            display_name = kwargs.get("display_name", None)
+            icon_url = kwargs.get("icon_url", None)
+            credential_id = kwargs.get("credential_id", None)
+            public_key = kwargs.get("public_key", None)
+            sign_count = kwargs.get("sign_count", None)
+            rp_id = kwargs.get("rp_id", None)
+        
         self.user_id = user_id
         self.username = username
         self.display_name = display_name
