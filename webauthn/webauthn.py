@@ -150,19 +150,22 @@ class WebAuthnAssertionOptions(object):
         if not self.challenge:
             raise AuthenticationRejectedException('Invalid challenge.')
 
-        # TODO: Handle multiple acceptable credentials.
-        acceptable_credential = {
-            'type': 'public-key',
-            'id': self.webauthn_user.credential_id,
-            'transports': ['usb', 'nfc', 'ble', 'internal']
-        }
+        acceptable_credential_list = []
+        if not isinstance(self.webauthn_user.credential_id, list):
+            credential_id_list = [self.webauthn_user.credential_id]
+        else:
+            credential_id_list = self.webauthn_user.credential_id
+        for credential_id in credential_id_list:
+            acceptable_credential_list.append( {
+                'type': 'public-key',
+                'id': credential_id,
+                'transports': ['usb', 'nfc', 'ble', 'internal']
+            } )
 
         assertion_dict = {
             'challenge': self.challenge,
             'timeout': 60000,  # 1 minute.
-            'allowCredentials': [
-                acceptable_credential,
-            ],
+            'allowCredentials': acceptable_credential_list,
             'rpId': self.webauthn_user.rp_id,
             # 'extensions': {}
         }
