@@ -80,7 +80,7 @@ class RegistrationRejectedException(Exception):
 
 class WebAuthnMakeCredentialOptions(object):
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
-                 display_name, icon_url):
+                 display_name, icon_url,timeout=60000):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -88,6 +88,7 @@ class WebAuthnMakeCredentialOptions(object):
         self.username = username
         self.display_name = display_name
         self.icon_url = icon_url
+        self.timeout = timeout
 
     @property
     def registration_dict(self):
@@ -114,7 +115,7 @@ class WebAuthnMakeCredentialOptions(object):
                 'type': 'public-key',
             }],
             'timeout':
-            60000,  # 1 minute.
+            self.timeout,
             'excludeCredentials': [],
             # Relying Parties may use AttestationConveyancePreference to specify their
             # preference regarding attestation conveyance during credential generation.
@@ -137,9 +138,10 @@ class WebAuthnMakeCredentialOptions(object):
 
 
 class WebAuthnAssertionOptions(object):
-    def __init__(self, webauthn_user, challenge):
+    def __init__(self, webauthn_user, challenge, timeout=60000):
         self.webauthn_user = webauthn_user
         self.challenge = challenge
+        self.timeout = timeout
 
     @property
     def assertion_dict(self):
@@ -159,7 +161,7 @@ class WebAuthnAssertionOptions(object):
 
         assertion_dict = {
             'challenge': self.challenge,
-            'timeout': 60000,  # 1 minute.
+            'timeout': self.timeout,
             'allowCredentials': [
                 acceptable_credential,
             ],
