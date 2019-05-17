@@ -120,7 +120,7 @@ def webauthn_begin_assertion():
         user.credential_id, user.pub_key, user.sign_count, user.rp_id)
 
     webauthn_assertion_options = webauthn.WebAuthnAssertionOptions(
-        [webauthn_user], challenge)
+        webauthn_user, challenge)
 
     return jsonify(webauthn_assertion_options.assertion_dict)
 
