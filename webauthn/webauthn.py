@@ -847,6 +847,9 @@ class WebAuthnAssertionResponse(object):
             # If credential.response.userHandle is present, verify that the user
             # identified by this value is the owner of the public key credential
             # identified by credential.id.
+            if self.webauthn_user.username == None:
+                raise WebAuthnUserDataMissing("username missing")
+            
             user_handle = self.assertion_response.get('userHandle')
             if user_handle:
                 if not user_handle == self.webauthn_user.username:
@@ -863,6 +866,9 @@ class WebAuthnAssertionResponse(object):
 
             if not isinstance(self.webauthn_user, WebAuthnUser):
                 raise AuthenticationRejectedException('Invalid user type.')
+
+            if self.webauthn_user.public_key == None:
+                raise WebAuthnUserDataMissing("public_key missing")
 
             credential_public_key = self.webauthn_user.public_key
             public_key_alg, user_pubkey = _load_cose_public_key(
@@ -1037,7 +1043,10 @@ class WebAuthnAssertionResponse(object):
             #             or not, is Relying Party-specific.
             sc = decoded_a_data[33:37]
             sign_count = struct.unpack('!I', sc)[0]
-            if sign_count or self.webauthn_user.sign_count:
+            if sign_count:
+                if self.webauthn_user.sign_count == None:
+                    raise WebAuthnUserDataMissing("sign_count missing")
+
                 if sign_count <= self.webauthn_user.sign_count:
                     raise AuthenticationRejectedException(
                         'Duplicate authentication detected.')
