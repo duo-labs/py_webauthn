@@ -138,8 +138,11 @@ class WebAuthnMakeCredentialOptions(object):
 
 
 class WebAuthnAssertionOptions(object):
-    def __init__(self, webauthn_users, challenge, timeout=60000):
-        self.webauthn_users = webauthn_users
+    def __init__(self, webauthn_user, challenge, timeout=60000):
+        if isinstance(list, webauthn_user):
+            self.webauthn_users = webauthn_user
+        else:
+            self.webauthn_users = [webauthn_user]
         self.challenge = challenge
         self.timeout = timeout
 
