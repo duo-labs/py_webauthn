@@ -77,6 +77,8 @@ class AuthenticationRejectedException(Exception):
 class RegistrationRejectedException(Exception):
     pass
 
+class WebAuthnUserDataMissing(Exception):
+    pass
 
 class WebAuthnMakeCredentialOptions(object):
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
@@ -189,6 +191,12 @@ class WebAuthnUser(object):
             sign_count = kwargs.get("sign_count", None)
             rp_id = kwargs.get("rp_id", None)
         
+        if credential_id == None:
+            raise WebAuthnUserDataMissing("credential_id missing")
+
+        if rp_id == None:
+            raise WebAuthnUserDataMissing("rp_id missing")
+
         self.user_id = user_id
         self.username = username
         self.display_name = display_name
