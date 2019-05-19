@@ -59,11 +59,11 @@ DEFAULT_TRUST_ANCHOR_DIR = 'trusted_attestation_roots'
 TYPE_CREATE = 'webauthn.create'
 TYPE_GET = 'webauthn.get'
 
-# Expected client extensions
-EXPECTED_CLIENT_EXTENSIONS = {'appid': None, 'loc': None}
+# Default client extensions
+DEFAULT_CLIENT_EXTENSIONS = {'appid': None, 'loc': None}
 
-# Expected authenticator extensions
-EXPECTED_AUTHENTICATOR_EXTENSIONS = {}
+# Default authenticator extensions
+DEFAULT_AUTHENTICATOR_EXTENSIONS = {}
 
 
 class COSEKeyException(Exception):
@@ -82,7 +82,7 @@ class WebAuthnUserDataMissing(Exception):
 
 class WebAuthnMakeCredentialOptions(object):
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
-                 display_name, icon_url):
+                 display_name, icon_url, timeout=60000):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -90,6 +90,7 @@ class WebAuthnMakeCredentialOptions(object):
         self.username = username
         self.display_name = display_name
         self.icon_url = icon_url
+        self.timeout = timeout
 
     @property
     def registration_dict(self):
@@ -116,7 +117,7 @@ class WebAuthnMakeCredentialOptions(object):
                 'type': 'public-key',
             }],
             'timeout':
-            60000,  # 1 minute.
+            self.timeout,
             'excludeCredentials': [],
             # Relying Parties may use AttestationConveyancePreference to specify their
             # preference regarding attestation conveyance during credential generation.
@@ -139,33 +140,41 @@ class WebAuthnMakeCredentialOptions(object):
 
 
 class WebAuthnAssertionOptions(object):
-    def __init__(self, webauthn_user, challenge):
-        self.webauthn_user = webauthn_user
+    def __init__(self, webauthn_user, challenge, timeout=60000):
+        if isinstance(webauthn_user, list):
+            self.webauthn_users = webauthn_user
+        else:
+            self.webauthn_users = [webauthn_user]
         self.challenge = challenge
+        self.timeout = timeout
 
     @property
     def assertion_dict(self):
-        if not isinstance(self.webauthn_user, WebAuthnUser):
-            raise AuthenticationRejectedException('Invalid user type.')
-        if not self.webauthn_user.credential_id:
-            raise AuthenticationRejectedException('Invalid credential ID.')
+        if not isinstance(self.webauthn_users, list) or len(self.webauthn_users) < 1:
+            raise AuthenticationRejectedException('Invalid user list.')
+        if len(set([u.rp_id for u in self.webauthn_users])) != 1:
+            raise AuthenticationRejectedException('Invalid (mutliple) RP IDs in user list.')
+        for user in self.webauthn_users:
+            if not isinstance(user, WebAuthnUser):
+                raise AuthenticationRejectedException('Invalid user type.')
+            if not user.credential_id:
+                raise AuthenticationRejectedException('Invalid credential ID.')
         if not self.challenge:
             raise AuthenticationRejectedException('Invalid challenge.')
 
-        # TODO: Handle multiple acceptable credentials.
-        acceptable_credential = {
-            'type': 'public-key',
-            'id': self.webauthn_user.credential_id,
-            'transports': ['usb', 'nfc', 'ble', 'internal']
-        }
+        acceptable_credentials = []
+        for user in self.webauthn_users:
+            acceptable_credentials.append({
+                'type': 'public-key',
+                'id': user.credential_id,
+                'transports': ['usb', 'nfc', 'ble', 'internal'],
+            })
 
         assertion_dict = {
             'challenge': self.challenge,
-            'timeout': 60000,  # 1 minute.
-            'allowCredentials': [
-                acceptable_credential,
-            ],
-            'rpId': self.webauthn_user.rp_id,
+            'allowCredentials': acceptable_credentials,
+            'rpId': self.webauthn_users[0].rp_id,
+            'timeout': self.timeout,
             # 'extensions': {}
         }
 
@@ -234,7 +243,9 @@ class WebAuthnRegistrationResponse(object):
                  trusted_attestation_cert_required=False,
                  self_attestation_permitted=False,
                  none_attestation_permitted=False,
-                 uv_required=False):
+                 uv_required=False,
+                 expected_registration_client_extensions=DEFAULT_CLIENT_EXTENSIONS,
+                 expected_registration_authenticator_extensions=DEFAULT_AUTHENTICATOR_EXTENSIONS):
         self.rp_id = rp_id
         self.origin = origin
         self.registration_response = registration_response
@@ -242,6 +253,9 @@ class WebAuthnRegistrationResponse(object):
         self.trust_anchor_dir = trust_anchor_dir
         self.trusted_attestation_cert_required = trusted_attestation_cert_required
         self.uv_required = uv_required
+        self.expected_registration_client_extensions = expected_registration_client_extensions
+        self.expected_registration_authenticator_extensions = \
+            expected_registration_authenticator_extensions
 
         # With self attestation, the credential public key is
         # also used as the attestation public key.
@@ -683,10 +697,11 @@ class WebAuthnRegistrationResponse(object):
                 'registrationClientExtensions')
             if registration_client_extensions:
                 rce = json.loads(registration_client_extensions)
-                if not _verify_client_extensions(rce):
+                if not _verify_client_extensions(rce, self.expected_registration_client_extensions):
                     raise RegistrationRejectedException(
                         'Unable to verify client extensions.')
-                if not _verify_authenticator_extensions(c):
+                if not _verify_authenticator_extensions(
+                        c, self.expected_registration_authenticator_extensions):
                     raise RegistrationRejectedException(
                         'Unable to verify authenticator extensions.')
 
@@ -760,6 +775,8 @@ class WebAuthnRegistrationResponse(object):
                             trust_path, trust_anchors):
                         raise RegistrationRejectedException(
                             'Untrusted attestation certificate.')
+            elif attestation_type == AT_NONE:
+                pass
             else:
                 raise RegistrationRejectedException(
                     'Unknown attestation type.')
@@ -821,13 +838,18 @@ class WebAuthnAssertionResponse(object):
                  challenge,
                  origin,
                  allow_credentials=None,
-                 uv_required=False):
+                 uv_required=False,
+                 expected_assertion_client_extensions=DEFAULT_CLIENT_EXTENSIONS,
+                 expected_assertion_authenticator_extensions=DEFAULT_AUTHENTICATOR_EXTENSIONS):
         self.webauthn_user = webauthn_user
         self.assertion_response = assertion_response
         self.challenge = challenge
         self.origin = origin
         self.allow_credentials = allow_credentials
         self.uv_required = uv_required
+        self.expected_assertion_client_extensions = expected_assertion_client_extensions
+        self.expected_assertion_authenticator_extensions = \
+            expected_assertion_authenticator_extensions
 
     def verify(self):
         try:
@@ -991,10 +1013,11 @@ class WebAuthnAssertionResponse(object):
                 'assertionClientExtensions')
             if assertion_client_extensions:
                 ace = json.loads(assertion_client_extensions)
-                if not _verify_client_extensions(ace):
+                if not _verify_client_extensions(ace, self.expected_assertion_client_extensions):
                     raise AuthenticationRejectedException(
                         'Unable to verify client extensions.')
-                if not _verify_authenticator_extensions(c):
+                if not _verify_authenticator_extensions(
+                        c, self.expected_assertion_authenticator_extensions):
                     raise AuthenticationRejectedException(
                         'Unable to verify authenticator extensions.')
 
@@ -1262,14 +1285,14 @@ def _verify_token_binding_id(client_data):
     return False
 
 
-def _verify_client_extensions(client_extensions):
-    if set(EXPECTED_CLIENT_EXTENSIONS.keys()).issuperset(
+def _verify_client_extensions(client_extensions, expected_client_extensions):
+    if set(expected_client_extensions.keys()).issuperset(
             client_extensions.keys()):
         return True
     return False
 
 
-def _verify_authenticator_extensions(client_data):
+def _verify_authenticator_extensions(client_data, expected_authenticator_extensions):
     # TODO
     return True
 
