@@ -200,10 +200,10 @@ class WebAuthnUser(object):
             sign_count = kwargs.get("sign_count", None)
             rp_id = kwargs.get("rp_id", None)
         
-        if credential_id == None:
+        if not credential_id:
             raise WebAuthnUserDataMissing("credential_id missing")
 
-        if rp_id == None:
+        if not rp_id:
             raise WebAuthnUserDataMissing("rp_id missing")
 
         self.user_id = user_id
@@ -869,7 +869,7 @@ class WebAuthnAssertionResponse(object):
             # If credential.response.userHandle is present, verify that the user
             # identified by this value is the owner of the public key credential
             # identified by credential.id.
-            if self.webauthn_user.username == None:
+            if not self.webauthn_user.username:
                 raise WebAuthnUserDataMissing("username missing")
             
             user_handle = self.assertion_response.get('userHandle')
@@ -889,7 +889,7 @@ class WebAuthnAssertionResponse(object):
             if not isinstance(self.webauthn_user, WebAuthnUser):
                 raise AuthenticationRejectedException('Invalid user type.')
 
-            if self.webauthn_user.public_key == None:
+            if not self.webauthn_user.public_key:
                 raise WebAuthnUserDataMissing("public_key missing")
 
             credential_public_key = self.webauthn_user.public_key
