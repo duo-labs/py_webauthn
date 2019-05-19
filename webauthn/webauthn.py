@@ -139,33 +139,40 @@ class WebAuthnMakeCredentialOptions(object):
 
 class WebAuthnAssertionOptions(object):
     def __init__(self, webauthn_user, challenge, timeout=60000):
-        self.webauthn_user = webauthn_user
+        if isinstance(webauthn_user, list):
+            self.webauthn_users = webauthn_user
+        else:
+            self.webauthn_users = [webauthn_user]
         self.challenge = challenge
         self.timeout = timeout
 
     @property
     def assertion_dict(self):
-        if not isinstance(self.webauthn_user, WebAuthnUser):
-            raise AuthenticationRejectedException('Invalid user type.')
-        if not self.webauthn_user.credential_id:
-            raise AuthenticationRejectedException('Invalid credential ID.')
+        if not isinstance(self.webauthn_users, list) or len(self.webauthn_users) < 1:
+            raise AuthenticationRejectedException('Invalid user list.')
+        if len(set([u.rp_id for u in self.webauthn_users])) != 1:
+            raise AuthenticationRejectedException('Invalid (mutliple) RP IDs in user list.')
+        for user in self.webauthn_users:
+            if not isinstance(user, WebAuthnUser):
+                raise AuthenticationRejectedException('Invalid user type.')
+            if not user.credential_id:
+                raise AuthenticationRejectedException('Invalid credential ID.')
         if not self.challenge:
             raise AuthenticationRejectedException('Invalid challenge.')
 
-        # TODO: Handle multiple acceptable credentials.
-        acceptable_credential = {
-            'type': 'public-key',
-            'id': self.webauthn_user.credential_id,
-            'transports': ['usb', 'nfc', 'ble', 'internal']
-        }
+        acceptable_credentials = []
+        for user in self.webauthn_users:
+            acceptable_credentials.append({
+                'type': 'public-key',
+                'id': user.credential_id,
+                'transports': ['usb', 'nfc', 'ble', 'internal'],
+            })
 
         assertion_dict = {
             'challenge': self.challenge,
+            'allowCredentials': acceptable_credentials,
+            'rpId': self.webauthn_users[0].rp_id,
             'timeout': self.timeout,
-            'allowCredentials': [
-                acceptable_credential,
-            ],
-            'rpId': self.webauthn_user.rp_id,
             # 'extensions': {}
         }
 
