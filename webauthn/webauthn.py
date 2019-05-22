@@ -1066,13 +1066,16 @@ class WebAuthnAssertionResponse(object):
             #             or not, is Relying Party-specific.
             sc = decoded_a_data[33:37]
             sign_count = struct.unpack('!I', sc)[0]
-            if sign_count:
-                if self.webauthn_user.sign_count == None:
-                    raise WebAuthnUserDataMissing("sign_count missing")
 
-                if sign_count <= self.webauthn_user.sign_count:
-                    raise AuthenticationRejectedException(
-                        'Duplicate authentication detected.')
+            if not sign_count:
+                raise AuthenticationRejectedException('Unable to parse sign_count.')
+
+            if not self.webauthn_user.sign_count:
+                raise WebAuthnUserDataMissing('sign_count missing from WebAuthnUser.')
+
+            if sign_count <= self.webauthn_user.sign_count:
+                raise AuthenticationRejectedException(
+                    'Duplicate authentication detected.')
 
             # Step 18.
             #
