@@ -186,8 +186,8 @@ class WebAuthnAssertionOptions(object):
 
 
 class WebAuthnUser(object):
-    def __init__(self, user_id=None, username=None, display_name=None, icon_url=None,
-                 credential_id=None, public_key=None, sign_count=None, rp_id=None):
+    def __init__(self, user_id, username, display_name, icon_url,
+                 credential_id, public_key, sign_count, rp_id):
         
         if not credential_id:
             raise WebAuthnUserDataMissing("credential_id missing")
