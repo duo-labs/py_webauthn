@@ -77,6 +77,8 @@ class AuthenticationRejectedException(Exception):
 class RegistrationRejectedException(Exception):
     pass
 
+class WebAuthnUserDataMissing(Exception):
+    pass
 
 class WebAuthnMakeCredentialOptions(object):
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
@@ -186,6 +188,13 @@ class WebAuthnAssertionOptions(object):
 class WebAuthnUser(object):
     def __init__(self, user_id, username, display_name, icon_url,
                  credential_id, public_key, sign_count, rp_id):
+        
+        if not credential_id:
+            raise WebAuthnUserDataMissing("credential_id missing")
+
+        if not rp_id:
+            raise WebAuthnUserDataMissing("rp_id missing")
+
         self.user_id = user_id
         self.username = username
         self.display_name = display_name
@@ -849,6 +858,9 @@ class WebAuthnAssertionResponse(object):
             # If credential.response.userHandle is present, verify that the user
             # identified by this value is the owner of the public key credential
             # identified by credential.id.
+            if not self.webauthn_user.username:
+                raise WebAuthnUserDataMissing("username missing")
+            
             user_handle = self.assertion_response.get('userHandle')
             if user_handle:
                 if not user_handle == self.webauthn_user.username:
@@ -865,6 +877,9 @@ class WebAuthnAssertionResponse(object):
 
             if not isinstance(self.webauthn_user, WebAuthnUser):
                 raise AuthenticationRejectedException('Invalid user type.')
+
+            if not self.webauthn_user.public_key:
+                raise WebAuthnUserDataMissing("public_key missing")
 
             credential_public_key = self.webauthn_user.public_key
             public_key_alg, user_pubkey = _load_cose_public_key(
@@ -1040,10 +1055,16 @@ class WebAuthnAssertionResponse(object):
             #             or not, is Relying Party-specific.
             sc = decoded_a_data[33:37]
             sign_count = struct.unpack('!I', sc)[0]
-            if sign_count or self.webauthn_user.sign_count:
-                if sign_count <= self.webauthn_user.sign_count:
-                    raise AuthenticationRejectedException(
-                        'Duplicate authentication detected.')
+
+            if not sign_count:
+                raise AuthenticationRejectedException('Unable to parse sign_count.')
+
+            if not self.webauthn_user.sign_count:
+                raise WebAuthnUserDataMissing('sign_count missing from WebAuthnUser.')
+
+            if sign_count <= self.webauthn_user.sign_count:
+                raise AuthenticationRejectedException(
+                    'Duplicate authentication detected.')
 
             # Step 18.
             #
