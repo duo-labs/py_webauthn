@@ -81,8 +81,11 @@ class WebAuthnUserDataMissing(Exception):
     pass
 
 class WebAuthnMakeCredentialOptions(object):
+
+    _attestation_forms = {'none', 'indirect', 'direct'}
+
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
-                 display_name, icon_url, timeout=60000):
+                 display_name, icon_url, timeout=60000, attestation='direct'):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -91,6 +94,12 @@ class WebAuthnMakeCredentialOptions(object):
         self.display_name = display_name
         self.icon_url = icon_url
         self.timeout = timeout
+
+        attestation = str(attestation).lower()
+        if attestation not in self._attestation_forms:
+            raise ValueError('attestation must be a string and one of ' +
+                    ', '.join(self._attestation_forms))
+        self.attestation = attestation
 
     @property
     def registration_dict(self):
@@ -121,8 +130,7 @@ class WebAuthnMakeCredentialOptions(object):
             'excludeCredentials': [],
             # Relying Parties may use AttestationConveyancePreference to specify their
             # preference regarding attestation conveyance during credential generation.
-            'attestation':
-            'direct',  # none, indirect, direct
+            'attestation': self.attestation,
             'extensions': {
                 # Include location information in attestation.
                 'webauthn.loc': True
