@@ -22,7 +22,7 @@ def find_version(*file_paths):
     raise RuntimeError('Unable to find version string.')
 
 
-LONG_DESCRIPTION = read('README.md')
+LONG_DESCRIPTION = read('README.rst')
 VERSION = find_version('webauthn', '__init__.py')
 
 
@@ -33,7 +33,7 @@ setup(
     version=VERSION,
     description='A WebAuthn Python module.',
     long_description=LONG_DESCRIPTION,
-    long_description_content_type='text/markdown',
+    long_description_content_type='text/x-rst',
     author='James Barclay',
     author_email='jbarclay@duo.com',
     url='https://github.com/duo-labs/py_webauthn',

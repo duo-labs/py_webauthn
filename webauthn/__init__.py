@@ -6,4 +6,4 @@ from .webauthn import WebAuthnMakeCredentialOptions
 from .webauthn import WebAuthnRegistrationResponse
 from .webauthn import WebAuthnUser
 
-__version__ = '0.4.4'
+__version__ = '0.4.5'
