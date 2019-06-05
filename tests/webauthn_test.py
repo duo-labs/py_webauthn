@@ -1,8 +1,12 @@
+import os
 import unittest
-import webauthn
-from webauthn import const
 import struct
+
 from copy import copy
+
+import webauthn
+
+from webauthn import const
 
 REGISTRATION_CHALLENGE = 'bPzpX3hHQtsp9evyKYkaZtVc9UN07PUdJ22vZUdDp94'
 ASSERTION_CHALLENGE = 'e-g-nXaRxMagEiqTJSyD82RsEc5if_6jyfJDy8bNKlw'
@@ -24,7 +28,8 @@ ASSERTION_RESPONSE_TMPL = {
     'signature': b'304502204a76f05cd52a778cdd4df1565e0004e5cc1ead360419d0f5c3a0143bf37e7f15022100932b5c308a560cfe4f244214843075b904b3eda64e85d64662a81198c386cdde',  # noqa
 }
 ES256_KEY = {'alg': -7, 'type': 'public-key'}
-TRUST_ANCHOR_DIR = "../webauthn/trusted_attestation_roots"
+HERE = os.path.abspath(os.path.dirname(__file__))
+TRUST_ANCHOR_DIR = "{}/../webauthn/trusted_attestation_roots".format(HERE)
 
 
 class WebAuthnTest(unittest.TestCase):

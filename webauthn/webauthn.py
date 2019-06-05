@@ -77,8 +77,10 @@ class AuthenticationRejectedException(Exception):
 class RegistrationRejectedException(Exception):
     pass
 
+
 class WebAuthnUserDataMissing(Exception):
     pass
+
 
 class WebAuthnMakeCredentialOptions(object):
 
@@ -97,8 +99,8 @@ class WebAuthnMakeCredentialOptions(object):
 
         attestation = str(attestation).lower()
         if attestation not in self._attestation_forms:
-            raise ValueError('attestation must be a string and one of ' +
-                    ', '.join(self._attestation_forms))
+            raise ValueError('Attestation must be a string and one of ' +
+                             ', '.join(self._attestation_forms))
         self.attestation = attestation
 
     @property
@@ -196,7 +198,7 @@ class WebAuthnAssertionOptions(object):
 class WebAuthnUser(object):
     def __init__(self, user_id, username, display_name, icon_url,
                  credential_id, public_key, sign_count, rp_id):
-        
+
         if not credential_id:
             raise WebAuthnUserDataMissing("credential_id missing")
 
@@ -868,7 +870,7 @@ class WebAuthnAssertionResponse(object):
             # identified by credential.id.
             if not self.webauthn_user.username:
                 raise WebAuthnUserDataMissing("username missing")
-            
+
             user_handle = self.assertion_response.get('userHandle')
             if user_handle:
                 if not user_handle == self.webauthn_user.username:
@@ -1067,7 +1069,9 @@ class WebAuthnAssertionResponse(object):
             if not sign_count:
                 raise AuthenticationRejectedException('Unable to parse sign_count.')
 
-            if not self.webauthn_user.sign_count:
+            if (isinstance(self.webauthn_user.sign_count, int) and
+                    self.webauthn_user.sign_count < 0) or not isinstance(
+                        self.webauthn_user.sign_count, int):
                 raise WebAuthnUserDataMissing('sign_count missing from WebAuthnUser.')
 
             if sign_count <= self.webauthn_user.sign_count:
