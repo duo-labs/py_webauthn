@@ -105,9 +105,11 @@ class WebAuthnMakeCredentialOptions(object):
                              ', '.join(self._attestation_forms))
         self.attestation = attestation
 
-        if userVerification != None and userVerification not in self._userVerification:
-            raise ValueError('userVerification must be a string and one of ' +
-                             ', '.join(self._userVerification))
+        if userVerification != None:
+            userVerification = str(userVerification).lower()
+            if userVerification not in self._userVerification:
+                raise ValueError('userVerification must be a string and one of ' +
+                                 ', '.join(self._userVerification))
         self.userVerification = userVerification
 
     @property
