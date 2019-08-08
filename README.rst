@@ -132,6 +132,13 @@ To run the `Flask <http://flask.pocoo.org/>`_ demo with `Docker <https://www.doc
 #. ``docker-compose up -d``
 #. Go to `https://localhost:5000 <https://localhost:5000>`_ in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
+Unit Tests
+==========
+
+To run the unit tests, use the following command:
+
+``python3 -m unittest tests/webauthn_test.py``
+
 Note
 ====
 
