@@ -106,8 +106,7 @@ class WebAuthnMakeCredentialOptions(object):
     @property
     def registration_dict(self):
         registration_dict = {
-            'challenge':
-            self.challenge,
+            'challenge': self.challenge,
             'rp': {
                 'name': self.rp_name,
                 'id': self.rp_id
@@ -127,8 +126,7 @@ class WebAuthnMakeCredentialOptions(object):
                 'alg': COSE_ALG_PS256,
                 'type': 'public-key',
             }],
-            'timeout':
-            self.timeout,
+            'timeout': self.timeout,
             'excludeCredentials': [],
             # Relying Parties may use AttestationConveyancePreference to specify their
             # preference regarding attestation conveyance during credential generation.
