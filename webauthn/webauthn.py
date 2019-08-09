@@ -85,11 +85,11 @@ class WebAuthnUserDataMissing(Exception):
 class WebAuthnMakeCredentialOptions(object):
 
     _attestation_forms = {'none', 'indirect', 'direct'}
-    _userVerification = {'required','preferred','discouraged'}
+    _user_verification = {'required', 'preferred', 'discouraged'}
 
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
                  display_name, icon_url, timeout=60000, attestation='direct',
-                 userVerification=None):
+                 user_verification=None):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -105,12 +105,12 @@ class WebAuthnMakeCredentialOptions(object):
                              ', '.join(self._attestation_forms))
         self.attestation = attestation
 
-        if userVerification != None:
-            userVerification = str(userVerification).lower()
-            if userVerification not in self._userVerification:
-                raise ValueError('userVerification must be a string and one of ' +
-                                 ', '.join(self._userVerification))
-        self.userVerification = userVerification
+        if user_verification != None:
+            user_verification = str(user_verification).lower()
+            if user_verification not in self._user_verification:
+                raise ValueError('user_verification must be a string and one of ' +
+                                 ', '.join(self._user_verification))
+        self.user_verification = user_verification
 
     @property
     def registration_dict(self):
@@ -148,9 +148,9 @@ class WebAuthnMakeCredentialOptions(object):
             }
         }
 
-        if self.userVerification:
+        if self.user_verification:
             registration_dict['authenticatorSelection'] = {
-                'userVerification': self.userVerification
+                'userVerification': self.user_verification
             }
 
         if self.icon_url:
