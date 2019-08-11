@@ -105,7 +105,7 @@ class WebAuthnMakeCredentialOptions(object):
                              ', '.join(self._attestation_forms))
         self.attestation = attestation
 
-        if user_verification != None:
+        if user_verification is not None:
             user_verification = str(user_verification).lower()
             if user_verification not in self._user_verification:
                 raise ValueError('user_verification must be a string and one of ' +
@@ -148,7 +148,7 @@ class WebAuthnMakeCredentialOptions(object):
             }
         }
 
-        if self.user_verification:
+        if self.user_verification is not None:
             registration_dict['authenticatorSelection'] = {
                 'userVerification': self.user_verification
             }
