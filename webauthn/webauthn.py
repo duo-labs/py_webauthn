@@ -85,9 +85,11 @@ class WebAuthnUserDataMissing(Exception):
 class WebAuthnMakeCredentialOptions(object):
 
     _attestation_forms = {'none', 'indirect', 'direct'}
+    _user_verification = {'required', 'preferred', 'discouraged'}
 
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
-                 display_name, icon_url, timeout=60000, attestation='direct'):
+                 display_name, icon_url, timeout=60000, attestation='direct',
+                 user_verification=None):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -102,6 +104,13 @@ class WebAuthnMakeCredentialOptions(object):
             raise ValueError('Attestation must be a string and one of ' +
                              ', '.join(self._attestation_forms))
         self.attestation = attestation
+
+        if user_verification is not None:
+            user_verification = str(user_verification).lower()
+            if user_verification not in self._user_verification:
+                raise ValueError('user_verification must be a string and one of ' +
+                                 ', '.join(self._user_verification))
+        self.user_verification = user_verification
 
     @property
     def registration_dict(self):
@@ -136,6 +145,11 @@ class WebAuthnMakeCredentialOptions(object):
                 'webauthn.loc': True
             }
         }
+
+        if self.user_verification is not None:
+            registration_dict['authenticatorSelection'] = {
+                'userVerification': self.user_verification
+            }
 
         if self.icon_url:
             registration_dict['user']['icon'] = self.icon_url
