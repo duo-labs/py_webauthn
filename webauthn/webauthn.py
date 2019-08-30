@@ -1154,7 +1154,7 @@ def _load_cose_public_key(key_bytes):
         if not set(cose_public_key.keys()).issuperset(required_keys):
             raise COSEKeyException('Public key must match COSE_Key spec.')
 
-        if len(cose_public_key[E_KEY]) != 256 or len(cose_public_key[N_KEY]) != 3:
+        if len(cose_public_key[E_KEY]) != 3 or len(cose_public_key[N_KEY]) != 256:
             raise COSEKeyException('Bad public key.')
 
         e = int(codecs.encode(cose_public_key[E_KEY], 'hex'), 16)
