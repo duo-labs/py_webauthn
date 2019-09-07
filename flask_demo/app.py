@@ -175,6 +175,8 @@ def verify_credential_info():
         if sys.version_info >= (3, 0):
             webauthn_credential.credential_id = str(
                 webauthn_credential.credential_id, "utf-8")
+            webauthn_credential.public_key = str(
+                webauthn_credential.public_key, "utf-8")
         user = User(
             ukey=ukey,
             username=username,
