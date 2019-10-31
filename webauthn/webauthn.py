@@ -12,7 +12,7 @@ import sys
 import binascii
 import codecs
 
-from builtins import bytes
+from builtins import bytes, int
 
 import cbor2
 import six
