@@ -1362,7 +1362,7 @@ def _verify_signature(public_key, alg, data, signature):
     elif alg == COSE_ALG_RS256:
         public_key.verify(signature, data, PKCS1v15(), SHA256())
     elif alg == COSE_ALG_PS256:
-        padding = PSS(mgf=MGF1(SHA256()), salt_length=PSS.MAX_LENGTH)
+        padding = PSS(mgf=MGF1(SHA256()), salt_length=32)
         public_key.verify(signature, data, padding, SHA256())
     else:
         raise NotImplementedError()
