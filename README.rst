@@ -132,6 +132,21 @@ To run the `Flask <http://flask.pocoo.org/>`_ demo with `Docker <https://www.doc
 #. ``docker-compose up -d``
 #. Go to `https://localhost:5000 <https://localhost:5000>`_ in your web browser. Try registering and logging in with a compatible U2F or WebAuthn authenticator.
 
+Demo Troubleshooting
+====================
+By default, both the local and Docker demos try to run the web app using HTTPS. This may cause issues such as
+``NET::ERR_CERT_AUTHORITY_INVALID`` on Chrome. To get around this issue on Chrome, you can do the following:
+
+#. Generate a self-signed certificate through tools like mkcert_
+#. Enable requests to localhost over HTTPS through the following flag: ``chrome://flags/#allow-insecure-localhost``.
+
+For Firefox, you should be able to proceed to the page being served by the Flask app by doing the following:
+
+#. Clicking 'Advanced'
+#. Clicking 'Accept the Risk and Continue'.
+
+.. _mkcert: https://github.com/FiloSottile/mkcert
+
 Unit Tests
 ==========
 
