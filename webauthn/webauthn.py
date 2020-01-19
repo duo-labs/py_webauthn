@@ -599,7 +599,7 @@ class WebAuthnRegistrationResponse(object):
             # parser on JSONtext.
             decoded_cd = _webauthn_b64_decode(json_text)
 
-            if sys.version_info < (3, 0):  # if python2
+            if sys.version_info < (3, 6):  # if json.loads doesn't support bytes
                 c = json.loads(decoded_cd.decode('utf-8'))
             else:
                 c = json.loads(decoded_cd)
@@ -933,7 +933,7 @@ class WebAuthnAssertionResponse(object):
             # parser on JSONtext.
             decoded_cd = _webauthn_b64_decode(json_text)
 
-            if sys.version_info < (3, 0):  # if python2
+            if sys.version_info < (3, 6):  # if json.loads doesn't support bytes
                 c = json.loads(decoded_cd.decode('utf-8'))
             else:
                 c = json.loads(decoded_cd)
