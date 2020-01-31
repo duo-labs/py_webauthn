@@ -1079,7 +1079,7 @@ class WebAuthnAssertionResponse(object):
             sign_count = struct.unpack('!I', sc)[0]
             
             if sign_count == 0 and self.webauthn_user.sign_count == 0:
-                return sign_count
+                return 0
             
             if not sign_count:
                 raise AuthenticationRejectedException('Unable to parse sign_count.')
