@@ -1077,7 +1077,10 @@ class WebAuthnAssertionResponse(object):
             #             or not, is Relying Party-specific.
             sc = decoded_a_data[33:37]
             sign_count = struct.unpack('!I', sc)[0]
-
+            
+            if sign_count == 0 and self.webauthn_user.sign_count == 0:
+                return sign_count
+            
             if not sign_count:
                 raise AuthenticationRejectedException('Unable to parse sign_count.')
 
