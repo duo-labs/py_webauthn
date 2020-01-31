@@ -162,13 +162,14 @@ class WebAuthnMakeCredentialOptions(object):
 
 
 class WebAuthnAssertionOptions(object):
-    def __init__(self, webauthn_user, challenge, timeout=60000):
+    def __init__(self, webauthn_user, challenge, timeout=60000, userVerification='discouraged'):
         if isinstance(webauthn_user, list):
             self.webauthn_users = webauthn_user
         else:
             self.webauthn_users = [webauthn_user]
         self.challenge = challenge
         self.timeout = timeout
+        self.userVerification = userVerification
 
     @property
     def assertion_dict(self):
@@ -197,6 +198,7 @@ class WebAuthnAssertionOptions(object):
             'allowCredentials': acceptable_credentials,
             'rpId': self.webauthn_users[0].rp_id,
             'timeout': self.timeout,
+            'userVerification': self.userVerification,
             # 'extensions': {}
         }
 
