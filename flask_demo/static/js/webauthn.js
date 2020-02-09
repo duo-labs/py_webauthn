@@ -100,7 +100,7 @@ const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) =
     let {challenge, allowCredentials} = credentialRequestOptionsFromServer;
 
     challenge = Uint8Array.from(
-        atob(challenge), c => c.charCodeAt(0));
+        atob(challenge.replace(/\_/g, "/").replace(/\-/g, "+")), c => c.charCodeAt(0));
 
     allowCredentials = allowCredentials.map(credentialDescriptor => {
         let {id} = credentialDescriptor;
@@ -141,10 +141,18 @@ const getCredentialCreateOptionsFromServer = async (formData) => {
 const transformCredentialCreateOptions = (credentialCreateOptionsFromServer) => {
     let {challenge, user} = credentialCreateOptionsFromServer;
     user.id = Uint8Array.from(
-        atob(credentialCreateOptionsFromServer.user.id), c => c.charCodeAt(0));
+        atob(credentialCreateOptionsFromServer.user.id
+            .replace(/\_/g, "/")
+            .replace(/\-/g, "+")
+            ), 
+        c => c.charCodeAt(0));
 
     challenge = Uint8Array.from(
-        atob(credentialCreateOptionsFromServer.challenge), c => c.charCodeAt(0));
+        atob(credentialCreateOptionsFromServer.challenge
+            .replace(/\_/g, "/")
+            .replace(/\-/g, "+")
+            ),
+        c => c.charCodeAt(0));
     
     const transformedCredentialCreateOptions = Object.assign(
             {}, credentialCreateOptionsFromServer,
