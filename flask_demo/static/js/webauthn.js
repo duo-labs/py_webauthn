@@ -47,7 +47,7 @@ const didClickRegister = async (e) => {
     try {
         credentialCreateOptionsFromServer = await getCredentialCreateOptionsFromServer(formData);
     } catch (err) {
-        return console.error("Failed to generate credential request options:", credentialCreateOptionsFromServer)
+        return console.error("Failed to generate credential request options:", err);
     }
 
     // convert certain members of the PublicKeyCredentialCreateOptions into
