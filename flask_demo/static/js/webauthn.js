@@ -28,6 +28,42 @@ async function fetch_json(url, options) {
 }
 
 /**
+ * Get PublicKeyCredentialRequestOptions for this user from the server
+ * destination specifies the url of the handler
+ * "webauthn_begin_activate" for registration handler
+ * "webauthn_begin_assertion" for authentication handler
+ * formData of the registration or authentication form
+ * @param {string} destination
+ * @param {FormData} formData
+ */
+const postFormToServer = async (destination, formData) => {
+    return await fetch_json(
+        destination,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+/**
+ * Posts webauthn credential data to the server at the destination url
+ * "verify_credential_info" for registration
+ * Posts the new credential data to the server for validation and storage.
+ * "verify_assertion" for authentication
+ * Post the assertion to the server for validation and logging the user in. 
+ * @param {string} destination
+ * @param {Object} credentialDataForServer
+ */
+const postCredentialToServer = async (destination, credentialDataForServer) => {
+    const formData = new FormData();
+    Object.entries(credentialDataForServer).forEach(([key, value]) => {
+        formData.set(key, value);
+    });
+    return await postFormToServer(destination, formData);
+}
+
+/**
  * REGISTRATION FUNCTIONS
  */
 
@@ -45,7 +81,9 @@ const didClickRegister = async (e) => {
     // post the data to the server to generate the PublicKeyCredentialCreateOptions
     let credentialCreateOptionsFromServer;
     try {
-        credentialCreateOptionsFromServer = await getCredentialCreateOptionsFromServer(formData);
+        //getCredentialCreateOptionsFromServer
+        //Get PublicKeyCredentialRequestOptions for this user from the server
+        credentialCreateOptionsFromServer = await postFormToServer("/webauthn_begin_activate", formData);
     } catch (err) {
         return console.error("Failed to generate credential request options:", err);
     }
@@ -72,28 +110,13 @@ const didClickRegister = async (e) => {
     // and storing the public key
     let assertionValidationResponse;
     try {
-        assertionValidationResponse = await postNewAssertionToServer(newAssertionForServer);
+        assertionValidationResponse = await postCredentialToServer("/verify_credential_info", newAssertionForServer);
     } catch (err) {
         return console.error("Server validation of credential failed:", err);
     }
     
     // reload the page after a successful result
     window.location.reload();
-}
-
-/**
- * Get PublicKeyCredentialRequestOptions for this user from the server
- * formData of the registration form
- * @param {FormData} formData 
- */
-const getCredentialRequestOptionsFromServer = async (formData) => {
-    return await fetch_json(
-        "/webauthn_begin_assertion",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
 }
 
 const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) => {
@@ -116,22 +139,6 @@ const transformCredentialRequestOptions = (credentialRequestOptionsFromServer) =
 
     return transformedCredentialRequestOptions;
 };
-
-
-/**
- * Get PublicKeyCredentialRequestOptions for this user from the server
- * formData of the registration form
- * @param {FormData} formData 
- */
-const getCredentialCreateOptionsFromServer = async (formData) => {
-    return await fetch_json(
-        "/webauthn_begin_activate",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-}
 
 /**
  * Transforms items in the credentialCreateOptions generated on the server
@@ -181,7 +188,9 @@ const didClickLogin = async (e) => {
     // post the login data to the server to retrieve the PublicKeyCredentialRequestOptions
     let credentialCreateOptionsFromServer;
     try {
-        credentialRequestOptionsFromServer = await getCredentialRequestOptionsFromServer(formData);
+        //getCredentialRequestOptionsFromServer
+        //Get PublicKeyCredentialRequestOptions for this user from the server
+        credentialRequestOptionsFromServer = await postFormToServer("/webauthn_begin_assertion", formData);
     } catch (err) {
         return console.error("Error when getting request options from server:", err);
     }
@@ -209,7 +218,7 @@ const didClickLogin = async (e) => {
     // post the assertion to the server for verification.
     let response;
     try {
-        response = await postAssertionToServer(transformedAssertionForServer);
+        response = await postCredentialToServer("/verify_assertion", transformedAssertionForServer);
     } catch (err) {
         return console.error("Error when validating assertion on server:", err);
     }
@@ -243,23 +252,6 @@ const transformNewAssertionForServer = (newAssertion) => {
 }
 
 /**
- * Posts the new credential data to the server for validation and storage.
- * @param {Object} credentialDataForServer 
- */
-const postNewAssertionToServer = async (credentialDataForServer) => {
-    const formData = new FormData();
-    Object.entries(credentialDataForServer).forEach(([key, value]) => {
-        formData.set(key, value);
-    });
-    
-    return await fetch_json(
-        "/verify_credential_info", {
-        method: "POST",
-        body: formData
-    });
-}
-
-/**
  * Encodes the binary data in the assertion into strings for posting to the server.
  * @param {PublicKeyCredential} newAssertion 
  */
@@ -280,24 +272,6 @@ const transformAssertionForServer = (newAssertion) => {
         assertionClientExtensions: JSON.stringify(assertionClientExtensions)
     };
 };
-
-/**
- * Post the assertion to the server for validation and logging the user in. 
- * @param {Object} assertionDataForServer 
- */
-const postAssertionToServer = async (assertionDataForServer) => {
-    const formData = new FormData();
-    Object.entries(assertionDataForServer).forEach(([key, value]) => {
-        formData.set(key, value);
-    });
-    
-    return await fetch_json(
-        "/verify_assertion", {
-        method: "POST",
-        body: formData
-    });
-}
-
 
 document.addEventListener("DOMContentLoaded", e => {
     document.querySelector('#register').addEventListener('click', didClickRegister);
