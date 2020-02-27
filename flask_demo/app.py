@@ -32,7 +32,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 RP_ID = 'localhost'
-RP_NAME = 'localhost'
+RP_NAME = 'webauthn demo localhost'
 ORIGIN = 'https://localhost:5000'
 
 # Trust anchors (trusted attestation roots) should be
