@@ -32,6 +32,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 RP_ID = 'localhost'
+RP_NAME = 'webauthn demo localhost'
 ORIGIN = 'https://localhost:5000'
 
 # Trust anchors (trusted attestation roots) should be
@@ -68,19 +69,15 @@ def webauthn_begin_activate():
     if User.query.filter_by(username=username).first():
         return make_response(jsonify({'fail': 'User already exists.'}), 401)
 
-    if 'register_ukey' in session:
-        del session['register_ukey']
-    if 'register_username' in session:
-        del session['register_username']
-    if 'register_display_name' in session:
-        del session['register_display_name']
-    if 'challenge' in session:
-        del session['challenge']
+    #clear session variables prior to starting a new registration
+    session.pop('register_ukey', None)
+    session.pop('register_username', None)
+    session.pop('register_display_name', None)
+    session.pop('challenge', None)
 
     session['register_username'] = username
     session['register_display_name'] = display_name
 
-    rp_name = 'localhost'
     challenge = util.generate_challenge(32)
     ukey = util.generate_ukey()
 
@@ -88,7 +85,7 @@ def webauthn_begin_activate():
     session['register_ukey'] = ukey
 
     make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
-        challenge, rp_name, RP_ID, ukey, username, display_name,
+        challenge, RP_NAME, RP_ID, ukey, username, display_name,
         'https://example.com')
 
     return jsonify(make_credential_options.registration_dict)
@@ -108,8 +105,7 @@ def webauthn_begin_assertion():
     if not user.credential_id:
         return make_response(jsonify({'fail': 'Unknown credential ID.'}), 401)
 
-    if 'challenge' in session:
-        del session['challenge']
+    session.pop('challenge', None)
 
     challenge = util.generate_challenge(32)
 
