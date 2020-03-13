@@ -150,9 +150,11 @@ For Firefox, you should be able to proceed to the page being served by the Flask
 Unit Tests
 ==========
 
-To run the unit tests, use the following command:
+To run the unit tests, use the following command from the top directory:
 
-``python3 -m unittest tests/webauthn_test.py``
+``python3 -m unittest``
+
+This will run both the `py_webauthn` library tests and the Flask demo tests.
 
 Note
 ====

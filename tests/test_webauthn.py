@@ -1,13 +1,10 @@
 import os
 import unittest
 import struct
-
 from copy import copy
 
 import webauthn
-
 from webauthn import const
-
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TRUST_ANCHOR_DIR = "{}/../webauthn/trusted_attestation_roots".format(HERE)
