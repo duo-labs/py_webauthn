@@ -114,6 +114,8 @@ def webauthn_begin_assertion():
 
     challenge = util.generate_challenge(32)
 
+    # We strip the padding from the challenge stored in the session
+    # for the reasons outlined in the comment in webauthn_begin_activate.
     session['challenge'] = challenge.rstrip('=')
 
     webauthn_user = webauthn.WebAuthnUser(
