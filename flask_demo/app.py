@@ -81,7 +81,12 @@ def webauthn_begin_activate():
     challenge = util.generate_challenge(32)
     ukey = util.generate_ukey()
 
-    session['challenge'] = challenge
+    # We strip the saved challenge of padding, so that we can do a byte
+    # comparison on the URL-safe-without-padding challenge we get back
+    # from the browser.
+    # We will still pass the padded version down to the browser so that the JS
+    # can decode the challenge into binary without too much trouble.
+    session['challenge'] = challenge.rstrip('=')
     session['register_ukey'] = ukey
 
     make_credential_options = webauthn.WebAuthnMakeCredentialOptions(
