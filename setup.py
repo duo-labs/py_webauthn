@@ -34,8 +34,8 @@ setup(
     description='A WebAuthn Python module.',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/x-rst',
-    author='James Barclay',
-    author_email='jbarclay@duo.com',
+    author='Duo Labs',
+    author_email='labs@duo.com',
     url='https://github.com/duo-labs/py_webauthn',
     download_url='https://github.com/duo-labs/py_webauthn/archive/'
                  '{}.tar.gz'.format(VERSION),
