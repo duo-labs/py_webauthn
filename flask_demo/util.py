@@ -32,9 +32,11 @@ def validate_display_name(display_name):
 
 def generate_challenge(challenge_len):
     '''Generate a challenge of challenge_len bytes, Base64-encoded.
-    We use the weird URL-safe base64 without padding that is specified in the
-    WebAuthn spec. The output of this function is passed directly to the web client,
-    which will have to add the padding back in if it wants to use `atob`.
+    We use URL-safe base64, but we *don't* strip the padding, so that
+    the browser can decode it without too much hassle.
+    Note that if we are doing byte comparisons with the challenge in collectedClientData
+    later on, that value will not have padding, so we must remove the padding
+    before storing the value in the session.
     '''
     # If we know Python 3.6 or greater is available, we could replace this with one
     # call to secrets.token_urlsafe
@@ -43,7 +45,7 @@ def generate_challenge(challenge_len):
     # Python 2/3 compatibility: b64encode returns bytes only in newer Python versions
     if not isinstance(challenge_base64, str):
         challenge_base64 = challenge_base64.decode('utf-8')
-    return challenge_base64.rstrip('=')
+    return challenge_base64
 
 
 def generate_ukey():

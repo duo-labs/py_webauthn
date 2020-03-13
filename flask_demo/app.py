@@ -114,7 +114,7 @@ def webauthn_begin_assertion():
 
     challenge = util.generate_challenge(32)
 
-    session['challenge'] = challenge
+    session['challenge'] = challenge.rstrip('=')
 
     webauthn_user = webauthn.WebAuthnUser(
         user.ukey, user.username, user.display_name, user.icon_url,
