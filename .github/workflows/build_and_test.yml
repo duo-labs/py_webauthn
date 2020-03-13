@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,4 +29,4 @@ jobs:
         pip install -r flask_demo/requirements.txt
     - name: Test with unittest
       run: |
-        python -m unittest tests/webauthn_test.py
+        python -m unittest
