@@ -4,11 +4,16 @@ import string
 import os
 import base64
 
+CHALLENGE_DEFAULT_BYTE_LEN = 32
+UKEY_DEFAULT_BYTE_LEN = 20
+USERNAME_MAX_LENGTH = 32
+DISPLAY_NAME_MAX_LENGTH = 65
+
 def validate_username(username):
     if not isinstance(username, six.string_types):
         return False
 
-    if len(username) > 32:
+    if len(username) > USERNAME_MAX_LENGTH:
         return False
 
     if not username.isalnum():
@@ -21,7 +26,7 @@ def validate_display_name(display_name):
     if not isinstance(display_name, six.string_types):
         return False
 
-    if len(display_name) > 65:
+    if len(display_name) > DISPLAY_NAME_MAX_LENGTH:
         return False
 
     if not display_name.replace(' ', '').isalnum():
@@ -30,7 +35,7 @@ def validate_display_name(display_name):
     return True
 
 
-def generate_challenge(challenge_len):
+def generate_challenge(challenge_len=CHALLENGE_DEFAULT_BYTE_LEN):
     '''Generate a challenge of challenge_len bytes, Base64-encoded.
     We use URL-safe base64, but we *don't* strip the padding, so that
     the browser can decode it without too much hassle.
@@ -60,4 +65,4 @@ def generate_ukey():
     sets the RP ID. For a user account entity, this will be an
     arbitrary string specified by the relying party.
     '''
-    return generate_challenge(20)
+    return generate_challenge(UKEY_DEFAULT_BYTE_LEN)
