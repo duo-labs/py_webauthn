@@ -33,7 +33,9 @@ login_manager.init_app(app)
 
 RP_ID = 'localhost'
 RP_NAME = 'webauthn demo localhost'
-ORIGIN = 'https://localhost:5000'
+FLASK_HOST = 'localhost'
+FLASK_PORT = '5000'
+ORIGIN = 'https://{host}:{port}'.format(host=FLASK_HOST, port=FLASK_PORT)
 
 # Trust anchors (trusted attestation roots) should be
 # placed in TRUST_ANCHOR_DIR.
@@ -246,4 +248,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', ssl_context='adhoc', debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT, ssl_context='adhoc', debug=True)
