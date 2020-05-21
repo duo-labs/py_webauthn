@@ -1,0 +1,5 @@
+cbor2==5.1.0
+cryptography==2.9.2
+Django==3.0.6
+pyOpenSSL==19.1.0
+six==1.14.0

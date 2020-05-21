@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Registration{% endblock %}
+
+{% block content %}
+
+    <div class="row" style='height:480px'>
+      <div class="col-md-4"> </div>
+      <div class="col-md-4">
+        <div id=status_message class=green style="visibility: hidden;">
+            <span class="status-icon"></span>
+            <div id="login-message"></div>
+        </div>
+        <div id=login_box>
+            <form id=register-form action="" method="post" novalidate>{% csrf_token %}
+                <img id="logo" alt="Logo" style="top:5px;" id=ProgramTitle src="/static/imgs/Logo.png">
+                <div class="form-horizontal">
+                    <br></br>
+
+                    <label for="id_auth-username">Username:</label>
+                    <input type="text" name="auth-username" autofocus maxlength="254" id="id_auth-username" required>
+
+                    <br> <br></br>
+
+                    <label for="id_auth-dispname">Display name:</label>
+                    <input type="text" name="auth-dispname" autofocus maxlength="254" id="id_auth-dispname" required>
+
+                    <br> <br></br>
+                       <button class="btn btn-primary" id=register type=submit>Register</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+      </div>
+      <div class="col-md-4"> </div>
+  </div>
+{% endblock %}

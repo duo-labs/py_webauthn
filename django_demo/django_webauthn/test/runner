@@ -1,0 +1,48 @@
+#!/bin/bash -x
+
+export PYTHONPATH=.
+export TESTUSER='testuser'
+
+function runLocal {
+    nosetests --stop -v $1 
+    if [[ $? -ne 0 ]]; then
+        echo "nosetests failed ($@)"
+        exit 1
+    fi
+}
+
+function setupTestJS {
+    if [[ $1 =~ "setup_test" && ! -f ../../test_setup ]]; then
+        mv ../../media/js/webauthn.js ../../media/js/webauthn.js.orig
+        mv ../../media/js/webauthn.js.tester ../../media/js/webauthn.js
+        touch ../../test_setup
+    elif [[ $1 =~ "restore" && -f ../../test_setup ]]; then
+        mv ../../media/js/webauthn.js ../../media/js/webauthn.js.tester
+        mv ../../media/js/webauthn.js.orig ../../media/js/webauthn.js
+        rm ../../test_setup
+    fi
+}
+
+function clearDB {
+    sqlite3 ../../webauthn.db 'delete from auth_user' 2>/dev/null
+    sqlite3 ../../webauthn.db 'delete from django_webauthn_wa_user' 2>/dev/null
+}
+
+function changeCredential {
+    echo 'update django_webauthn_wa_user set credential_id = "invalid_credential" where username="'${TESTUSER}'"'
+    sqlite3 ../../webauthn.db 'update django_webauthn_wa_user set credential_id = "invalid_credential" where username="'${TESTUSER}'"' 2>/dev/null
+}
+
+cd "$(dirname "$0")"
+setupTestJS setup_test
+diff -w  ../../media/js/webauthn.js ../../media/js/webauthn.js.orig
+clearDB
+runLocal "test_Register:testRegister.test01_register"
+runLocal "test_Login:testLogin.test01_login"
+changeCredential
+runLocal "test_Login:testLogin.test02_bad_credential"
+setupTestJS restore
+
+sleep 1
+kill -TERM -$(pgrep -o runner)
+exit 0
