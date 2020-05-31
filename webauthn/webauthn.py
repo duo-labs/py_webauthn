@@ -945,7 +945,7 @@ class WebAuthnAssertionResponse(object):
             # Verify that the value of C.type is the string webauthn.get.
             received_type = c.get('type')
             if not _verify_type(received_type, TYPE_GET):
-                raise RegistrationRejectedException('Invalid type.')
+                raise AuthenticationRejectedException('Invalid type.')
 
             # Step 8.
             #
@@ -1006,7 +1006,7 @@ class WebAuthnAssertionResponse(object):
             # If user verification is required for this assertion, verify that
             # the User Verified bit of the flags in authData is set.
             if (self.uv_required and (flags & const.USER_VERIFIED) != 0x04):
-                raise RegistrationRejectedException(
+                raise AuthenticationRejectedException(
                     'Malformed request received.')
 
             # Step 14.
