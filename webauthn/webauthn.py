@@ -66,19 +66,23 @@ DEFAULT_CLIENT_EXTENSIONS = {'appid': None, 'loc': None}
 DEFAULT_AUTHENTICATOR_EXTENSIONS = {}
 
 
-class COSEKeyException(Exception):
+class WebAuthnError(Exception):
     pass
 
 
-class AuthenticationRejectedException(Exception):
+class COSEKeyException(WebAuthnError):
     pass
 
 
-class RegistrationRejectedException(Exception):
+class AuthenticationRejectedException(WebAuthnError):
     pass
 
 
-class WebAuthnUserDataMissing(Exception):
+class RegistrationRejectedException(WebAuthnError):
+    pass
+
+
+class WebAuthnUserDataMissing(WebAuthnError):
     pass
 
 
