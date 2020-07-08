@@ -32,6 +32,11 @@ from OpenSSL import crypto
 
 from . import const
 
+try:
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+except ImportError as e:
+    ed25519 = None
+
 # Only supporting 'None', 'Basic', and 'Self Attestation' attestation types for now.
 AT_BASIC = 'Basic'
 AT_ECDAA = 'ECDAA'
@@ -51,6 +56,7 @@ SUPPORTED_ATTESTATION_FORMATS = (AT_FMT_FIDO_U2F, AT_FMT_PACKED, AT_FMT_NONE)
 COSE_ALG_ES256 = -7
 COSE_ALG_PS256 = -37
 COSE_ALG_RS256 = -257
+COSE_ALG_EdDSA = -8
 
 # Trust anchors (trusted attestation roots directory).
 DEFAULT_TRUST_ANCHOR_DIR = 'trusted_attestation_roots'
@@ -134,7 +140,10 @@ class WebAuthnMakeCredentialOptions(object):
             }, {
                 'alg': COSE_ALG_PS256,
                 'type': 'public-key',
-            }],
+            }, {
+                'alg': COSE_ALG_EdDSA,
+                'type': 'public-key',
+            },],
             'timeout': self.timeout,
             'excludeCredentials': [],
             # Relying Parties may use AttestationConveyancePreference to specify their
@@ -1167,6 +1176,21 @@ def _load_cose_public_key(key_bytes):
 
         return alg, RSAPublicNumbers(e,
                                      n).public_key(backend=default_backend())
+    elif alg == COSE_ALG_EdDSA:
+        if ed25519 is None:
+            raise COSEKeyException('Unsupported algorithm.')
+
+        E_KEY = -2
+        N_KEY = -1
+
+        required_keys = {ALG_KEY, E_KEY, N_KEY}
+
+        if not set(cose_public_key.keys()).issuperset(required_keys):
+            raise COSEKeyException('Public key must match COSE_key spec.') 
+
+        if cose_public_key[N_KEY] != 6:
+            raise COSEKeyException("Unsupported elliptic curve, only Ed25519 supported")
+        return alg, ed25519.Ed25519PublicKey.from_public_bytes(cose_public_key[E_KEY])
     else:
         raise COSEKeyException('Unsupported algorithm.')
 
@@ -1369,5 +1393,7 @@ def _verify_signature(public_key, alg, data, signature):
     elif alg == COSE_ALG_PS256:
         padding = PSS(mgf=MGF1(SHA256()), salt_length=32)
         public_key.verify(signature, data, padding, SHA256())
+    elif alg == COSE_ALG_EdDSA:
+        public_key.verify(signature, data)
     else:
         raise NotImplementedError()
