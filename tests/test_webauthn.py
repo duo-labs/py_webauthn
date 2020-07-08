@@ -9,6 +9,7 @@ from webauthn import const
 HERE = os.path.abspath(os.path.dirname(__file__))
 TRUST_ANCHOR_DIR = "{}/../webauthn/trusted_attestation_roots".format(HERE)
 
+
 class WebAuthnES256Test(unittest.TestCase):
     REGISTRATION_RESPONSE_TMPL = {
         'clientData': b'eyJ0eXBlIjogIndlYmF1dGhuLmNyZWF0ZSIsICJjbGllbnRFeHRlbnNpb25zIjoge30sICJjaGFsbGVuZ2UiOiAiYlB6cFgzaEhRdHNwOWV2eUtZa2FadFZjOVVOMDdQVWRKMjJ2WlVkRHA5NCIsICJvcmlnaW4iOiAiaHR0cHM6Ly93ZWJhdXRobi5pbyJ9',  # noqa

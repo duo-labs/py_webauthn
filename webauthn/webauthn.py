@@ -34,8 +34,8 @@ from . import const
 
 try:
     from cryptography.hazmat.primitives.asymmetric import ed25519
-except Exception as e:
-    pass
+except ImportError as e:
+    ed25519 = None
 
 # Only supporting 'None', 'Basic', and 'Self Attestation' attestation types for now.
 AT_BASIC = 'Basic'
@@ -1128,6 +1128,7 @@ def _encode_public_key(public_key):
     return b'\x04' + binascii.unhexlify('{:064x}{:064x}'.format(
         numbers.x, numbers.y))
 
+
 def _load_cose_public_key(key_bytes):
     ALG_KEY = 3
 
@@ -1176,6 +1177,9 @@ def _load_cose_public_key(key_bytes):
         return alg, RSAPublicNumbers(e,
                                      n).public_key(backend=default_backend())
     elif alg == COSE_ALG_EdDSA:
+        if ed25519 is None:
+            raise COSEKeyException('Unsupported algorithm.')
+
         E_KEY = -2
         N_KEY = -1
 
