@@ -1178,7 +1178,7 @@ def _load_cose_public_key(key_bytes):
                                      n).public_key(backend=default_backend())
     elif alg == COSE_ALG_EdDSA:
         if ed25519 is None:
-            raise COSEKeyException('Unsupported algorithm.')
+            raise COSEKeyException('Unable to import ed25519, check cryptography version (min 2.6 needed).')
 
         E_KEY = -2
         N_KEY = -1
