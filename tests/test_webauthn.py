@@ -161,7 +161,7 @@ class WebAuthnRS256Test(WebAuthnES256Test):
     ICON_URL = "https://example.com/icon.png"
     USER_ID = b'\x80\xf1\xdc\xec\xb5\x18\xb1\xc8b\x05\x886\xbc\xdfJ\xdf'
 
-@unittest.skipIf(ed25519 is None, "Minimum cryptography version(2.6) requirement not met")
+@unittest.skipIf(ed25519 is None, "Minimum cryptography version (2.6) requirement not met")
 class WebAuthnEdDSATest(WebAuthnES256Test):
     REGISTRATION_RESPONSE_TMPL = {
         'clientData': b'eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiZ0I0bGJKMFNiY1VzSElBZ0NGUUNBRHNXZFdsbUlvNnZNdThDV0RZaFBCUSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0',  # noqa
