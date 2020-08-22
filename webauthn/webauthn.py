@@ -83,13 +83,15 @@ class WebAuthnUserDataMissing(Exception):
 
 
 class WebAuthnMakeCredentialOptions(object):
-
     _attestation_forms = {'none', 'indirect', 'direct'}
     _user_verification = {'required', 'preferred', 'discouraged'}
+    _authenticator_attachment = {'platform', 'cross-platform'}
 
     def __init__(self, challenge, rp_name, rp_id, user_id, username,
                  display_name, icon_url, timeout=60000, attestation='direct',
-                 user_verification=None):
+                 user_verification=None,
+                 require_resident_key=None,
+                 authenticator_attachment=None):
         self.challenge = challenge
         self.rp_name = rp_name
         self.rp_id = rp_id
@@ -111,6 +113,18 @@ class WebAuthnMakeCredentialOptions(object):
                 raise ValueError('user_verification must be a string and one of ' +
                                  ', '.join(self._user_verification))
         self.user_verification = user_verification
+
+        if require_resident_key is not None:
+            if not isinstance(require_resident_key, bool):
+                raise ValueError('require_resident_key must be a bool')
+        self.require_resident_key = require_resident_key
+
+        if authenticator_attachment is not None:
+            authenticator_attachment = str(authenticator_attachment).lower()
+            if authenticator_attachment not in self._authenticator_attachment:
+                raise ValueError('authenticator_attachment must be a string and one of ' +
+                                 ', '.join(self._authenticator_attachment))
+        self.authenticator_attachment = authenticator_attachment
 
     @property
     def registration_dict(self):
@@ -146,10 +160,16 @@ class WebAuthnMakeCredentialOptions(object):
             }
         }
 
-        if self.user_verification is not None:
-            registration_dict['authenticatorSelection'] = {
-                'userVerification': self.user_verification
-            }
+        authenticator_selection_dict = {
+            k: v for k, v in {
+                'userVerification': self.user_verification,
+                'requireResidentKey': self.require_resident_key,
+                'authenticatorAttachment': self.authenticator_attachment
+            }.items() if v is not None
+        }
+
+        if authenticator_selection_dict:
+            registration_dict['authenticatorSelection'] = authenticator_selection_dict
 
         if self.icon_url:
             registration_dict['user']['icon'] = self.icon_url
