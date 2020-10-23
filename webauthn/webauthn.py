@@ -974,7 +974,7 @@ class WebAuthnAssertionResponse(object):
 
             user_handle = self.assertion_response.get('userHandle')
             if user_handle:
-                if not user_handle == self.webauthn_user.username:
+                if user_handle != self.webauthn_user.user_id:
                     raise AuthenticationRejectedException(
                         'Invalid credential.')
 
