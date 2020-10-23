@@ -381,7 +381,7 @@ class WebAuthnRegistrationResponse(object):
             credential_pub_key = attestation_data[18 + credential_id_len:]
             numbers = x509_att_cert.public_key().public_numbers()
             subject_pub_key = binascii.unhexlify(
-                f'{numbers.x:064x}{numbers.y:064x}',
+                '{:064x}{:064x}'.format(numbers.x, numbers.y),
             )
             if (
                 credential_pub_key[10:42] != subject_pub_key[:32]
