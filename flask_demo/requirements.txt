@@ -1,5 +1,5 @@
 cbor2==4.0.1
-cryptography==2.3.1
+cryptography==3.2
 Flask==1.0.2
 Flask-Login==0.4.0
 Flask-SQLAlchemy>=2.3.2
