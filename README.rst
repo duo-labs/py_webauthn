@@ -134,16 +134,21 @@ To run the `Flask <http://flask.pocoo.org/>`_ demo with `Docker <https://www.doc
 
 Demo Troubleshooting
 ====================
-By default, both the local and Docker demos try to run the web app using HTTPS. This may cause issues such as
-``NET::ERR_CERT_AUTHORITY_INVALID`` on Chrome. To get around this issue on Chrome, you can do the following:
+By default, both the local and Docker demos try to run the web app using HTTPS. You may see a security mechanism such as
+``NET::ERR_CERT_AUTHORITY_INVALID`` (on Chrome). For a operating system wide solution you may use ``security add-trusted-cert``
+on Mac OS X or; ``certutil -addstore`` on Windows or; ``libnss3-tools`` apt package, ``nss-tools`` yum package, ``mozilla-nss-tools``
+zypper package n Linux.
+
+Alternatively to get around this security mechanism on Chrome only, you can do the following:
 
 #. Generate a self-signed certificate through tools like mkcert_
-#. Enable requests to localhost over HTTPS through the following flag: ``chrome://flags/#allow-insecure-localhost``.
+#. Install Client Digital Certificate (Using Chrome) go to Settings > Show Advanced Settings > Manage Certificates OR;
+#. Avoid TLS security on your computer (localhost) entirely and allow any requests over HTTPS; enable ``chrome://flags/#allow-insecure-localhost``.
 
 For Firefox, you should be able to proceed to the page being served by the Flask app by doing the following:
 
-#. Clicking 'Advanced'
-#. Clicking 'Accept the Risk and Continue'.
+#. Install Client Digital Certificate (Using Firefox) go to Options > Privacy & Security > Certificates > View Certificates. In Certificate Manager click ``Import`` under ``Authorities`` tab. OR;
+#. Avoid TLS security when you load the page, you can Click 'Advanced' then chose 'Accept the Risk and Continue'.
 
 .. _mkcert: https://github.com/FiloSottile/mkcert
 
