@@ -150,6 +150,8 @@ For Firefox, you should be able to proceed to the page being served by the Flask
 #. Install Client Digital Certificate (Using Firefox) go to Options > Privacy & Security > Certificates > View Certificates. In Certificate Manager click ``Import`` under ``Authorities`` tab. OR;
 #. Avoid TLS security when you load the page, you can Click 'Advanced' then chose 'Accept the Risk and Continue'.
 
+Note: When you avoid TLS security by disabling localhost checks, many applications you install that have a localhost server (such as Zoom, Discord, Slack) may be compromised.
+
 .. _mkcert: https://github.com/FiloSottile/mkcert
 
 Unit Tests
