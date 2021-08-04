@@ -32,21 +32,29 @@ from OpenSSL import crypto
 
 from . import const
 
-# Only supporting 'None', 'Basic', and 'Self Attestation' attestation types for now.
+# Only supporting 'Anonymization CA', 'None', 'Basic',
+# and 'Self Attestation' attestation types for now.
 AT_BASIC = 'Basic'
 AT_ECDAA = 'ECDAA'
 AT_NONE = 'None'
 AT_ATTESTATION_CA = 'AttCA'
+AT_ANONYMOUS_CA = 'Anonymization CA'
 AT_SELF_ATTESTATION = 'Self'
 
-SUPPORTED_ATTESTATION_TYPES = (AT_BASIC, AT_NONE, AT_SELF_ATTESTATION)
+SUPPORTED_ATTESTATION_TYPES = (
+    AT_ANONYMOUS_CA, AT_BASIC, AT_NONE, AT_SELF_ATTESTATION,
+)
 
+AT_FMT_APPLE = 'apple'
 AT_FMT_FIDO_U2F = 'fido-u2f'
 AT_FMT_PACKED = 'packed'
 AT_FMT_NONE = 'none'
 
-# Only supporting 'fido-u2f', 'packed', and 'none' attestation formats for now.
-SUPPORTED_ATTESTATION_FORMATS = (AT_FMT_FIDO_U2F, AT_FMT_PACKED, AT_FMT_NONE)
+# Only supporting 'apple', 'fido-u2f', 'packed', and 'none'
+# attestation formats for now.
+SUPPORTED_ATTESTATION_FORMATS = (
+    AT_FMT_APPLE, AT_FMT_FIDO_U2F, AT_FMT_PACKED, AT_FMT_NONE,
+)
 
 COSE_ALG_ES256 = -7
 COSE_ALG_PS256 = -37
@@ -283,6 +291,8 @@ class WebAuthnRegistrationResponse(object):
         #           be performed.
         self.none_attestation_permitted = none_attestation_permitted
 
+        self.additional_trust_anchors = []
+
     def _verify_attestation_statement(self, fmt, att_stmt, auth_data,
                                       client_data_hash):
         '''Verification procedure: The procedure for verifying an attestation statement,
@@ -315,7 +325,83 @@ class WebAuthnRegistrationResponse(object):
         cred_id = attestation_data[18:18 + credential_id_len]
         credential_pub_key = attestation_data[18 + credential_id_len:]
 
-        if fmt == AT_FMT_FIDO_U2F:
+        if fmt == 'apple':
+            # https://webkit.org/blog/11312/meet-face-id-and-touch-id-for-the-web/
+            # $$attStmtType //= (
+            #                        fmt: "apple",
+            #                        attStmt: appleStmtFormat
+            #                    )
+            #
+            # appleStmtFormat = {
+            #                        x5c: [ credCert: bytes, * (caCert: bytes) ]
+            #                    }
+            # The semantics of the above fields are as follows:
+            # x5c
+            #   credCert followed by its certificate chain, each encoded in
+            #   X.509 format.
+            # credCert
+            #   The credential public key certificate used for attestation,
+            #   encoded in X.509 format.
+            #
+            # Here is the verification procedure given inputs attStmt,
+            # authenticatorData and clientDataHash:
+            # 1. Verify that attStmt is valid CBOR conforming to the syntax defined
+            #    above and perform CBOR decoding on it to extract the contained
+            #    fields.
+            if 'x5c' not in att_stmt or len(att_stmt['x5c']) != 2:
+                raise RegistrationRejectedException(
+                    'Attestation statement must be a valid CBOR object.',
+                )
+            # 2. Concatenate authenticatorData and clientDataHash to form
+            #    nonceToHash.
+            nonce_to_hash = b''.join([auth_data, client_data_hash])
+            # 3. Perform SHA-256 hash of nonceToHash to produce nonce.
+            nonce = hashlib.sha256(nonce_to_hash).digest()
+            # 4. Verify nonce matches the value of the extension with OID
+            #    (1.2.840.113635.100.8.2) in credCert. The nonce here is used to
+            #    prove that the attestation is live and to protect the integrity of
+            #    the authenticatorData and the client data.
+            oid = x509.ObjectIdentifier('1.2.840.113635.100.8.2')
+            att_cert = att_stmt.get('x5c')[0]
+            x509_att_cert = load_der_x509_certificate(
+                att_cert,
+                default_backend(),
+            )
+            extensions = x509_att_cert.extensions
+            ext = extensions.get_extension_for_oid(oid)
+            if ext.value.value[6:] != nonce:
+                raise RegistrationRejectedException(
+                    'Attestation certificate GUID must match authenticator data.',
+                )
+            # 5. Verify credential public key matches the Subject Public Key of
+            #    credCert.
+            attestation_data = auth_data[37:]
+            credential_id_len = struct.unpack('!H', attestation_data[16:18])[0]
+            cred_id = attestation_data[18:18 + credential_id_len]
+            credential_pub_key = attestation_data[18 + credential_id_len:]
+            numbers = x509_att_cert.public_key().public_numbers()
+            subject_pub_key = binascii.unhexlify(
+                '{:064x}{:064x}'.format(numbers.x, numbers.y),
+            )
+            if (
+                credential_pub_key[10:42] != subject_pub_key[:32]
+                and credential_pub_key[45:] != subject_pub_key[32:]
+            ):
+                raise RegistrationRejectedException(
+                    'Attestation certificate public key must match '
+                    'Subject public key of credCert.',
+                )
+            # 6. If successful, return implementation-specific values representing
+            #    attestation type Anonymous CA and attestation trust path x5c.
+            ca_cert = att_stmt.get('x5c')[1]
+            crypto_ca_cert = load_der_x509_certificate(ca_cert,
+                                                       default_backend())
+            x509_ca_cert = crypto.X509.from_cryptography(crypto_ca_cert)
+            self.additional_trust_anchors.append(x509_ca_cert)
+            attestation_type = AT_ANONYMOUS_CA
+            trust_path = [x509_att_cert]
+            return attestation_type, trust_path, credential_pub_key, cred_id
+        elif fmt == AT_FMT_FIDO_U2F:
             # Step 1.
             #
             # Verify that attStmt is valid CBOR conforming to the syntax
@@ -751,7 +837,8 @@ class WebAuthnRegistrationResponse(object):
             # such information, using the aaguid in the attestedCredentialData
             # in authData.
             trust_anchors = _get_trust_anchors(attestation_type, fmt,
-                                               self.trust_anchor_dir)
+                                               self.trust_anchor_dir,
+                                               self.additional_trust_anchors)
             if not trust_anchors and self.trusted_attestation_cert_required:
                 raise RegistrationRejectedException(
                     'No trust anchors available to verify attestation certificate.'
@@ -782,7 +869,7 @@ class WebAuthnRegistrationResponse(object):
             elif attestation_type == AT_ECDAA:
                 raise NotImplementedError(
                     'ECDAA attestation type is not currently supported.')
-            elif attestation_type == AT_BASIC:
+            elif attestation_type in (AT_BASIC, AT_ANONYMOUS_CA):
                 if self.trusted_attestation_cert_required:
                     if not _is_trusted_attestation_cert(
                             trust_path, trust_anchors):
@@ -887,7 +974,7 @@ class WebAuthnAssertionResponse(object):
 
             user_handle = self.assertion_response.get('userHandle')
             if user_handle:
-                if not user_handle == self.webauthn_user.username:
+                if user_handle != self.webauthn_user.user_id:
                     raise AuthenticationRejectedException(
                         'Invalid credential.')
 
@@ -1191,7 +1278,7 @@ def _webauthn_b64_encode(raw):
     return base64.urlsafe_b64encode(raw).rstrip(b'=')
 
 
-def _get_trust_anchors(attestation_type, attestation_fmt, trust_anchor_dir):
+def _get_trust_anchors(attestation_type, attestation_fmt, trust_anchor_dir, additional_trust_anchors):
     '''Return a list of trusted attestation root certificates.
     '''
     if attestation_type not in SUPPORTED_ATTESTATION_TYPES:
@@ -1220,6 +1307,7 @@ def _get_trust_anchors(attestation_type, attestation_fmt, trust_anchor_dir):
                     except Exception:
                         pass
 
+    trust_anchors.extend(additional_trust_anchors)
     return trust_anchors
 
 
