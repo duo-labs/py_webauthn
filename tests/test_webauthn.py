@@ -6,6 +6,11 @@ from copy import copy
 import webauthn
 from webauthn import const
 
+try:
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+except ImportError as e:
+    ed25519 = None
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 TRUST_ANCHOR_DIR = "{}/../webauthn/trusted_attestation_roots".format(HERE)
 
@@ -156,6 +161,27 @@ class WebAuthnRS256Test(WebAuthnES256Test):
     ICON_URL = "https://example.com/icon.png"
     USER_ID = b'\x80\xf1\xdc\xec\xb5\x18\xb1\xc8b\x05\x886\xbc\xdfJ\xdf'
 
+@unittest.skipIf(ed25519 is None, "Minimum cryptography version (2.6) requirement not met")
+class WebAuthnEdDSATest(WebAuthnES256Test):
+    REGISTRATION_RESPONSE_TMPL = {
+        'clientData': b'eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiZ0I0bGJKMFNiY1VzSElBZ0NGUUNBRHNXZFdsbUlvNnZNdThDV0RZaFBCUSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0',  # noqa
+        'attObj': b'o2NmbXRmcGFja2VkZ2F0dFN0bXSjY2FsZyZjc2lnWEcwRQIhAJrjEo233rBVH4tL0V7v2lcjNBzYB_sZHB42fJysXo4OAiADsJdZmHyQIFgw1HNX2qm9eMVxckplr4oacD3EHNNIX2N4NWOBWQLBMIICvTCCAaWgAwIBAgIEK_F8eDANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZdWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0xNDA4MDEwMDAwMDBaGA8yMDUwMDkwNDAwMDAwMFowbjELMAkGA1UEBhMCU0UxEjAQBgNVBAoMCVl1YmljbyBBQjEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvbjEnMCUGA1UEAwweWXViaWNvIFUyRiBFRSBTZXJpYWwgNzM3MjQ2MzI4MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdMLHhCPIcS6bSPJZWGb8cECuTN8H13fVha8Ek5nt-pI8vrSflxb59Vp4bDQlH8jzXj3oW1ZwUDjHC6EnGWB5i6NsMGowIgYJKwYBBAGCxAoCBBUxLjMuNi4xLjQuMS40MTQ4Mi4xLjcwEwYLKwYBBAGC5RwCAQEEBAMCAiQwIQYLKwYBBAGC5RwBAQQEEgQQxe9V_62aS5-1gK3rr-Am0DAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCLbpN2nXhNbunZANJxAn_Cd-S4JuZsObnUiLnLLS0FPWa01TY8F7oJ8bE-aFa4kTe6NQQfi8-yiZrQ8N-JL4f7gNdQPSrH-r3iFd4SvroDe1jaJO4J9LeiFjmRdcVa-5cqNF4G1fPCofvw9W4lKnObuPakr0x_icdVq1MXhYdUtQk6Zr5mBnc4FhN9qi7DXqLHD5G7ZFUmGwfIcD2-0m1f1mwQS8yRD5-_aDCf3vutwddoi3crtivzyromwbKklR4qHunJ75LGZLZA8pJ_mXnUQ6TTsgRqPvPXgQPbSyGMf2z_DIPbQqCD_Bmc4dj9o6LozheBdDtcZCAjSPTAd_uiaGF1dGhEYXRhWOFJlg3liA6MaHQ0Fw9kdmBbj-SuuaKGMseZXPO6gx2XY0EAAAACxe9V_62aS5-1gK3rr-Am0ACA66T2CBZBXT2qq3qQwO34IvlLsGV-YS4eS_AJnUodZSQ854CD3FEnhNVFg-cQR9XAFxZaaXTBOEMoKuDj0b9MltR4ITXMTbV2xRlg74QJKVj9dkX7YE5GQxSXcvIbfcn-iVpyKUfVicigDMAcDHxjmTweIQkLnpnCNujUP-GqXwSkAQEDJyAGIVggiB15haciBy1b5CW4osxvVaaEpPoZ3nZh3Ci1d-xspsc'  # noqa
+    }
+    ASSERTION_RESPONSE_TMPL = {
+        'authData': b'SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAAAw==',
+        'clientData': b'eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQXp0aW1zaW83aTU5TENsVE9iZGlLbXlqdW42VDdWSF9ZRHJoRWZJR3ZXZyIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0=',  # noqa
+        'signature': b'720b5e963760d2743f3a6f7d66e5b6d5be7b7abe328c3acfe6866f07c8ddd34244c0851fe3e021978f0d212e4203eadd8430fd7bec83a7c1bc929c22ed6eed0f',  # noqa
+    }
+    CRED_KEY = {'alg': -8, 'type': 'public-key'}
+    REGISTRATION_CHALLENGE = 'gB4lbJ0SbcUsHIAgCFQCADsWdWlmIo6vMu8CWDYhPBQ'
+    ASSERTION_CHALLENGE = 'Aztimsio7i59LClTObdiKmyjun6T7VH_YDrhEfIGvWg'
+    RP_ID = "localhost"
+    ORIGIN = "http://localhost:5000"
+    USER_NAME = 'testuser'
+    ICON_URL = "https://example.com/icon.png"
+    USER_DISPLAY_NAME = "A Test User"
+    USER_ID = b'!?~\xa5\xd9*\x95\xf5\x97\x8d;0\xcf\x8fkj\x13\xd2~\xb7'
+    RP_NAME = "Web Authentication"
 
 if __name__ == '__main__':
     unittest.main()
