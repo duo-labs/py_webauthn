@@ -71,7 +71,6 @@ def verify_registration_response(
         Mapping[AttestationFormat, List[bytes]]
     ] = None,
 ) -> VerifiedRegistration:
-    # TODO - T121537 - pylint: disable=dangerous-default-value
     """Verify an authenticator's response to navigator.credentials.create()
 
     Args:
