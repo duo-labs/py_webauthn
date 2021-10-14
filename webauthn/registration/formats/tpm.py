@@ -14,20 +14,20 @@ from cryptography.x509 import (
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import ExtensionOID
 
-from ...helpers import (
+from webauthn.helpers import (
     decode_credential_public_key,
     hash_by_alg,
     validate_certificate_chain,
     verify_signature,
 )
-from ...helpers.decode_credential_public_key import (
+from webauthn.helpers.decode_credential_public_key import (
     DecodedEC2PublicKey,
     DecodedRSAPublicKey,
 )
-from ...helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
-from ...helpers.structs import AttestationStatement
-from ...helpers.tpm import parse_cert_info, parse_pub_area
-from ...helpers.tpm.structs import (
+from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.structs import AttestationStatement
+from webauthn.helpers.tpm import parse_cert_info, parse_pub_area
+from webauthn.helpers.tpm.structs import (
     TPM_ALG_COSE_ALG_MAP,
     TPM_ECC_CURVE_COSE_CRV_MAP,
     TPM_MANUFACTURERS,

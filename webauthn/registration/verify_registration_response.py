@@ -1,16 +1,16 @@
 import hashlib
 from typing import List, Mapping, Optional, Union
 
-from ..helpers import (
+from webauthn.helpers import (
     aaguid_to_string,
     bytes_to_base64url,
     decode_credential_public_key,
     parse_attestation_object,
     parse_client_data_json,
 )
-from ..helpers.cose import COSEAlgorithmIdentifier
-from ..helpers.exceptions import InvalidRegistrationResponse
-from ..helpers.structs import (
+from webauthn.helpers.cose import COSEAlgorithmIdentifier
+from webauthn.helpers.exceptions import InvalidRegistrationResponse
+from webauthn.helpers.structs import (
     AttestationFormat,
     ClientDataType,
     PublicKeyCredentialType,

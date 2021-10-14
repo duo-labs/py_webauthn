@@ -9,11 +9,11 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 
-from ...helpers.cose import COSEAlgorithmIdentifier
-from ...helpers import base64url_to_bytes, validate_certificate_chain, verify_signature
-from ...helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
-from ...helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from ...helpers.structs import AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.cose import COSEAlgorithmIdentifier
+from webauthn.helpers import base64url_to_bytes, validate_certificate_chain, verify_signature
+from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
+from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
 
 
 class SafetyNetJWSHeader(WebAuthnBaseModel):

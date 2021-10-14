@@ -9,14 +9,14 @@ from cryptography.hazmat.primitives.asymmetric.ec import (
     EllipticCurvePublicKey,
 )
 
-from ...helpers import aaguid_to_string, validate_certificate_chain, verify_signature
-from ...helpers.cose import COSEAlgorithmIdentifier
-from ...helpers.decode_credential_public_key import (
+from webauthn.helpers import aaguid_to_string, validate_certificate_chain, verify_signature
+from webauthn.helpers.cose import COSEAlgorithmIdentifier
+from webauthn.helpers.decode_credential_public_key import (
     DecodedEC2PublicKey,
     decode_credential_public_key,
 )
-from ...helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
-from ...helpers.structs import AttestationStatement
+from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.structs import AttestationStatement
 
 
 def verify_fido_u2f(

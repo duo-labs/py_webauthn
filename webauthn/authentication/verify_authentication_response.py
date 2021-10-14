@@ -3,7 +3,7 @@ from typing import List, Union
 
 from cryptography.exceptions import InvalidSignature
 
-from ..helpers import (
+from webauthn.helpers import (
     bytes_to_base64url,
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
@@ -11,8 +11,8 @@ from ..helpers import (
     parse_client_data_json,
     verify_signature,
 )
-from ..helpers.exceptions import InvalidAuthenticationResponse
-from ..helpers.structs import (
+from webauthn.helpers.exceptions import InvalidAuthenticationResponse
+from webauthn.helpers.structs import (
     AuthenticationCredential,
     ClientDataType,
     PublicKeyCredentialType,

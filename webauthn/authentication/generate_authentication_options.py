@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from ..helpers import generate_challenge
-from ..helpers.structs import (
+from webauthn.helpers import generate_challenge
+from webauthn.helpers.structs import (
     PublicKeyCredentialDescriptor,
     PublicKeyCredentialRequestOptions,
     UserVerificationRequirement,

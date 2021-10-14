@@ -6,14 +6,14 @@ from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 
-from ...helpers import (
+from webauthn.helpers import (
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
     validate_certificate_chain,
     verify_signature,
 )
-from ...helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
-from ...helpers.structs import AttestationStatement
+from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.structs import AttestationStatement
 
 
 def verify_packed(

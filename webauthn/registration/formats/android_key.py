@@ -13,24 +13,24 @@ from cryptography.x509 import (
     UnrecognizedExtension,
 )
 
-from ...helpers import (
+from webauthn.helpers import (
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
     validate_certificate_chain,
     verify_signature,
 )
-from ...helpers.asn1.android_key import (
+from webauthn.helpers.asn1.android_key import (
     AuthorizationList,
     KeyDescription,
     KeyOrigin,
     KeyPurpose,
 )
-from ...helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
-from ...helpers.known_root_certs import (
+from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.known_root_certs import (
     google_hardware_attestation_root_1,
     google_hardware_attestation_root_2,
 )
-from ...helpers.structs import AttestationStatement
+from webauthn.helpers.structs import AttestationStatement
 
 
 def verify_android_key(

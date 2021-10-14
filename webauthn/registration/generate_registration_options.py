@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from ..helpers import generate_challenge
-from ..helpers.cose import COSEAlgorithmIdentifier
-from ..helpers.structs import (
+from webauthn.helpers import generate_challenge
+from webauthn.helpers.cose import COSEAlgorithmIdentifier
+from webauthn.helpers.structs import (
     AttestationConveyancePreference,
     AuthenticatorSelectionCriteria,
     PublicKeyCredentialCreationOptions,
