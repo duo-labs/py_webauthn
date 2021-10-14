@@ -8,4 +8,4 @@ from .authentication import (
 )
 from .helpers import base64url_to_bytes, options_to_json
 
-__version__ = "1.0.0"
+__version__ = "1.0.0-beta1"
