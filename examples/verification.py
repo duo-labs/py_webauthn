@@ -1,10 +1,12 @@
-from webauthn.authentication import verify_authentication_response
-from webauthn.helpers import base64url_to_bytes
+from webauthn import (
+    verify_authentication_response,
+    verify_registration_response,
+    base64url_to_bytes,
+)
 from webauthn.helpers.structs import (
     AuthenticationCredential,
     RegistrationCredential,
 )
-from webauthn.registration import verify_registration_response
 
 ################
 #

@@ -1,5 +1,8 @@
-from webauthn.authentication import generate_authentication_options
-from webauthn.helpers import options_to_json
+from webauthn import (
+    generate_authentication_options,
+    generate_registration_options,
+    options_to_json,
+)
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.structs import (
     AttestationConveyancePreference,
@@ -9,7 +12,6 @@ from webauthn.helpers.structs import (
     ResidentKeyRequirement,
     UserVerificationRequirement,
 )
-from webauthn.registration import generate_registration_options
 
 ################
 #
