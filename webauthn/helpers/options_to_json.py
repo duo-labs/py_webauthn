@@ -17,6 +17,6 @@ def options_to_json(
     """
     return options.json(
         by_alias=True,
-        skip_defaults=False,
+        exclude_unset=False,
         exclude_none=True,
     )
