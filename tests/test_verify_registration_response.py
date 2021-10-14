@@ -10,7 +10,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialType,
     RegistrationCredential,
 )
-from webauthn.registration import verify_registration_response
+from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponse(TestCase):

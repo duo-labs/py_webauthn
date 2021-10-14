@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from webauthn.authentication import verify_authentication_response
+from webauthn import verify_authentication_response
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
 from webauthn.helpers.structs import AuthenticationCredential

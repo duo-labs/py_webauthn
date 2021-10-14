@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat, RegistrationCredential
-from webauthn.registration import verify_registration_response
+from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseAndroidKey(TestCase):

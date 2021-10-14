@@ -12,7 +12,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialUserEntity,
     ResidentKeyRequirement,
 )
-from webauthn.registration import generate_registration_options
+from webauthn import generate_registration_options
 
 
 class TestGenerateRegistrationOptions(TestCase):
