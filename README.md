@@ -29,7 +29,7 @@ Two additional helper methods are also exposed:
 - `options_to_json()`
 - `base64url_to_bytes()`
 
-Additional data structures are available on `webauthn.helpers.structs`. These are useful for constructing inputs to the methods above, and for type hinting.
+Additional data structures are available on `webauthn.helpers.structs`. These are useful for constructing inputs to the methods above, and for type hinting. These [Pydantic-powered](https://pydantic-docs.helpmanual.io/) dataclasses provide runtime data validation to help ensure consistency in the shape of data being passed around.
 
 ### Registration
 
