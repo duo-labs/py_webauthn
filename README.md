@@ -29,6 +29,8 @@ Two additional helper methods are also exposed:
 - `options_to_json()`
 - `base64url_to_bytes()`
 
+Additional data structures are available on `webauthn.helpers.structs`. These are useful for constructing inputs to the methods above, and for type hinting. These [Pydantic-powered](https://pydantic-docs.helpmanual.io/) dataclasses provide runtime data validation to help ensure consistency in the shape of data being passed around.
+
 ### Registration
 
 See **examples/registration.py** for practical examples of using `generate_registration_options()` and `verify_registration_response()`.
