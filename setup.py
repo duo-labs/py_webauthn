@@ -2,7 +2,7 @@ import codecs
 import os
 import re
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -28,7 +28,7 @@ VERSION = find_version('webauthn', '__init__.py')
 
 setup(
     name='webauthn',
-    packages=['webauthn'],
+    packages=find_packages(exclude=["tests"]),
     include_package_data=True,
     version=VERSION,
     description='Pythonic WebAuthn',
