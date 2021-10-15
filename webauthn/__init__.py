@@ -4,4 +4,4 @@ from .authentication.generate_authentication_options import generate_authenticat
 from .authentication.verify_authentication_response import verify_authentication_response
 from .helpers import base64url_to_bytes, options_to_json
 
-__version__ = "1.0.0-beta2"
+__version__ = "1.0.0"
