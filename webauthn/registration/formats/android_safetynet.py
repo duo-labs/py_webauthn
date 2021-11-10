@@ -123,7 +123,7 @@ def verify_android_safetynet(
 
     if not payload.cts_profile_match:
         raise InvalidRegistrationResponse(
-            "Could not verify device integrity (SafetyNet"
+            "Could not verify device integrity (SafetyNet)"
         )
 
     if verify_timestamp_ms:
@@ -134,7 +134,7 @@ def verify_android_safetynet(
 
         if now < payload_ms:
             raise InvalidRegistrationResponse(
-                f"Payload timestamp {payload_ms} was later than {now}"
+                f"Payload timestamp {payload_ms} was later than {now} (SafetyNet)"
             )
 
         # Give a 60-second grace period for the response to have been generated and make it
