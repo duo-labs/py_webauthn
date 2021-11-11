@@ -16,7 +16,10 @@ from webauthn.helpers import (
     verify_safetynet_timestamp,
     verify_signature,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
 from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
 
