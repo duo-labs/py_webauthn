@@ -10,8 +10,16 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
-from webauthn.helpers import base64url_to_bytes, validate_certificate_chain, verify_signature
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers import (
+    base64url_to_bytes,
+    validate_certificate_chain,
+    verify_safetynet_timestamp,
+    verify_signature,
+)
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
 from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
 
@@ -123,25 +131,14 @@ def verify_android_safetynet(
 
     if not payload.cts_profile_match:
         raise InvalidRegistrationResponse(
-            "Could not verify device integrity (SafetyNet"
+            "Could not verify device integrity (SafetyNet)"
         )
 
     if verify_timestamp_ms:
-        # Verify timestampMs
-        # Get "now" in Unix epoch milliseconds
-        now = int(time.time()) * 1000
-        payload_ms = payload.timestamp_ms
-
-        if now < payload_ms:
-            raise InvalidRegistrationResponse(
-                f"Payload timestamp {payload_ms} was later than {now}"
-            )
-
-        # Give a 60-second grace period for the response to have been generated and make it
-        # here to the server
-        payload_ms_grace = payload_ms + (60 * 1000)
-        if payload_ms_grace < now:
-            raise InvalidRegistrationResponse("Payload has expired (SafetyNet)")
+        try:
+            verify_safetynet_timestamp(payload.timestamp_ms)
+        except ValueError as err:
+            raise InvalidRegistrationResponse(f"{err} (SafetyNet)")
 
     # Verify that the leaf certificate was issued to the hostname attest.android.com
     attestation_cert = x509.load_der_x509_certificate(x5c[0], default_backend())
