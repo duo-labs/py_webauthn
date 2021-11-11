@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.0
+
+**Changes:**
+
+- Fixed SafetyNet attestation statement verification failing due to server time drift
+- Added py.typed file to indicate type information is present (PEP-561)
+
+
 ## v1.0.1
 
 **Changes:**
