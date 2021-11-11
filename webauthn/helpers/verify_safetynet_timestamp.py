@@ -17,5 +17,5 @@ def verify_safetynet_timestamp(timestamp_ms: int) -> None:
         )
 
     # Make sure the response arrived within the grace period
-    if (timestamp_ms + grace_ms) < now:
+    if timestamp_ms < (now - grace_ms):
         raise ValueError("Payload has expired")
