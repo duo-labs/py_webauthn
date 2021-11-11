@@ -30,6 +30,7 @@ setup(
     name='webauthn',
     packages=find_packages(exclude=["tests"]),
     include_package_data=True,
+    package_data={"webauthn": ["py.typed"]},
     version=VERSION,
     description='Pythonic WebAuthn',
     long_description=LONG_DESCRIPTION,
