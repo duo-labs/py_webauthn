@@ -2,7 +2,7 @@ import time
 
 
 def verify_safetynet_timestamp(timestamp_ms: int) -> None:
-    """Handle time drift between this RP and the Google SafetyNet API servers with a window of
+    """Handle time drift between an RP and the Google SafetyNet API servers with a window of
     time within which the response is valid
     """
     # Buffer period in ms
