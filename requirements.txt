@@ -1,5 +1,7 @@
 asn1crypto==0.24.0
+attrs==21.2.0
 black==21.9b0
+cattrs==1.8.0
 cbor2==4.0.1
 cffi==1.15.0
 click==8.0.3
