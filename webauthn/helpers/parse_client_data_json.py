@@ -53,7 +53,6 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
                 )
 
             status = token_binding_dict["status"]
-            # This will raise ValidationError on an unexpected status
             token_binding = TokenBinding(status=status)
 
             # Handle optional values
