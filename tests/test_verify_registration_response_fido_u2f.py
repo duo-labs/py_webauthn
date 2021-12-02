@@ -90,17 +90,15 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
         rp_id = "duo.test"
         expected_origin = "https://api-duo1.duo.test"
 
-        verification = verify_registration_response(
-            credential=credential,
-            expected_challenge=challenge,
-            expected_origin=expected_origin,
-            expected_rp_id=rp_id,
-        )
-
-        assert verification.fmt == AttestationFormat.FIDO_U2F
-        assert verification.credential_id == base64url_to_bytes(
-            "JeC3qgQjIVysq88GxhGUYyDl4oZeW8mLWd7luJWQvnrm-wxGZ5mzf2bBCaUDq7D2qr4aQezvzfoFIF880ciAsQ",
-        )
+        with self.assertRaisesRegex(
+            Exception, "Unexpected token_binding status"
+        ):
+            verify_registration_response(
+                credential=credential,
+                expected_challenge=challenge,
+                expected_origin=expected_origin,
+                expected_rp_id=rp_id,
+            )
 
     def test_verify_attestation_with_unsupported_token_binding(self) -> None:
         # Credential contains `clientDataJSON: { tokenBinding: "unused" }`
