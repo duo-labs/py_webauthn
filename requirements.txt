@@ -7,6 +7,7 @@ cffi==1.15.0
 click==8.0.3
 cryptography==3.4.7
 mccabe==0.6.1
+mypy==0.910
 mypy-extensions==0.4.3
 pathspec==0.9.0
 platformdirs==2.4.0
@@ -16,5 +17,6 @@ pyflakes==2.4.0
 pyOpenSSL==20.0.1
 regex==2021.10.8
 six==1.16.0
+toml==0.10.2
 tomli==1.2.1
 typing-extensions==3.10.0.2
