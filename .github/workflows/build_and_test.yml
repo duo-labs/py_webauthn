@@ -30,3 +30,6 @@ jobs:
     - name: Test with unittest
       run: |
         python -m unittest
+    - name: Run mypy
+      run: |
+        python -m mypy webauthn
