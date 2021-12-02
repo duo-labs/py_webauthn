@@ -34,8 +34,8 @@ class SafetyNetJWSHeader:
     x5c: List[str]
 
     @classmethod
-    def parse_raw(cls, json_str: str):
-        parsed: dict = json_loads_base64url_to_bytes(json_str)
+    def parse_raw(cls, header_data: str):
+        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(header_data))
         return cls(
             alg=parsed.get("alg"),
             x5c=parsed.get("x5c"),
@@ -59,8 +59,8 @@ class SafetyNetJWSPayload:
     basic_integrity: bool
 
     @classmethod
-    def parse_raw(cls, json_str: str):
-        parsed: dict = json_loads_base64url_to_bytes(json_str)
+    def parse_raw(cls, payload_data: str):
+        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(payload_data))
         return cls(
             nonce=parsed.get("nonce"),
             timestamp_ms=parsed.get("timestampMs"),
@@ -113,8 +113,8 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-    payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    header = SafetyNetJWSHeader.parse_raw(jws_parts[0])
+    payload = SafetyNetJWSPayload.parse_raw(jws_parts[1])
     signature_bytes: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the
