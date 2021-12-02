@@ -115,7 +115,7 @@ def verify_android_safetynet(
 
     header = SafetyNetJWSHeader.parse_raw(jws_parts[0])
     payload = SafetyNetJWSPayload.parse_raw(jws_parts[1])
-    signature_bytes: str = jws_parts[2]
+    signature_bytes_str: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the
     # Base64 encoding of the SHA-256 hash of the concatenation of authenticatorData and
@@ -128,24 +128,24 @@ def verify_android_safetynet(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     nonce_data = b"".join(
         [
             authenticator_data_bytes,
-            client_data_hash,
+            client_data_hash_bytes,
         ]
     )
     # Start with a sha256 hash
     nonce_data_hash = hashlib.sha256()
     nonce_data_hash.update(nonce_data)
-    nonce_data_hash = nonce_data_hash.digest()
+    nonce_data_hash_bytes = nonce_data_hash.digest()
     # Encode to base64
-    nonce_data_hash = base64.b64encode(nonce_data_hash)
+    nonce_data_hash_bytes = base64.b64encode(nonce_data_hash_bytes)
     # Finish by decoding to string
-    nonce_data_hash = nonce_data_hash.decode("utf-8")
+    nonce_data_str = nonce_data_hash_bytes.decode("utf-8")
 
-    if payload.nonce != nonce_data_hash:
+    if payload.nonce != nonce_data_str:
         raise InvalidRegistrationResponse(
             "Payload nonce was not expected value (SafetyNet)"
         )
@@ -192,7 +192,7 @@ def verify_android_safetynet(
 
     # Verify signature
     verification_data = f"{jws_parts[0]}.{jws_parts[1]}".encode("utf-8")
-    signature_bytes = base64url_to_bytes(signature_bytes)
+    signature_bytes = base64url_to_bytes(signature_bytes_str)
 
     if header.alg != "RS256":
         raise InvalidRegistrationResponse(

@@ -143,9 +143,9 @@ def verify_registration_response(
     # Generate a hash of the expected RP ID for comparison
     expected_rp_id_hash = hashlib.sha256()
     expected_rp_id_hash.update(expected_rp_id.encode("utf-8"))
-    expected_rp_id_hash = expected_rp_id_hash.digest()
+    expected_rp_id_hash_bytes = expected_rp_id_hash.digest()
 
-    if auth_data.rp_id_hash != expected_rp_id_hash:
+    if auth_data.rp_id_hash != expected_rp_id_hash_bytes:
         raise InvalidRegistrationResponse("Unexpected RP ID hash")
 
     if not auth_data.flags.up:

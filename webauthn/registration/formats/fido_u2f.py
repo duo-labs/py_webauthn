@@ -107,14 +107,14 @@ def verify_fido_u2f(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     # Prepare the signature base (called "verificationData" in the WebAuthn spec)
     verification_data = b"".join(
         [
             bytes([0x00]),
             rp_id_hash,
-            client_data_hash,
+            client_data_hash_bytes,
             credential_id,
             public_key_u2f,
         ]

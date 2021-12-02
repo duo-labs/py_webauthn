@@ -85,12 +85,12 @@ def verify_android_key(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     verification_data = b"".join(
         [
             authenticator_data_bytes,
-            client_data_hash,
+            client_data_hash_bytes,
         ]
     )
 

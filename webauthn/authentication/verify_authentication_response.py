@@ -114,9 +114,9 @@ def verify_authentication_response(
     # Generate a hash of the expected RP ID for comparison
     expected_rp_id_hash = hashlib.sha256()
     expected_rp_id_hash.update(expected_rp_id.encode("utf-8"))
-    expected_rp_id_hash = expected_rp_id_hash.digest()
+    expected_rp_id_hash_bytes = expected_rp_id_hash.digest()
 
-    if auth_data.rp_id_hash != expected_rp_id_hash:
+    if auth_data.rp_id_hash != expected_rp_id_hash_bytes:
         raise InvalidAuthenticationResponse("Unexpected RP ID hash")
 
     if not auth_data.flags.up:
@@ -141,9 +141,9 @@ def verify_authentication_response(
 
     client_data_hash = hashlib.sha256()
     client_data_hash.update(response.client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
-    signature_base = response.authenticator_data + client_data_hash
+    signature_base = response.authenticator_data + client_data_hash_bytes
 
     try:
         decoded_public_key = decode_credential_public_key(credential_public_key)
