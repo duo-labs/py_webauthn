@@ -24,7 +24,10 @@ from webauthn.helpers.decode_credential_public_key import (
     DecodedEC2PublicKey,
     DecodedRSAPublicKey,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.structs import AttestationStatement
 from webauthn.helpers.tpm import parse_cert_info, parse_pub_area
 from webauthn.helpers.tpm.structs import (

@@ -9,13 +9,20 @@ from cryptography.hazmat.primitives.asymmetric.ec import (
     EllipticCurvePublicKey,
 )
 
-from webauthn.helpers import aaguid_to_string, validate_certificate_chain, verify_signature
+from webauthn.helpers import (
+    aaguid_to_string,
+    validate_certificate_chain,
+    verify_signature,
+)
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.decode_credential_public_key import (
     DecodedEC2PublicKey,
     decode_credential_public_key,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.structs import AttestationStatement
 
 

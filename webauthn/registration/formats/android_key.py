@@ -25,7 +25,10 @@ from webauthn.helpers.asn1.android_key import (
     KeyOrigin,
     KeyPurpose,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import (
     google_hardware_attestation_root_1,
     google_hardware_attestation_root_2,

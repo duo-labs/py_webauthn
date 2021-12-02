@@ -17,7 +17,10 @@ from webauthn.helpers import (
     decoded_public_key_to_cryptography,
     validate_certificate_chain,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import apple_webauthn_root_ca
 from webauthn.helpers.structs import AttestationStatement
 

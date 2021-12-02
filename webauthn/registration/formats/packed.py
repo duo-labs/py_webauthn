@@ -12,7 +12,10 @@ from webauthn.helpers import (
     validate_certificate_chain,
     verify_signature,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.structs import AttestationStatement
 
 
