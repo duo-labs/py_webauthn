@@ -1,6 +1,7 @@
 import hashlib
 from typing import List, Union
 
+from attr import define
 from cryptography.exceptions import InvalidSignature
 
 from webauthn.helpers import (
@@ -17,11 +18,11 @@ from webauthn.helpers.structs import (
     ClientDataType,
     PublicKeyCredentialType,
     TokenBindingStatus,
-    WebAuthnBaseModel,
 )
 
 
-class VerifiedAuthentication(WebAuthnBaseModel):
+@define
+class VerifiedAuthentication:
     """
     Information about a verified authentication of which an RP can make use
     """

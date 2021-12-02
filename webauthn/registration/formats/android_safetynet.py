@@ -1,8 +1,9 @@
 import base64
 import hashlib
-import time
+import json
 from typing import List
 
+from attr import define
 import cbor2
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -15,23 +16,34 @@ from webauthn.helpers import (
     validate_certificate_chain,
     verify_safetynet_timestamp,
     verify_signature,
+    json_loads_base64url_to_bytes,
 )
 from webauthn.helpers.exceptions import (
     InvalidCertificateChain,
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.structs import AttestationStatement
 
 
-class SafetyNetJWSHeader(WebAuthnBaseModel):
+@define
+class SafetyNetJWSHeader:
     """Properties in the Header of a SafetyNet JWS"""
 
     alg: str
     x5c: List[str]
 
+    @classmethod
+    def parse_raw(cls, json_str: str):
+        parsed: dict = json_loads_base64url_to_bytes(json_str)
+        return cls(
+            alg=parsed.get("alg"),
+            x5c=parsed.get("x5c"),
+        )
 
-class SafetyNetJWSPayload(WebAuthnBaseModel):
+
+@define
+class SafetyNetJWSPayload:
     """Properties in the Payload of a SafetyNet JWS
 
     Values below correspond to camelCased properties in the JWS itself. This class
@@ -45,6 +57,19 @@ class SafetyNetJWSPayload(WebAuthnBaseModel):
     cts_profile_match: bool
     apk_certificate_digest_sha256: List[str]
     basic_integrity: bool
+
+    @classmethod
+    def parse_raw(cls, json_str: str):
+        parsed: dict = json_loads_base64url_to_bytes(json_str)
+        return cls(
+            nonce=parsed.get("nonce"),
+            timestamp_ms=parsed.get("timestampMs"),
+            apk_package_name=parsed.get("apkPackageName"),
+            apk_digest_sha256=parsed.get("apkDigestSha256"),
+            cts_profile_match=parsed.get("ctsProfileMatch"),
+            apk_certificate_digest_sha256=parsed.get("apkCertificateDigestSha256"),
+            basic_integrity=parsed.get("basicIntegrity"),
+        )
 
 
 def verify_android_safetynet(
