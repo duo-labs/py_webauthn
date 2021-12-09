@@ -1,7 +1,7 @@
 import base64
 import hashlib
 import json
-from typing import List
+from typing import List, Optional
 
 from attr import define
 import cbor2
@@ -37,8 +37,8 @@ class SafetyNetJWSHeader:
     def parse_raw(cls, header_data: str):
         parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(header_data))
         return cls(
-            alg=parsed.get("alg"),
-            x5c=parsed.get("x5c"),
+            alg=parsed["alg"],
+            x5c=parsed["x5c"],
         )
 
 
@@ -62,13 +62,13 @@ class SafetyNetJWSPayload:
     def parse_raw(cls, payload_data: str):
         parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(payload_data))
         return cls(
-            nonce=parsed.get("nonce"),
-            timestamp_ms=parsed.get("timestampMs"),
-            apk_package_name=parsed.get("apkPackageName"),
-            apk_digest_sha256=parsed.get("apkDigestSha256"),
-            cts_profile_match=parsed.get("ctsProfileMatch"),
-            apk_certificate_digest_sha256=parsed.get("apkCertificateDigestSha256"),
-            basic_integrity=parsed.get("basicIntegrity"),
+            nonce=parsed["nonce"],
+            timestamp_ms=parsed["timestampMs"],
+            apk_package_name=parsed["apkPackageName"],
+            apk_digest_sha256=parsed["apkDigestSha256"],
+            cts_profile_match=parsed["ctsProfileMatch"],
+            apk_certificate_digest_sha256=parsed["apkCertificateDigestSha256"],
+            basic_integrity=parsed["basicIntegrity"],
         )
 
 

@@ -2,7 +2,6 @@ from enum import Enum
 from typing import List, Literal, Optional, Union, Type
 import json
 
-import attr
 from attr import define
 
 from .bytes_to_base64url import bytes_to_base64url
@@ -232,9 +231,7 @@ class PublicKeyCredentialDescriptor:
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
-    transports: Optional[List[AuthenticatorTransport]] = attr.field(
-        default=attr.Factory(list)
-    )
+    transports: Optional[List[AuthenticatorTransport]] = None
 
 
 @define
@@ -358,8 +355,8 @@ class RegistrationCredential:
             id=parsed["id"],
             raw_id=parsed["rawId"],
             response=AuthenticatorAttestationResponse(
-                attestation_object=parsed_response.get("attestationObject"),
-                client_data_json=parsed_response.get("clientDataJSON"),
+                attestation_object=parsed_response["attestationObject"],
+                client_data_json=parsed_response["clientDataJSON"],
             ),
         )
 
@@ -535,9 +532,9 @@ class AuthenticationCredential:
             id=parsed["id"],
             raw_id=parsed["rawId"],
             response=AuthenticatorAssertionResponse(
-                client_data_json=parsed_response.get("clientDataJSON"),
-                authenticator_data=parsed_response.get("authenticatorData"),
-                signature=parsed_response.get("signature"),
-                user_handle=parsed_response.get("userHandle"),
+                client_data_json=parsed_response["clientDataJSON"],
+                authenticator_data=parsed_response["authenticatorData"],
+                signature=parsed_response["signature"],
+                user_handle=parsed_response["userHandle"],
             ),
         )
