@@ -14,15 +14,19 @@ from .bytes_to_base64url import bytes_to_base64url
 
 
 # Create a converter to convert our attr classes into JSON strings
-converter = make_converter(omit_if_default=True)
+converter = make_converter()
 # Convert snake_case property names to camelCase
 def _to_camel_case_unstructure(cls):
     return make_dict_unstructure_fn(
         cls,
         converter,
         **{
-            a.name: override(rename=snake_case_to_camel_case(a.name))
-            for a in fields(cls)
+            attribute.name: override(
+                # Avoid sending optional `None` defaults as `null` in JSON
+                omit_if_default=attribute.default is None,
+                rename=snake_case_to_camel_case(attribute.name),
+            )
+            for attribute in fields(cls)
         }
     )
 
