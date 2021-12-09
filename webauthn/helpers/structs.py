@@ -535,6 +535,6 @@ class AuthenticationCredential:
                 client_data_json=parsed_response["clientDataJSON"],
                 authenticator_data=parsed_response["authenticatorData"],
                 signature=parsed_response["signature"],
-                user_handle=parsed_response["userHandle"],
+                user_handle=parsed_response.get("userHandle"),
             ),
         )
