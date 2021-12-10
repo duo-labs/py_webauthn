@@ -1,33 +1,13 @@
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union, Type
+import json
 
-from pydantic import BaseModel
+from attr import define
 
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
 from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .snake_case_to_camel_case import snake_case_to_camel_case
-
-
-class WebAuthnBaseModel(BaseModel):
-    """
-    A subclass of Pydantic's BaseModel that includes convenient defaults
-    when working with WebAuthn data structures
-
-    `modelInstance.json()` (to JSON):
-    - Encodes bytes to Base64URL
-    - Converts snake_case properties to camelCase
-
-    `Model.parse_raw()` (from JSON):
-    - Decodes Base64URL to bytes
-    - Converts camelCase properties to snake_case
-    """
-
-    class Config:
-        json_encoders = {bytes: bytes_to_base64url}
-        json_loads = json_loads_base64url_to_bytes
-        alias_generator = snake_case_to_camel_case
-        allow_population_by_field_name = True
 
 
 ################
@@ -178,16 +158,18 @@ class TokenBindingStatus(str, Enum):
     SUPPORTED = "supported"
 
 
-class TokenBinding(BaseModel):
+@define
+class TokenBinding:
     """
     https://www.w3.org/TR/webauthn-2/#dictdef-tokenbinding
     """
 
     status: TokenBindingStatus
-    id: Optional[str]
+    id: Optional[str] = None
 
 
-class PublicKeyCredentialRpEntity(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialRpEntity:
     """Information about the Relying Party.
 
     Attributes:
@@ -198,10 +180,11 @@ class PublicKeyCredentialRpEntity(WebAuthnBaseModel):
     """
 
     name: str
-    id: Optional[str]
+    id: Optional[str] = None
 
 
-class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialUserEntity:
     """Information about a user of a Relying Party.
 
     Attributes:
@@ -217,7 +200,8 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     display_name: str
 
 
-class PublicKeyCredentialParameters(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialParameters:
     """Information about a cryptographic algorithm that may be used when creating a credential.
 
     Attributes:
@@ -231,7 +215,8 @@ class PublicKeyCredentialParameters(WebAuthnBaseModel):
     alg: COSEAlgorithmIdentifier
 
 
-class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialDescriptor:
     """Information about a generated credential.
 
     Attributes:
@@ -242,14 +227,15 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
     """
 
+    id: bytes
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
-    id: bytes
     transports: Optional[List[AuthenticatorTransport]] = None
 
 
-class AuthenticatorSelectionCriteria(WebAuthnBaseModel):
+@define
+class AuthenticatorSelectionCriteria:
     """A Relying Party's requirements for the types of authenticators that may interact with the client/browser.
 
     Attributes:
@@ -261,15 +247,16 @@ class AuthenticatorSelectionCriteria(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-authenticatorselectioncriteria
     """
 
-    authenticator_attachment: Optional[AuthenticatorAttachment]
-    resident_key: Optional[ResidentKeyRequirement]
+    authenticator_attachment: Optional[AuthenticatorAttachment] = None
+    resident_key: Optional[ResidentKeyRequirement] = None
     require_resident_key: Optional[bool] = False
     user_verification: Optional[
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
 
 
-class CollectedClientData(BaseModel):
+@define
+class CollectedClientData:
     """Decoded ClientDataJSON
 
     Attributes:
@@ -285,8 +272,8 @@ class CollectedClientData(BaseModel):
     type: ClientDataType
     challenge: bytes
     origin: str
-    cross_origin: Optional[bool]
-    token_binding: Optional[TokenBinding]
+    cross_origin: Optional[bool] = None
+    token_binding: Optional[TokenBinding] = None
 
 
 ################
@@ -296,7 +283,8 @@ class CollectedClientData(BaseModel):
 ################
 
 
-class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialCreationOptions:
     """Registration Options.
 
     Attributes:
@@ -316,13 +304,14 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
     user: PublicKeyCredentialUserEntity
     challenge: bytes
     pub_key_cred_params: List[PublicKeyCredentialParameters]
-    timeout: Optional[int]
-    exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]]
-    authenticator_selection: Optional[AuthenticatorSelectionCriteria]
+    timeout: Optional[int] = None
+    exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
+    authenticator_selection: Optional[AuthenticatorSelectionCriteria] = None
     attestation: AttestationConveyancePreference = AttestationConveyancePreference.NONE
 
 
-class AuthenticatorAttestationResponse(WebAuthnBaseModel):
+@define
+class AuthenticatorAttestationResponse:
     """The `response` property on a registration credential.
 
     Attributes:
@@ -336,7 +325,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     attestation_object: bytes
 
 
-class RegistrationCredential(WebAuthnBaseModel):
+@define
+class RegistrationCredential:
     """A registration-specific subclass of PublicKeyCredential returned from `navigator.credentials.create()`
 
     Attributes:
@@ -352,13 +342,27 @@ class RegistrationCredential(WebAuthnBaseModel):
     id: str
     raw_id: bytes
     response: AuthenticatorAttestationResponse
+    transports: Optional[List[AuthenticatorTransport]] = None
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
-    transports: Optional[List[AuthenticatorTransport]]
+
+    @classmethod
+    def parse_raw(cls, json_str: str):
+        parsed: dict = json_loads_base64url_to_bytes(json_str)
+        parsed_response: dict = parsed["response"]
+        return cls(
+            id=parsed["id"],
+            raw_id=parsed["rawId"],
+            response=AuthenticatorAttestationResponse(
+                attestation_object=parsed_response["attestationObject"],
+                client_data_json=parsed_response["clientDataJSON"],
+            ),
+        )
 
 
-class AttestationStatement(BaseModel):
+@define
+class AttestationStatement:
     """A collection of all possible fields that may exist in an attestation statement. Combinations of these fields are specific to a particular attestation format.
 
     https://www.w3.org/TR/webauthn-2/#sctn-defined-attestation-formats
@@ -368,16 +372,17 @@ class AttestationStatement(BaseModel):
     attestation format.
     """
 
-    sig: Optional[bytes]
-    x5c: Optional[List[bytes]]
-    response: Optional[bytes]
-    alg: Optional[COSEAlgorithmIdentifier]
-    ver: Optional[str]
-    cert_info: Optional[bytes]
-    pub_area: Optional[bytes]
+    sig: Optional[bytes] = None
+    x5c: Optional[List[bytes]] = None
+    response: Optional[bytes] = None
+    alg: Optional[COSEAlgorithmIdentifier] = None
+    ver: Optional[str] = None
+    cert_info: Optional[bytes] = None
+    pub_area: Optional[bytes] = None
 
 
-class AuthenticatorDataFlags(BaseModel):
+@define
+class AuthenticatorDataFlags:
     """Flags the authenticator will set about information contained within the `attestationObject.authData` property.
 
     Attributes:
@@ -394,7 +399,8 @@ class AuthenticatorDataFlags(BaseModel):
     ed: bool
 
 
-class AttestedCredentialData(BaseModel):
+@define
+class AttestedCredentialData:
     """Information about a credential.
 
     Attributes:
@@ -410,7 +416,8 @@ class AttestedCredentialData(BaseModel):
     credential_public_key: bytes
 
 
-class AuthenticatorData(BaseModel):
+@define
+class AuthenticatorData:
     """Context the authenticator provides about itself and the environment in which the registration or authentication ceremony took place.
 
     Attributes:
@@ -427,11 +434,12 @@ class AuthenticatorData(BaseModel):
     rp_id_hash: bytes
     flags: AuthenticatorDataFlags
     sign_count: int
-    attested_credential_data: Optional[AttestedCredentialData]
-    extensions: Optional[bytes]
+    attested_credential_data: Optional[AttestedCredentialData] = None
+    extensions: Optional[bytes] = None
 
 
-class AttestationObject(BaseModel):
+@define
+class AttestationObject:
     """Information about an attestation, including a statement and authenticator data.
 
     Attributes:
@@ -443,8 +451,8 @@ class AttestationObject(BaseModel):
     """
 
     fmt: AttestationFormat
-    att_stmt: AttestationStatement = AttestationStatement()
     auth_data: AuthenticatorData
+    att_stmt: AttestationStatement = AttestationStatement()
 
 
 ################
@@ -454,7 +462,8 @@ class AttestationObject(BaseModel):
 ################
 
 
-class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
+@define
+class PublicKeyCredentialRequestOptions:
     """Authentication Options.
 
     Attributes:
@@ -468,15 +477,16 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     """
 
     challenge: bytes
-    timeout: Optional[int]
-    rp_id: Optional[str]
+    timeout: Optional[int] = None
+    rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
     user_verification: Optional[
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
 
 
-class AuthenticatorAssertionResponse(WebAuthnBaseModel):
+@define
+class AuthenticatorAssertionResponse:
     """The `response` property on an authentication credential.
 
     Attributes:
@@ -491,10 +501,11 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     client_data_json: bytes
     authenticator_data: bytes
     signature: bytes
-    user_handle: Optional[bytes]
+    user_handle: Optional[bytes] = None
 
 
-class AuthenticationCredential(WebAuthnBaseModel):
+@define
+class AuthenticationCredential:
     """An authentication-specific subclass of PublicKeyCredential. Returned from `navigator.credentials.get()`
 
     Attributes:
@@ -512,3 +523,18 @@ class AuthenticationCredential(WebAuthnBaseModel):
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
+
+    @classmethod
+    def parse_raw(cls, json_str: str):
+        parsed: dict = json_loads_base64url_to_bytes(json_str)
+        parsed_response: dict = parsed["response"]
+        return cls(
+            id=parsed["id"],
+            raw_id=parsed["rawId"],
+            response=AuthenticatorAssertionResponse(
+                client_data_json=parsed_response["clientDataJSON"],
+                authenticator_data=parsed_response["authenticatorData"],
+                signature=parsed_response["signature"],
+                user_handle=parsed_response.get("userHandle"),
+            ),
+        )

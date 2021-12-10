@@ -17,7 +17,10 @@ from webauthn.helpers import (
     decoded_public_key_to_cryptography,
     validate_certificate_chain,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import apple_webauthn_root_ca
 from webauthn.helpers.structs import AttestationStatement
 
@@ -57,19 +60,19 @@ def verify_apple(
 
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     nonce_to_hash = b"".join(
         [
             authenticator_data_bytes,
-            client_data_hash,
+            client_data_hash_bytes,
         ]
     )
 
     # Perform SHA-256 hash of nonceToHash to produce nonce.
     nonce = hashlib.sha256()
     nonce.update(nonce_to_hash)
-    nonce = nonce.digest()
+    nonce_bytes = nonce.digest()
 
     # Verify that nonce equals the value of the extension with
     # OID 1.2.840.113635.100.8.2 in credCert.
@@ -97,7 +100,7 @@ def verify_apple(
     # OCTET STRING. Should trim off '0$\xa1"\x04'
     ext_value: bytes = ext_value_wrapper.value[6:]
 
-    if ext_value != nonce:
+    if ext_value != nonce_bytes:
         raise InvalidRegistrationResponse(
             "Certificate nonce was not expected value (Apple)"
         )

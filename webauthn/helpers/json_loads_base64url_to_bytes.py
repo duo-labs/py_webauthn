@@ -34,6 +34,6 @@ def _object_hook_base64url_to_bytes(orig_dict: dict) -> dict:
 def json_loads_base64url_to_bytes(input: Union[str, bytes]) -> Any:
     """
     Wrap `json.loads()` with a custom object_hook that knows which dict keys to convert
-    from Base64URL to bytes when converting from JSON to Pydantic model
+    from Base64URL to bytes when converting from JSON to a Python class
     """
     return json.loads(input, object_hook=_object_hook_base64url_to_bytes)

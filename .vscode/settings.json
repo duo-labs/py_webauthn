@@ -1,7 +1,8 @@
 {
   "python.pythonPath": "venv/bin/python",
-  "python.linting.mypyEnabled": false,
+  "python.linting.mypyEnabled": true,
   "python.linting.flake8Enabled": false,
   "python.formatting.blackPath": "venv/bin/black",
+  "python.formatting.provider": "black",
   "python.linting.enabled": true
 }

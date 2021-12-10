@@ -7,6 +7,7 @@ from webauthn.helpers.structs import (
     AttestationConveyancePreference,
     AuthenticatorAttachment,
     AuthenticatorSelectionCriteria,
+    AuthenticatorTransport,
     PublicKeyCredentialDescriptor,
     ResidentKeyRequirement,
 )
@@ -55,3 +56,25 @@ class TestWebAuthnOptionsToJSON(TestCase):
             },
             "attestation": "direct",
         }
+
+    def test_includes_optional_value_when_set(self) -> None:
+        options = generate_registration_options(
+            rp_id="example.com",
+            rp_name="Example Co",
+            user_id="ABAV6QWPBEY9WOTOA1A4",
+            user_name="lee",
+            exclude_credentials=[
+                PublicKeyCredentialDescriptor(
+                    id=b"1234567890",
+                    transports=[AuthenticatorTransport.USB],
+                )
+            ],
+        )
+
+        output = options_to_json(options)
+
+        assert json.loads(output)["excludeCredentials"] == [{
+            "id": "MTIzNDU2Nzg5MA",
+            "transports": ["usb"],
+            "type": "public-key",
+        }]

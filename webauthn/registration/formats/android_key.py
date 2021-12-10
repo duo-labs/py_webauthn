@@ -25,7 +25,10 @@ from webauthn.helpers.asn1.android_key import (
     KeyOrigin,
     KeyPurpose,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.known_root_certs import (
     google_hardware_attestation_root_1,
     google_hardware_attestation_root_2,
@@ -82,12 +85,12 @@ def verify_android_key(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     verification_data = b"".join(
         [
             authenticator_data_bytes,
-            client_data_hash,
+            client_data_hash_bytes,
         ]
     )
 

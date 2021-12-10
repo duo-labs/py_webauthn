@@ -1,8 +1,9 @@
 import base64
 import hashlib
-import time
-from typing import List
+import json
+from typing import List, Optional
 
+from attr import define
 import cbor2
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -15,23 +16,34 @@ from webauthn.helpers import (
     validate_certificate_chain,
     verify_safetynet_timestamp,
     verify_signature,
+    json_loads_base64url_to_bytes,
 )
 from webauthn.helpers.exceptions import (
     InvalidCertificateChain,
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.structs import AttestationStatement
 
 
-class SafetyNetJWSHeader(WebAuthnBaseModel):
+@define
+class SafetyNetJWSHeader:
     """Properties in the Header of a SafetyNet JWS"""
 
     alg: str
     x5c: List[str]
 
+    @classmethod
+    def parse_raw(cls, header_data: str):
+        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(header_data))
+        return cls(
+            alg=parsed["alg"],
+            x5c=parsed["x5c"],
+        )
 
-class SafetyNetJWSPayload(WebAuthnBaseModel):
+
+@define
+class SafetyNetJWSPayload:
     """Properties in the Payload of a SafetyNet JWS
 
     Values below correspond to camelCased properties in the JWS itself. This class
@@ -45,6 +57,19 @@ class SafetyNetJWSPayload(WebAuthnBaseModel):
     cts_profile_match: bool
     apk_certificate_digest_sha256: List[str]
     basic_integrity: bool
+
+    @classmethod
+    def parse_raw(cls, payload_data: str):
+        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(payload_data))
+        return cls(
+            nonce=parsed["nonce"],
+            timestamp_ms=parsed["timestampMs"],
+            apk_package_name=parsed["apkPackageName"],
+            apk_digest_sha256=parsed["apkDigestSha256"],
+            cts_profile_match=parsed["ctsProfileMatch"],
+            apk_certificate_digest_sha256=parsed["apkCertificateDigestSha256"],
+            basic_integrity=parsed["basicIntegrity"],
+        )
 
 
 def verify_android_safetynet(
@@ -88,9 +113,9 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-    payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
-    signature_bytes: str = jws_parts[2]
+    header = SafetyNetJWSHeader.parse_raw(jws_parts[0])
+    payload = SafetyNetJWSPayload.parse_raw(jws_parts[1])
+    signature_bytes_str: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the
     # Base64 encoding of the SHA-256 hash of the concatenation of authenticatorData and
@@ -103,24 +128,24 @@ def verify_android_safetynet(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     nonce_data = b"".join(
         [
             authenticator_data_bytes,
-            client_data_hash,
+            client_data_hash_bytes,
         ]
     )
     # Start with a sha256 hash
     nonce_data_hash = hashlib.sha256()
     nonce_data_hash.update(nonce_data)
-    nonce_data_hash = nonce_data_hash.digest()
+    nonce_data_hash_bytes = nonce_data_hash.digest()
     # Encode to base64
-    nonce_data_hash = base64.b64encode(nonce_data_hash)
+    nonce_data_hash_bytes = base64.b64encode(nonce_data_hash_bytes)
     # Finish by decoding to string
-    nonce_data_hash = nonce_data_hash.decode("utf-8")
+    nonce_data_str = nonce_data_hash_bytes.decode("utf-8")
 
-    if payload.nonce != nonce_data_hash:
+    if payload.nonce != nonce_data_str:
         raise InvalidRegistrationResponse(
             "Payload nonce was not expected value (SafetyNet)"
         )
@@ -167,7 +192,7 @@ def verify_android_safetynet(
 
     # Verify signature
     verification_data = f"{jws_parts[0]}.{jws_parts[1]}".encode("utf-8")
-    signature_bytes = base64url_to_bytes(signature_bytes)
+    signature_bytes = base64url_to_bytes(signature_bytes_str)
 
     if header.alg != "RS256":
         raise InvalidRegistrationResponse(

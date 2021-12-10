@@ -9,13 +9,20 @@ from cryptography.hazmat.primitives.asymmetric.ec import (
     EllipticCurvePublicKey,
 )
 
-from webauthn.helpers import aaguid_to_string, validate_certificate_chain, verify_signature
+from webauthn.helpers import (
+    aaguid_to_string,
+    validate_certificate_chain,
+    verify_signature,
+)
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.decode_credential_public_key import (
     DecodedEC2PublicKey,
     decode_credential_public_key,
 )
-from webauthn.helpers.exceptions import InvalidCertificateChain, InvalidRegistrationResponse
+from webauthn.helpers.exceptions import (
+    InvalidCertificateChain,
+    InvalidRegistrationResponse,
+)
 from webauthn.helpers.structs import AttestationStatement
 
 
@@ -100,14 +107,14 @@ def verify_fido_u2f(
     # Generate a hash of client_data_json
     client_data_hash = hashlib.sha256()
     client_data_hash.update(client_data_json)
-    client_data_hash = client_data_hash.digest()
+    client_data_hash_bytes = client_data_hash.digest()
 
     # Prepare the signature base (called "verificationData" in the WebAuthn spec)
     verification_data = b"".join(
         [
             bytes([0x00]),
             rp_id_hash,
-            client_data_hash,
+            client_data_hash_bytes,
             credential_id,
             public_key_u2f,
         ]
