@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.0
+
+**Changes:**
+
+- Switched from Pydantic to the combination of **attrs + cattrs**. This achieves more-Pythonic library behavior when used in a project alongside other third-party packages that use subclasses of `bytes` to represent such values as credential IDs and public keys.
+
+
 ## v1.1.0
 
 **Changes:**
