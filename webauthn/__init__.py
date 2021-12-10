@@ -8,4 +8,4 @@ from .authentication.verify_authentication_response import (
 )
 from .helpers import base64url_to_bytes, options_to_json
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
