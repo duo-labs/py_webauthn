@@ -50,7 +50,7 @@ def verify_authentication_response(
     """Verify a response from navigator.credentials.get()
 
     Args:
-        `credential`: The value returned from `navigator.credentials.create()`.
+        `credential`: The value returned from `navigator.credentials.get()`.
         `expected_challenge`: The challenge passed to the authenticator within the preceding authentication options.
         `expected_rp_id`: The Relying Party's unique identifier as specified in the precending authentication options.
         `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which the authentication ceremony should have occurred.
