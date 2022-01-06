@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.1
+
+**Changes:**
+
+- Clarify `credential` docstring for `verify_authentication_response()`
+
+
 ## v1.2.0
 
 **Changes:**
