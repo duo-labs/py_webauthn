@@ -1,8 +1,6 @@
 import hashlib
 from typing import List, Mapping, Optional, Union
 
-from attr import define, asdict
-
 from webauthn.helpers import (
     aaguid_to_string,
     bytes_to_base64url,
@@ -18,6 +16,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialType,
     RegistrationCredential,
     TokenBindingStatus,
+    WebAuthnBaseModel,
 )
 from .formats.android_key import verify_android_key
 from .formats.android_safetynet import verify_android_safetynet
@@ -28,8 +27,7 @@ from .formats.tpm import verify_tpm
 from .generate_registration_options import default_supported_pub_key_algs
 
 
-@define
-class VerifiedRegistration:
+class VerifiedRegistration(WebAuthnBaseModel):
     """Information about a verified attestation of which an RP can make use.
 
     Attributes:
@@ -196,12 +194,8 @@ def verify_registration_response(
     if attestation_object.fmt == AttestationFormat.NONE:
         # A "none" attestation should not contain _anything_ in its attestation
         # statement
-        num_att_stmt_fields_set = [
-            val
-            for _, val in asdict(attestation_object.att_stmt).items()
-            if val is not None
-        ]
-        if len(num_att_stmt_fields_set) > 0:
+        num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        if num_att_stmt_fields_set > 0:
             raise InvalidRegistrationResponse(
                 "None attestation had unexpected attestation statement"
             )

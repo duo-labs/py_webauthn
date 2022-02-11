@@ -1,22 +1,20 @@
 from typing import Union
 
-from attr import define
 from cbor2 import decoder
+from pydantic import BaseModel
 
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
 
 
-@define
-class DecodedOKPPublicKey:
+class DecodedOKPPublicKey(BaseModel):
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
     x: bytes
 
 
-@define
-class DecodedEC2PublicKey:
+class DecodedEC2PublicKey(BaseModel):
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
@@ -24,8 +22,7 @@ class DecodedEC2PublicKey:
     y: bytes
 
 
-@define
-class DecodedRSAPublicKey:
+class DecodedRSAPublicKey(BaseModel):
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     n: bytes
