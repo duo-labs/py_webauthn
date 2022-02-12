@@ -2,11 +2,11 @@ from typing import List, Optional
 
 from webauthn.helpers import generate_challenge
 from webauthn.helpers.structs import (
+    AuthenticationExtensionClientInputs,
+    AuthenticationExtensionsLargeBlobInputs,
     PublicKeyCredentialDescriptor,
     PublicKeyCredentialRequestOptions,
     UserVerificationRequirement,
-    AuthenticationExtensionsLargeBlobInputs,
-    AuthenticationExtensionClientInputs,
 )
 
 

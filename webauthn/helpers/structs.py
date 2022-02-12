@@ -316,7 +316,6 @@ class CollectedClientData(WebAuthnBaseModel):
     cross_origin: Optional[bool] = None
     token_binding: Optional[TokenBinding] = None
 
-
 ################
 #
 # Registration
@@ -506,6 +505,20 @@ class AuthenticationExtensionsLargeBlobInputs(WebAuthnBaseModel):
 class AuthenticationExtensionClientInputs(WebAuthnBaseModel):
     # See https://www.w3.org/TR/webauthn-2/#sctn-large-blob-extension
     large_blob: Optional[AuthenticationExtensionsLargeBlobInputs] = None
+
+class CredentialProtectionPolicy(str, Enum):
+    """Various registered values indicating whether a credential shall be protected (influences how discoverable credentials are handled).
+
+    Members:
+        `USER_VERIFICATION_OPTIONAL`
+        `USER_VERIFICATION_OPTIONAL_WITH_CREDENTIAL_ID_LIST`
+        `USER_VERIFICATION_REQUIRED`
+
+    https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#sctn-credProtect-extension
+    """
+    USER_VERIFICATION_OPTIONAL = 'userVerificationOptional'
+    USER_VERIFICATION_OPTIONAL_WITH_CREDENTIAL_ID_LIST = 'userVerificationOptionalWithCredentialIDList'
+    USER_VERIFICATION_REQUIRED = 'userVerificationRequired'
 
 
 ################
