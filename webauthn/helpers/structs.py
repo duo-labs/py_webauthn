@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel
+from pydantic.validators import strict_bytes_validator
 
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
@@ -28,6 +29,31 @@ class WebAuthnBaseModel(BaseModel):
         json_loads = json_loads_base64url_to_bytes
         alias_generator = snake_case_to_camel_case
         allow_population_by_field_name = True
+
+
+class BytesLike(bytes):
+    """
+    Custom type to use as an annotation in Pydantic models. This helps us be a better dependency
+    and get along with other libraries like mongoengine that use "clever" bytes subclasses that
+    otherwise act like normal `bytes` type.
+
+    BaseModel properties with this type will accept either `bytes` OR a subclass of `bytes`.
+
+    See the following issues on GitHub for more context:
+
+    - https://github.com/duo-labs/py_webauthn/issues/110
+    - https://github.com/duo-labs/py_webauthn/issues/113
+    """
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, bytes):
+            return v
+        else:
+            return strict_bytes_validator(v)
 
 
 ################
