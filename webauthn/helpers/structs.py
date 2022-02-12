@@ -238,7 +238,7 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: bytes
+    id: BytesLike
     name: str
     display_name: str
 
@@ -268,7 +268,7 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
     """
 
-    id: bytes
+    id: BytesLike
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
@@ -309,7 +309,7 @@ class CollectedClientData(WebAuthnBaseModel):
     """
 
     type: ClientDataType
-    challenge: bytes
+    challenge: BytesLike
     origin: str
     cross_origin: Optional[bool] = None
     token_binding: Optional[TokenBinding] = None
@@ -340,7 +340,7 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
 
     rp: PublicKeyCredentialRpEntity
     user: PublicKeyCredentialUserEntity
-    challenge: bytes
+    challenge: BytesLike
     pub_key_cred_params: List[PublicKeyCredentialParameters]
     timeout: Optional[int] = None
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
@@ -358,8 +358,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorattestationresponse
     """
 
-    client_data_json: bytes
-    attestation_object: bytes
+    client_data_json: BytesLike
+    attestation_object: BytesLike
 
 
 class RegistrationCredential(WebAuthnBaseModel):
@@ -376,7 +376,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: BytesLike
     response: AuthenticatorAttestationResponse
     transports: Optional[List[AuthenticatorTransport]] = None
     type: Literal[
@@ -431,9 +431,9 @@ class AttestedCredentialData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#attested-credential-data
     """
 
-    aaguid: bytes
-    credential_id: bytes
-    credential_public_key: bytes
+    aaguid: BytesLike
+    credential_id: BytesLike
+    credential_public_key: BytesLike
 
 
 class AuthenticatorData(WebAuthnBaseModel):
@@ -450,7 +450,7 @@ class AuthenticatorData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
     """
 
-    rp_id_hash: bytes
+    rp_id_hash: BytesLike
     flags: AuthenticatorDataFlags
     sign_count: int
     attested_credential_data: Optional[AttestedCredentialData] = None
@@ -493,7 +493,7 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
     """
 
-    challenge: bytes
+    challenge: BytesLike
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
@@ -514,9 +514,9 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorassertionresponse
     """
 
-    client_data_json: bytes
-    authenticator_data: bytes
-    signature: bytes
+    client_data_json: BytesLike
+    authenticator_data: BytesLike
+    signature: BytesLike
     user_handle: Optional[bytes] = None
 
 
@@ -533,7 +533,7 @@ class AuthenticationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: BytesLike
     response: AuthenticatorAssertionResponse
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
