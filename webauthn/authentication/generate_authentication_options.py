@@ -5,6 +5,8 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialDescriptor,
     PublicKeyCredentialRequestOptions,
     UserVerificationRequirement,
+    AuthenticationExtensionsLargeBlobInputs,
+    AuthenticationExtensionClientInputs,
 )
 
 
@@ -15,6 +17,7 @@ def generate_authentication_options(
     timeout: int = 60000,
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None,
     user_verification: UserVerificationRequirement = UserVerificationRequirement.PREFERRED,
+    large_blob_extension: Optional[AuthenticationExtensionsLargeBlobInputs] = None
 ) -> PublicKeyCredentialRequestOptions:
     """Generate options for retrieving a credential via navigator.credentials.get()
 
@@ -24,6 +27,7 @@ def generate_authentication_options(
         (optional) `timeout`: How long in milliseconds the browser should give the user to choose an authenticator. This value is a *hint* and may be ignored by the browser.
         (optional) `allow_credentials`: A list of credentials registered to the user.
         (optional) `user_verification`: The RP's preference for the authenticator's enforcement of the "user verified" flag.
+        (optional) `large_blob_extension`: The input for the large blob extension
 
     Returns:
         Authentication options ready for the browser. Consider using `helpers.options_to_json()` in this library to quickly convert the options to JSON.
@@ -39,10 +43,21 @@ def generate_authentication_options(
     if not allow_credentials:
         allow_credentials = []
 
-    return PublicKeyCredentialRequestOptions(
+    options = PublicKeyCredentialRequestOptions(
         rp_id=rp_id,
         challenge=challenge,
         timeout=timeout,
         allow_credentials=allow_credentials,
         user_verification=user_verification,
     )
+
+    ########
+    # Set optional values if specified
+    ########
+
+    if large_blob_extension is not None:
+        options.extensions = AuthenticationExtensionClientInputs(
+            large_blob=large_blob_extension
+        )
+
+    return options

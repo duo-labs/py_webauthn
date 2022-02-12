@@ -297,7 +297,6 @@ class AuthenticatorSelectionCriteria(WebAuthnBaseModel):
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
 
-
 class CollectedClientData(WebAuthnBaseModel):
     """Decoded ClientDataJSON
 
@@ -349,6 +348,7 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
     authenticator_selection: Optional[AuthenticatorSelectionCriteria] = None
     attestation: AttestationConveyancePreference = AttestationConveyancePreference.NONE
+    extensions: Optional[AuthenticationExtensionClientInputs] = None
 
 
 class AuthenticatorAttestationResponse(WebAuthnBaseModel):
@@ -475,6 +475,38 @@ class AttestationObject(WebAuthnBaseModel):
     auth_data: AuthenticatorData
     att_stmt: AttestationStatement = AttestationStatement()
 
+class LargeBlobSupport(str, Enum):
+    """A Relying Party's requirement for large blob support.
+
+    Members:
+        `REQUIRED`: Large blob support is required.
+        `PREFERRED`: Large blob support is preferred, but operation will not fail if the authenticator does not support large blobs.
+
+    https://www.w3.org/TR/webauthn-2/#enumdef-largeblobsupport
+    """
+
+    REQUIRED = "required"
+    PREFERRED = "preferred"
+
+# See https://www.w3.org/TR/webauthn-2/#sctn-large-blob-extension
+class AuthenticationExtensionsLargeBlobInputs(WebAuthnBaseModel):
+    """A Relying Party's input for the large blob extension.
+
+    Attributes:
+        (optional) `support`: Whether large blob support is requested
+        (optional) `read`: Whether the large blob content shall be read from the authenticator
+        (optional) `write`: The data that shall be written to the authenticator
+
+    https://www.w3.org/TR/webauthn-2/#dictdef-authenticationextensionslargeblobinputs
+    """
+    support: Optional[LargeBlobSupport] = None
+    read: Optional[bool] = None
+    write: Optional[bytes] = None
+
+class AuthenticationExtensionClientInputs(WebAuthnBaseModel):
+    # See https://www.w3.org/TR/webauthn-2/#sctn-large-blob-extension
+    large_blob: Optional[AuthenticationExtensionsLargeBlobInputs] = None
+
 
 ################
 #
@@ -503,6 +535,7 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     user_verification: Optional[
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
+    extensions: Optional[AuthenticationExtensionClientInputs] = None
 
 
 class AuthenticatorAssertionResponse(WebAuthnBaseModel):
