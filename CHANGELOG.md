@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.0
+
+**Changes:**
+
+- Switch back from attrs + cattrs to **Pydantic** while preserving support for `bytes`-like values in subclasses of `WebAuthnBaseModel`.
+  - See issue [#113](https://github.com/duo-labs/py_webauthn/issues/113) for more context
+
 ## v1.2.1
 
 **Changes:**
