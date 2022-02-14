@@ -86,7 +86,7 @@ class TestVerifyRegistrationResponse(TestCase):
         expected_origin = "http://localhost:5000"
 
         with self.assertRaisesRegex(
-            Exception, "Unsupported attestation type"
+            Exception, "value is not a valid enumeration member"
         ):
             verify_registration_response(
                 credential=credential,

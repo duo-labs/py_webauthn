@@ -48,11 +48,10 @@ setup(
         'Programming Language :: Python :: 3'
     ],
     install_requires=[
-        'asn1crypto>=0.24.0',
-        'cbor2>=4.0.1',
-        'cryptography>=3.4.7',
-        'attrs>=21.2.0',
-        'cattrs>=1.8.0',
-        'pyOpenSSL>=20.0.1',
+        'asn1crypto>=1.4.0',
+        'cbor2>=5.4.2.post1',
+        'cryptography>=36.0.1',
+        'pydantic>=1.9.0',
+        'pyOpenSSL>=22.0.0',
     ]
 )

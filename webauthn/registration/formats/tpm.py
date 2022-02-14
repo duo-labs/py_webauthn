@@ -10,6 +10,7 @@ from cryptography.x509 import (
     Name,
     SubjectAlternativeName,
     Version,
+    BasicConstraints,
 )
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import ExtensionOID
@@ -232,17 +233,17 @@ def verify_tpm(
     # The Subject Alternative Name extension MUST be set as defined in
     # [TPMv2-EK-Profile] section 3.2.9.
     try:
+        # Ignore mypy because we're casting to a known type
         ext_subject_alt_name: SubjectAlternativeName = (
-            cert_extensions.get_extension_for_oid(
-                ExtensionOID.SUBJECT_ALTERNATIVE_NAME
-            ).value
+            cert_extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME).value  # type: ignore[assignment]
         )
     except ExtensionNotFound:
         raise InvalidRegistrationResponse(
             f"Certificate missing extension {ExtensionOID.SUBJECT_ALTERNATIVE_NAME} (TPM)"
         )
 
-    tcg_at_tpm_values: Name = ext_subject_alt_name.get_values_for_type(GeneralName)[0]
+    # `type(tcg_at_tpm_values)` return "<class 'cryptography.x509.name.Name'>" so ignore mypy
+    tcg_at_tpm_values: Name = ext_subject_alt_name.get_values_for_type(GeneralName)[0]  # type: ignore[arg-type, assignment]
     tcg_at_tpm_manufacturer = None
     tcg_at_tpm_model = None
     tcg_at_tpm_version = None
@@ -271,8 +272,9 @@ def verify_tpm(
     # ("joint-iso-itu-t(2) internationalorganizations(23) 133 tcg-kp(8)
     # tcg-kp-AIKCertificate(3)").
     try:
+        # Ignore mypy because we're casting to a known type
         ext_extended_key_usage: ExtendedKeyUsage = (
-            cert_extensions.get_extension_for_oid(ExtensionOID.EXTENDED_KEY_USAGE).value
+            cert_extensions.get_extension_for_oid(ExtensionOID.EXTENDED_KEY_USAGE).value  # type: ignore[assignment]
         )
     except ExtensionNotFound:
         raise InvalidRegistrationResponse(
@@ -286,17 +288,18 @@ def verify_tpm(
             f'Certificate Extended Key Usage OID "{ext_key_usage_oid}" was not "2.23.133.8.3" (TPM)'
         )
 
-    # The Basic Constraints extension MUST have the CA component set to false.
     try:
-        ext_basic_constraints = cert_extensions.get_extension_for_oid(
+        # Ignore mypy because we're casting to a known type
+        ext_basic_constraints: BasicConstraints = cert_extensions.get_extension_for_oid(
             ExtensionOID.BASIC_CONSTRAINTS
-        )
+        ).value  # type: ignore[assignment]
     except ExtensionNotFound:
         raise InvalidRegistrationResponse(
             f"Certificate missing extension {ExtensionOID.BASIC_CONSTRAINTS} (TPM)"
         )
 
-    if ext_basic_constraints.value.ca is not False:
+    # The Basic Constraints extension MUST have the CA component set to false.
+    if ext_basic_constraints.ca is not False:
         raise InvalidRegistrationResponse(
             "Certificate Basic Constraints CA was not False (TPM)"
         )

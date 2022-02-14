@@ -1,9 +1,7 @@
 import base64
 import hashlib
-import json
-from typing import List, Optional
+from typing import List
 
-from attr import define
 import cbor2
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -16,34 +14,23 @@ from webauthn.helpers import (
     validate_certificate_chain,
     verify_safetynet_timestamp,
     verify_signature,
-    json_loads_base64url_to_bytes,
 )
 from webauthn.helpers.exceptions import (
     InvalidCertificateChain,
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import AttestationStatement
+from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
 
 
-@define
-class SafetyNetJWSHeader:
+class SafetyNetJWSHeader(WebAuthnBaseModel):
     """Properties in the Header of a SafetyNet JWS"""
 
     alg: str
     x5c: List[str]
 
-    @classmethod
-    def parse_raw(cls, header_data: str):
-        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(header_data))
-        return cls(
-            alg=parsed["alg"],
-            x5c=parsed["x5c"],
-        )
 
-
-@define
-class SafetyNetJWSPayload:
+class SafetyNetJWSPayload(WebAuthnBaseModel):
     """Properties in the Payload of a SafetyNet JWS
 
     Values below correspond to camelCased properties in the JWS itself. This class
@@ -57,19 +44,6 @@ class SafetyNetJWSPayload:
     cts_profile_match: bool
     apk_certificate_digest_sha256: List[str]
     basic_integrity: bool
-
-    @classmethod
-    def parse_raw(cls, payload_data: str):
-        parsed: dict = json_loads_base64url_to_bytes(base64url_to_bytes(payload_data))
-        return cls(
-            nonce=parsed["nonce"],
-            timestamp_ms=parsed["timestampMs"],
-            apk_package_name=parsed["apkPackageName"],
-            apk_digest_sha256=parsed["apkDigestSha256"],
-            cts_profile_match=parsed["ctsProfileMatch"],
-            apk_certificate_digest_sha256=parsed["apkCertificateDigestSha256"],
-            basic_integrity=parsed["basicIntegrity"],
-        )
 
 
 def verify_android_safetynet(
@@ -113,8 +87,8 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    header = SafetyNetJWSHeader.parse_raw(jws_parts[0])
-    payload = SafetyNetJWSPayload.parse_raw(jws_parts[1])
+    header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
+    payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
     signature_bytes_str: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the
