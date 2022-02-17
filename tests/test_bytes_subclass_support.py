@@ -7,19 +7,18 @@ from webauthn.helpers.structs import (
 )
 
 
-class CustomBytes(bytes):
-    def __new__(cls, data: str):
-        data_bytes = base64url_to_bytes(data)
-        self = bytes.__new__(cls, memoryview(data_bytes).tobytes())
-        return self
-
-
 class TestWebAuthnBytesSubclassSupport(TestCase):
     def test_handles_bytes_subclasses(self) -> None:
         """
         Ensure the library can support being used in projects that might work with values that are
         subclasses of `bytes`. Let's embrace Python's duck-typing, not shy away from it
         """
+        class CustomBytes(bytes):
+            def __new__(cls, data: str):
+                data_bytes = base64url_to_bytes(data)
+                self = bytes.__new__(cls, memoryview(data_bytes).tobytes())
+                return self
+
         verification = verify_authentication_response(
             credential=AuthenticationCredential(
                 id="fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
