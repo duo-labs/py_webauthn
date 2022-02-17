@@ -13,6 +13,7 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
         Ensure the library can support being used in projects that might work with values that are
         subclasses of `bytes`. Let's embrace Python's duck-typing, not shy away from it
         """
+
         class CustomBytes(bytes):
             def __new__(cls, data: str):
                 data_bytes = base64url_to_bytes(data)
@@ -54,6 +55,7 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
         """
         Ensure support for libraries that leverage memoryviews
         """
+
         def base64url_to_memoryview(data: str) -> memoryview:
             data_bytes = base64url_to_bytes(data)
             return memoryview(data_bytes)
