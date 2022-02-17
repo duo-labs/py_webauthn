@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0
+
+**Changes:**
+
+- Add support for `memoryviews` for `BytesLike` properties including `credential_public_key`, `authenticator_data`, etc...
+
 ## v1.3.0
 
 **Changes:**
