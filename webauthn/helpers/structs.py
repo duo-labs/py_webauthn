@@ -52,6 +52,8 @@ class BytesLike(bytes):
     def validate(cls, v):
         if isinstance(v, bytes):
             return v
+        elif isinstance(v, memoryview):
+            return v.tobytes()
         else:
             return strict_bytes_validator(v)
 
