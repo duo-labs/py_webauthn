@@ -234,9 +234,9 @@ def verify_tpm(
     # [TPMv2-EK-Profile] section 3.2.9.
     try:
         # Ignore mypy because we're casting to a known type
-        ext_subject_alt_name: SubjectAlternativeName = (
-            cert_extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME).value  # type: ignore[assignment]
-        )
+        ext_subject_alt_name: SubjectAlternativeName = cert_extensions.get_extension_for_oid(
+            ExtensionOID.SUBJECT_ALTERNATIVE_NAME
+        ).value  # type: ignore[assignment]
     except ExtensionNotFound:
         raise InvalidRegistrationResponse(
             f"Certificate missing extension {ExtensionOID.SUBJECT_ALTERNATIVE_NAME} (TPM)"
@@ -273,9 +273,9 @@ def verify_tpm(
     # tcg-kp-AIKCertificate(3)").
     try:
         # Ignore mypy because we're casting to a known type
-        ext_extended_key_usage: ExtendedKeyUsage = (
-            cert_extensions.get_extension_for_oid(ExtensionOID.EXTENDED_KEY_USAGE).value  # type: ignore[assignment]
-        )
+        ext_extended_key_usage: ExtendedKeyUsage = cert_extensions.get_extension_for_oid(
+            ExtensionOID.EXTENDED_KEY_USAGE
+        ).value  # type: ignore[assignment]
     except ExtensionNotFound:
         raise InvalidRegistrationResponse(
             f"Certificate missing extension {ExtensionOID.EXTENDED_KEY_USAGE} (TPM)"

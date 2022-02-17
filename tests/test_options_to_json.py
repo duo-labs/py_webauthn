@@ -73,8 +73,10 @@ class TestWebAuthnOptionsToJSON(TestCase):
 
         output = options_to_json(options)
 
-        assert json.loads(output)["excludeCredentials"] == [{
-            "id": "MTIzNDU2Nzg5MA",
-            "transports": ["usb"],
-            "type": "public-key",
-        }]
+        assert json.loads(output)["excludeCredentials"] == [
+            {
+                "id": "MTIzNDU2Nzg5MA",
+                "transports": ["usb"],
+                "type": "public-key",
+            }
+        ]
