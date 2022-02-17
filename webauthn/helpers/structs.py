@@ -44,6 +44,7 @@ class BytesLike(bytes):
     - https://github.com/duo-labs/py_webauthn/issues/110
     - https://github.com/duo-labs/py_webauthn/issues/113
     """
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
