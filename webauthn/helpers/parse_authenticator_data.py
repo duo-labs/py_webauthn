@@ -73,4 +73,10 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         pointer += len(extension_bytes)
         authenticator_data.extensions = extension_bytes
 
+    # We should have parsed all authenticator data by this point
+    if (len(val) > pointer):
+        raise InvalidAuthenticatorDataStructure(
+            "Leftover bytes detected while parsing authenticator data"
+        )
+
     return authenticator_data
