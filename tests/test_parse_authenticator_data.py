@@ -1,8 +1,10 @@
 import secrets
 from typing import Optional, Tuple
 from unittest import TestCase
+import cbor2
 
-from webauthn.helpers import parse_authenticator_data
+from webauthn.helpers import parse_authenticator_data, bytes_to_base64url
+from webauthn.helpers.base64url_to_bytes import base64url_to_bytes
 
 
 def _generate_auth_data(
@@ -93,27 +95,72 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         assert output.sign_count == sign_count
 
     def test_correctly_parses_attested_credential_data(self) -> None:
-        (
-            auth_data,
-            _,
-            _,
-            aaguid,
-            credential_id,
-            credential_public_key,
-        ) = _generate_auth_data(10, up=True, uv=True, at=True)
+        auth_data = base64url_to_bytes(
+            "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NBAAAAJch83ZdWwUm4niTLNjZU81AAIHa7Ksm5br3hAh3UjxP9-4rqu8BEsD-7SZ2xWe1_yHv6pAEDAzkBACBZAQDcxA7Ehs9goWB2Hbl6e9v-aUub9rvy2M7Hkvf-iCzMGE63e3sCEW5Ru33KNy4um46s9jalcBHtZgtEnyeRoQvszis-ws5o4Da0vQfuzlpBmjWT1dV6LuP-vs9wrfObW4jlA5bKEIhv63-jAxOtdXGVzo75PxBlqxrmrr5IR9n8Fw7clwRsDkjgRHaNcQVbwq_qdNwU5H3hZKu9szTwBS5NGRq01EaDF2014YSTFjwtAmZ3PU1tcO_QD2U2zg6eB5grfWDeAJtRE8cbndDWc8aLL0aeC37Q36-TVsGe6AhBgHEw6eO3I3NW5r9v_26CqMPBDwmEundeq1iGyKfMloobIUMBAAE"
+        )
 
         output = parse_authenticator_data(auth_data)
 
         cred_data = output.attested_credential_data
-        assert cred_data
-        assert cred_data.aaguid == aaguid
-        assert cred_data.credential_id == credential_id
-        assert cred_data.credential_public_key == credential_public_key
+        self.assertIsNotNone(cred_data)
+        assert cred_data  # Make mypy happy
+        self.assertEqual(
+            cred_data.aaguid,
+            base64url_to_bytes("yHzdl1bBSbieJMs2NlTzUA"),
+        )
+        self.assertEqual(
+            cred_data.credential_id,
+            base64url_to_bytes("drsqybluveECHdSPE_37iuq7wESwP7tJnbFZ7X_Ie_o"),
+        )
+        self.assertEqual(
+            cred_data.credential_public_key,
+            base64url_to_bytes(
+                "pAEDAzkBACBZAQDcxA7Ehs9goWB2Hbl6e9v-aUub9rvy2M7Hkvf-iCzMGE63e3sCEW5Ru33KNy4um46s9jalcBHtZgtEnyeRoQvszis-ws5o4Da0vQfuzlpBmjWT1dV6LuP-vs9wrfObW4jlA5bKEIhv63-jAxOtdXGVzo75PxBlqxrmrr5IR9n8Fw7clwRsDkjgRHaNcQVbwq_qdNwU5H3hZKu9szTwBS5NGRq01EaDF2014YSTFjwtAmZ3PU1tcO_QD2U2zg6eB5grfWDeAJtRE8cbndDWc8aLL0aeC37Q36-TVsGe6AhBgHEw6eO3I3NW5r9v_26CqMPBDwmEundeq1iGyKfMloobIUMBAAE"
+            ),
+        )
 
     def test_parses_uv_false(self) -> None:
         auth_data = _generate_auth_data()[0]
 
         output = parse_authenticator_data(auth_data)
 
-        assert output.flags.up is True
-        assert output.flags.uv is False
+        self.assertTrue(output.flags.up)
+        self.assertFalse(output.flags.uv)
+
+    def test_parses_attested_credential_data_and_extension_data(self) -> None:
+        auth_data = bytes.fromhex("50569158be61d7a1ba084f80e45e938fd326e0a8dff07b37036e6c82303ae26bc1000004377b3024675546afcb92e4495c8a1e193f00dca30058b8d74f6bd74de90baeb34afb51e3578e1ac4ca9f79a7f88473d8254d5762ca82d68f3bf63f49e9b284caab4d45d6f9bb468d0c1b7f0f727378c1db8adb4802cb7c5ad9c5eb905bf0ba03f79bd1f04d63765452d49c4087acfad340516dc892eafd87d498ae9e6fd6f06a3f423108ebdc032d93e82fdd6deacc1b638fd56838a482f01232ad01e266e016a50b8121816997a167f41139900fe46094b8ef30aad14ee08cc457366a033bb4a0554dcf9c9589f9622d4f84481541014c870291c87d7a3bbe3d8b07eb02509de5721e3f728aa5eac41e9c5af02869a4010103272006215820e613b86a8d4ebae24e84a0270b6773f7bb30d1d59f5ec379910ebe7c87714274a16b6372656450726f7465637401")
+        output = parse_authenticator_data(auth_data)
+
+        cred_data = output.attested_credential_data
+        self.assertIsNotNone(cred_data)
+        assert cred_data  # Make mypy happy
+        self.assertEqual(
+            bytes_to_base64url(cred_data.credential_public_key),
+            "pAEBAycgBiFYIOYTuGqNTrriToSgJwtnc_e7MNHVn17DeZEOvnyHcUJ0"
+        )
+
+        extensions = output.extensions
+        self.assertIsNotNone(extensions)
+        assert extensions  # Make mypy happy
+
+        parsed_extensions = cbor2.loads(extensions)
+        self.assertEqual(parsed_extensions, {'credProtect': 1})
+
+    def test_parses_only_extension_data(self) -> None:
+        # Pulled from Conformance Testing suite
+        auth_data = base64url_to_bytes(
+            "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2OBAAAAjaFxZXhhbXBsZS5leHRlbnNpb254dlRoaXMgaXMgYW4gZXhhbXBsZSBleHRlbnNpb24hIElmIHlvdSByZWFkIHRoaXMgbWVzc2FnZSwgeW91IHByb2JhYmx5IHN1Y2Nlc3NmdWxseSBwYXNzaW5nIGNvbmZvcm1hbmNlIHRlc3RzLiBHb29kIGpvYiE"
+        )
+
+        output = parse_authenticator_data(auth_data)
+
+        extensions = output.extensions
+        self.assertIsNotNone(extensions)
+        assert extensions  # Make mypy happy
+        parsed_extensions = cbor2.loads(extensions)
+        self.assertEqual(
+            parsed_extensions,
+            {
+                'example.extension': 'This is an example extension! If you read this message, you probably successfully passing conformance tests. Good job!',
+            }
+        )
