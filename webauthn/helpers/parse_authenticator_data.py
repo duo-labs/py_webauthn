@@ -67,4 +67,10 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         )
         authenticator_data.attested_credential_data = attested_cred_data
 
+    if flags.ed is True:
+        extension_object = cbor2.loads(val[pointer:])
+        extension_bytes = cbor2.dumps(extension_object)
+        pointer += len(extension_bytes)
+        authenticator_data.extensions = extension_bytes
+
     return authenticator_data
