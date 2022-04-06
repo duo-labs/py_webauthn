@@ -74,6 +74,7 @@ class AuthenticatorTransport(str, Enum):
         `NFC`: Near Field Communication
         `BLE`: Bluetooth Low Energy
         `INTERNAL`: Direct connection (read: a platform authenticator)
+        `CABLE`: Cloud Assisted Bluetooth Low Energy
 
     https://www.w3.org/TR/webauthn-2/#enum-transport
     """
@@ -82,6 +83,7 @@ class AuthenticatorTransport(str, Enum):
     NFC = "nfc"
     BLE = "ble"
     INTERNAL = "internal"
+    CABLE = "cable"
 
 
 class AuthenticatorAttachment(str, Enum):
