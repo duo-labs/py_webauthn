@@ -74,6 +74,7 @@ class AuthenticatorTransport(str, Enum):
         `NFC`: Near Field Communication
         `BLE`: Bluetooth Low Energy
         `INTERNAL`: Direct connection (read: a platform authenticator)
+        `CABLE`: Cloud Assisted Bluetooth Low Energy
 
     https://www.w3.org/TR/webauthn-2/#enum-transport
     """
@@ -82,6 +83,7 @@ class AuthenticatorTransport(str, Enum):
     NFC = "nfc"
     BLE = "ble"
     INTERNAL = "internal"
+    CABLE = "cable"
 
 
 class AuthenticatorAttachment(str, Enum):
@@ -221,7 +223,7 @@ class PublicKeyCredentialRpEntity(WebAuthnBaseModel):
 
     Attributes:
         `name`: A user-readable name for the Relying Party
-        `id`: A unique, constant value assigned to the Relying Party. Authenticators use this value to associate a credential with a particular Relying Party user
+        (optional) `id`: A unique, constant value assigned to the Relying Party. Authenticators use this value to associate a credential with a particular Relying Party user
 
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialrpentity
     """
@@ -373,7 +375,7 @@ class RegistrationCredential(WebAuthnBaseModel):
         `raw_id`: A byte sequence representing the credential's unique identifier
         `response`: The authenticator's attesation data
         `type`: The literal string `"public-key"`
-        `transports`: The authenticator's supported methods of communication with a client/browser
+        (optional) `transports`: The authenticator's supported methods of communication with a client/browser
 
     https://www.w3.org/TR/webauthn-2/#publickeycredential
     """
