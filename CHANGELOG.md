@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0
+
+**Changes:**
+
+- Fix authenticator data parsing to correctly parse extension data when present ([#125](https://github.com/duo-labs/py_webauthn/pull/125))
+- Add support for the new `"cable"` transport ([#129](https://github.com/duo-labs/py_webauthn/pull/129))
+
 ## 1.4.0
 
 **Changes:**
