@@ -1,3 +1,5 @@
+import cbor2
+
 from .exceptions import InvalidAuthenticatorDataStructure
 from .structs import AttestedCredentialData, AuthenticatorData, AuthenticatorDataFlags
 
@@ -53,14 +55,28 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         credential_id = val[pointer : pointer + credential_id_len]
         pointer += credential_id_len
 
-        # The remainder of the bytes will be the credential public key
-        credential_public_key = val[pointer:]
+        # Load the next CBOR-encoded value
+        credential_public_key = cbor2.loads(val[pointer:])
+        credential_public_key_bytes = cbor2.dumps(credential_public_key)
+        pointer += len(credential_public_key_bytes)
 
         attested_cred_data = AttestedCredentialData(
             aaguid=aaguid,
             credential_id=credential_id,
-            credential_public_key=credential_public_key,
+            credential_public_key=credential_public_key_bytes,
         )
         authenticator_data.attested_credential_data = attested_cred_data
+
+    if flags.ed is True:
+        extension_object = cbor2.loads(val[pointer:])
+        extension_bytes = cbor2.dumps(extension_object)
+        pointer += len(extension_bytes)
+        authenticator_data.extensions = extension_bytes
+
+    # We should have parsed all authenticator data by this point
+    if (len(val) > pointer):
+        raise InvalidAuthenticatorDataStructure(
+            "Leftover bytes detected while parsing authenticator data"
+        )
 
     return authenticator_data
