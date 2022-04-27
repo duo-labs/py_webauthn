@@ -31,34 +31,6 @@ class WebAuthnBaseModel(BaseModel):
         allow_population_by_field_name = True
 
 
-class BytesLike(bytes):
-    """
-    Custom type to use as an annotation in Pydantic models. This helps us be a better dependency
-    and get along with other libraries like mongoengine that use "clever" bytes subclasses that
-    otherwise act like normal `bytes` type.
-
-    BaseModel properties with this type will accept either `bytes` OR a subclass of `bytes`.
-
-    See the following issues on GitHub for more context:
-
-    - https://github.com/duo-labs/py_webauthn/issues/110
-    - https://github.com/duo-labs/py_webauthn/issues/113
-    """
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if isinstance(v, bytes):
-            return v
-        elif isinstance(v, memoryview):
-            return v.tobytes()
-        else:
-            return strict_bytes_validator(v)
-
-
 ################
 #
 # Fundamental data structures
@@ -243,7 +215,7 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: BytesLike
+    id: bytes
     name: str
     display_name: str
 
@@ -273,7 +245,7 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
     """
 
-    id: BytesLike
+    id: bytes
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
@@ -314,7 +286,7 @@ class CollectedClientData(WebAuthnBaseModel):
     """
 
     type: ClientDataType
-    challenge: BytesLike
+    challenge: bytes
     origin: str
     cross_origin: Optional[bool] = None
     token_binding: Optional[TokenBinding] = None
@@ -345,7 +317,7 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
 
     rp: PublicKeyCredentialRpEntity
     user: PublicKeyCredentialUserEntity
-    challenge: BytesLike
+    challenge: bytes
     pub_key_cred_params: List[PublicKeyCredentialParameters]
     timeout: Optional[int] = None
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
@@ -363,8 +335,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorattestationresponse
     """
 
-    client_data_json: BytesLike
-    attestation_object: BytesLike
+    client_data_json: bytes
+    attestation_object: bytes
 
 
 class RegistrationCredential(WebAuthnBaseModel):
@@ -381,7 +353,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: BytesLike
+    raw_id: bytes
     response: AuthenticatorAttestationResponse
     transports: Optional[List[AuthenticatorTransport]] = None
     type: Literal[
@@ -436,9 +408,9 @@ class AttestedCredentialData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#attested-credential-data
     """
 
-    aaguid: BytesLike
-    credential_id: BytesLike
-    credential_public_key: BytesLike
+    aaguid: bytes
+    credential_id: bytes
+    credential_public_key: bytes
 
 
 class AuthenticatorData(WebAuthnBaseModel):
@@ -455,7 +427,7 @@ class AuthenticatorData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
     """
 
-    rp_id_hash: BytesLike
+    rp_id_hash: bytes
     flags: AuthenticatorDataFlags
     sign_count: int
     attested_credential_data: Optional[AttestedCredentialData] = None
@@ -498,7 +470,7 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
     """
 
-    challenge: BytesLike
+    challenge: bytes
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
@@ -519,9 +491,9 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorassertionresponse
     """
 
-    client_data_json: BytesLike
-    authenticator_data: BytesLike
-    signature: BytesLike
+    client_data_json: bytes
+    authenticator_data: bytes
+    signature: bytes
     user_handle: Optional[bytes] = None
 
 
@@ -538,7 +510,7 @@ class AuthenticationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: BytesLike
+    raw_id: bytes
     response: AuthenticatorAssertionResponse
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY

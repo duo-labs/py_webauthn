@@ -17,7 +17,6 @@ from webauthn.helpers.structs import (
     RegistrationCredential,
     TokenBindingStatus,
     WebAuthnBaseModel,
-    BytesLike,
 )
 from .formats.android_key import verify_android_key
 from .formats.android_safetynet import verify_android_safetynet
@@ -42,14 +41,14 @@ class VerifiedRegistration(WebAuthnBaseModel):
         `attestation_object`: The raw attestation object for later scrutiny
     """
 
-    credential_id: BytesLike
-    credential_public_key: BytesLike
+    credential_id: bytes
+    credential_public_key: bytes
     sign_count: int
     aaguid: str
     fmt: AttestationFormat
     credential_type: PublicKeyCredentialType
     user_verified: bool
-    attestation_object: BytesLike
+    attestation_object: bytes
 
 
 expected_token_binding_statuses = [

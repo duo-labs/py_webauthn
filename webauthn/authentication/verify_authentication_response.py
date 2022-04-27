@@ -18,7 +18,6 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialType,
     TokenBindingStatus,
     WebAuthnBaseModel,
-    BytesLike,
 )
 
 
@@ -27,7 +26,7 @@ class VerifiedAuthentication(WebAuthnBaseModel):
     Information about a verified authentication of which an RP can make use
     """
 
-    credential_id: BytesLike
+    credential_id: bytes
     new_sign_count: int
 
 
