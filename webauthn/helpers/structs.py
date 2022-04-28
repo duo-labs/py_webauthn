@@ -42,7 +42,13 @@ class WebAuthnBaseModel(BaseModel):
             return v
 
         if isinstance(v, bytes):
-            # Return raw bytes from subclasses as well
+            """
+            Return raw bytes from subclasses as well
+
+            `strict_bytes_validator()` performs a similar check to this, but it passes through the
+            subclass as-is and Pydantic then rejects it. Passing the subclass into `bytes()` lets us
+            return `bytes` and make Pydantic happy.
+            """
             return bytes(v)
         elif isinstance(v, memoryview):
             return v.tobytes()
