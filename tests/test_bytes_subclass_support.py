@@ -90,3 +90,16 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
         )
 
         assert verification.new_sign_count == 7
+
+    def test_supports_strings_for_bytes(self) -> None:
+        """
+        Preserve the ability to pass strings for `bytes` fields
+        """
+        response = AuthenticatorAssertionResponse(
+            authenticator_data=bytes(),
+            client_data_json=bytes(),
+            signature=bytes(),
+            user_handle='some_user_handle_string'  # type: ignore
+        )
+
+        self.assertEqual(response.user_handle, b'some_user_handle_string')

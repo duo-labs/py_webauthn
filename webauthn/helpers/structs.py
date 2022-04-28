@@ -2,7 +2,6 @@ from enum import Enum
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, validator
-from pydantic.validators import strict_bytes_validator
 from pydantic.fields import ModelField
 
 from .bytes_to_base64url import bytes_to_base64url
@@ -53,7 +52,9 @@ class WebAuthnBaseModel(BaseModel):
         elif isinstance(v, memoryview):
             return v.tobytes()
         else:
-            return strict_bytes_validator(v)
+            # Allow Pydantic to validate the field as usual to support the full range of bytes-like
+            # values
+            return v
 
 ################
 #
