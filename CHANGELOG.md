@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.2
+
+**Changes:**
+
+- Restore the ability to pass more common bytes-like values for `bytes` fields, such as `str` values ([#132](https://github.com/duo-labs/py_webauthn/pull/132))
+
 ## 1.5.1
 
 **Changes:**
