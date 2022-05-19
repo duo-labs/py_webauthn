@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,600');
+
+body{
+    margin: 0;
+    font-family: AmazonEmber, Lato, Helvetica, sans-serif;
+    background-color: rgb(227, 234, 237);
+}
+
+.QRimg{
+	margin: auto;
+	height: 35%;
+	width: 20%;
+}
+
+
+ul{
+    /* makes bullet points disappear*/
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+
+h2{
+  
+  font-family: AmazonEmberLight, Lato, Helvetica, sans-serif;
+  font-size: 17.92px;
+  font-weight: 300;
+  height: 19px;
+  text-size-adjust: 100%;
+  width: 100%;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+a{
+  color: black;
+}
+a:hover{
+  color: black;
+}
+/* Classes */
+
+/* Button css */
+.button {
+  position: relative;
+  padding: 8px 16px;
+  border: none;
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.button__text {
+  transition: all 0.2s;
+}
+
+.button--loading .button__text {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.button--loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 4px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: button-loading-spinner 1s ease infinite;
+}
+
+@keyframes button-loading-spinner {
+  from {
+    transform: rotate(0turn);
+  }
+
+  to {
+    transform: rotate(1turn);
+  }
+}
+/* end button css */
+
+.container{
+  text-align: left;
+  background-clip: padding-box;
+  background-color: rgb(255, 255, 255);
+  border-bottom-color: rgb(221, 221, 221);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  box-sizing: border-box;
+  color: rgb(35, 47, 62);
+  display: block;
+  font-family: AmazonEmber, Lato, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  margin-bottom: 10px;
+  margin-top: 50px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 20px;
+  text-size-adjust: 100%;
+  width: 85%;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+
+
+.rDiv{
+  margin-top: 50px;
+}
+
+.norDiv{
+  margin-top: 100px;
+}
+
+
+.centeredH2{
+  margin: auto;
+  text-align: center;
+}
+.blink {
+  animation: blink 1s steps(1, end) infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.qr-image{
+  width: 300px;
+  height: 300px;
+}
+
+/****************IDs'****************/
+#driverName{
+    text-align: left;
+}
+
+#reason{
+    text-align: left;
+}
+
+/* The Modal */
+#modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+#modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+}
+
+/* The Modal Close Button */
+#close-button {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+#close-button:hover,
+#close-button:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#spinner {
+  text-align: center;
+}
+
+#qrcode {
+  display: none;
+}
+
+/******* @media *******/
+@media only screen and (min-width:650px){
+
+  .background-top{
+    width: 100%
+  }
+
+}
+
+@media only screen and (min-width:875px){
+
+  .background-top{
+    width: 100%
+  }
+
+}
+
+@media only screen and (min-width:1024px){
+
+  .background-top{
+    width: 100%
+  }
+
+  img{
+	margin-top: 35px;
+	height: 100%;
+	width: 100%;
+  }
+    
+}
+
+@media only screen and (min-width:1600px){
+
+  .background-top{
+    width: 100%
+  }
+  
+  img{
+	margin-top: 35px;
+	height: 100;
+	width: 15%;
+  }
+
+}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign-in{% endblock %}
+{% block content %}
+<div>
+  <center><h1>Home</h1></center> 
+</div>
+<br>
+<form method="POST">
+   <!--name -->
+   <div class="mb-3" id = "driverName">
+      <label align= "left" for="exampleFormControlInput1" class="form-label"><b>Enter your first name:</b></label>
+      <input name="fname" type="text" class="form-control" id="exampleFormControlInput1" placeholder="First name">
+   </div>
+   <div class="mb-3" id = "driverName">
+      <label align= "left" for="exampleFormControlInput1" class="form-label"><b>Enter your last name:</b></label>
+      <input name="lname" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Last name">
+   </div>
+   <div class="mb-3" id = "driverName">
+      <label align= "left" for="exampleFormControlInput1" class="form-label"><b>Enter your email:</b></label>
+      <input name="user_email" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Email">
+   </div>
+   <button type="submit" class="button btn btn-primary" onclick="this.classList.toggle('button--loading')">
+   <span class="button__text">Sign-up</span>
+   </button>
+</form>
+{% endblock %}
