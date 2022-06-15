@@ -4,8 +4,6 @@ from .structs import (
     PublicKeyCredentialCreationOptions,
     PublicKeyCredentialRequestOptions,
 )
-from .snake_case_to_camel_case import snake_case_to_camel_case
-from .bytes_to_base64url import bytes_to_base64url
 
 
 def options_to_json(
