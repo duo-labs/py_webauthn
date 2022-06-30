@@ -7,12 +7,14 @@ from webauthn.helpers import (
     decode_credential_public_key,
     parse_attestation_object,
     parse_client_data_json,
+    parse_backup_flags,
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.structs import (
     AttestationFormat,
     ClientDataType,
+    CredentialDeviceType,
     PublicKeyCredentialType,
     RegistrationCredential,
     TokenBindingStatus,
@@ -49,6 +51,8 @@ class VerifiedRegistration(WebAuthnBaseModel):
     credential_type: PublicKeyCredentialType
     user_verified: bool
     attestation_object: bytes
+    credential_device_type: CredentialDeviceType
+    credential_backed_up: bool
 
 
 expected_token_binding_statuses = [
@@ -262,6 +266,8 @@ def verify_registration_response(
     if not verified:
         raise InvalidRegistrationResponse("Attestation statement could not be verified")
 
+    parsed_backup_flags = parse_backup_flags(auth_data.flags)
+
     return VerifiedRegistration(
         credential_id=attested_credential_data.credential_id,
         credential_public_key=attested_credential_data.credential_public_key,
@@ -271,4 +277,6 @@ def verify_registration_response(
         credential_type=credential.type,
         user_verified=auth_data.flags.uv,
         attestation_object=response.attestation_object,
+        credential_device_type=parsed_backup_flags.credential_device_type,
+        credential_backed_up=parsed_backup_flags.credential_backed_up,
     )

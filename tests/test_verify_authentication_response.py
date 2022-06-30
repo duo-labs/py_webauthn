@@ -44,6 +44,8 @@ class TestVerifyAuthenticationResponse(TestCase):
             "EDx9FfAbp4obx6oll2oC4-CZuDidRVV4gZhxC529ytlnqHyqCStDUwfNdm1SNHAe3X5KvueWQdAX3x9R1a2b9Q"
         )
         assert verification.new_sign_count == 78
+        assert verification.credential_backed_up == False
+        assert verification.credential_device_type == 'single_device'
 
     def test_verify_authentication_response_with_RSA_public_key(self):
         credential = AuthenticationCredential.parse_raw(

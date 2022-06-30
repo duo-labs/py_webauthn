@@ -8,6 +8,7 @@ from webauthn.helpers import (
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
     parse_authenticator_data,
+    parse_backup_flags,
     parse_client_data_json,
     verify_signature,
 )
@@ -15,6 +16,7 @@ from webauthn.helpers.exceptions import InvalidAuthenticationResponse
 from webauthn.helpers.structs import (
     AuthenticationCredential,
     ClientDataType,
+    CredentialDeviceType,
     PublicKeyCredentialType,
     TokenBindingStatus,
     WebAuthnBaseModel,
@@ -28,6 +30,8 @@ class VerifiedAuthentication(WebAuthnBaseModel):
 
     credential_id: bytes
     new_sign_count: int
+    credential_device_type: CredentialDeviceType
+    credential_backed_up: bool
 
 
 expected_token_binding_statuses = [
@@ -157,7 +161,11 @@ def verify_authentication_response(
     except InvalidSignature:
         raise InvalidAuthenticationResponse("Could not verify authentication signature")
 
+    parsed_backup_flags = parse_backup_flags(auth_data.flags)
+
     return VerifiedAuthentication(
         credential_id=credential.raw_id,
         new_sign_count=auth_data.sign_count,
+        credential_device_type=parsed_backup_flags.credential_device_type,
+        credential_backed_up=parsed_backup_flags.credential_backed_up,
     )
