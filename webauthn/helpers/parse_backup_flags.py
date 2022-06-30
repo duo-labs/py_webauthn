@@ -1,22 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel
 
-from .structs import AuthenticatorDataFlags
+from .structs import AuthenticatorDataFlags, CredentialDeviceType
 from .exceptions import InvalidBackupFlags
-
-
-class CredentialDeviceType(str, Enum):
-    """A determination of the number of devices a credential can be used from
-
-    Members:
-        `SINGLE_DEVICE`: A credential that is bound to a single device
-        `MULTI_DEVICE`: A credential that can be used from multiple devices (e.g. passkeys)
-
-    https://w3c.github.io/webauthn/#sctn-credential-backup (L3 Draft)
-    """
-
-    SINGLE_DEVICE = "single_device"
-    MULTI_DEVICE = "multi_device"
 
 
 class ParsedBackupFlags(BaseModel):
