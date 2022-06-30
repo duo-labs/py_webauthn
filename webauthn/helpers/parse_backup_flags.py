@@ -11,7 +11,7 @@ class ParsedBackupFlags(BaseModel):
 
 
 def parse_backup_flags(flags: AuthenticatorDataFlags) -> ParsedBackupFlags:
-    """Parse backup eligibility and backup state flags into more useful representations
+    """Convert backup eligibility and backup state flags into more useful representations
 
     Raises:
         `helpers.exceptions.InvalidBackupFlags` if an invalid backup state is detected
