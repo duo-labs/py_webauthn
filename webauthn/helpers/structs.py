@@ -411,13 +411,18 @@ class AuthenticatorDataFlags(WebAuthnBaseModel):
     Attributes:
         `up`: [U]ser was [P]resent
         `uv`: [U]ser was [V]erified
+        `be`: [B]ackup [E]ligible
+        `bs`: [B]ackup [S]tate
         `at`: [AT]tested credential is included
         `ed`: [E]xtension [D]ata is included
+
     https://www.w3.org/TR/webauthn-2/#flags
     """
 
     up: bool
     uv: bool
+    be: bool
+    bs: bool
     at: bool
     ed: bool
 
