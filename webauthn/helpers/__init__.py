@@ -12,6 +12,7 @@ from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes  # noqa
 from .options_to_json import options_to_json  # noqa: F401
 from .parse_attestation_object import parse_attestation_object  # noqa: F401
 from .parse_authenticator_data import parse_authenticator_data  # noqa: F401
+from .parse_backup_flags import parse_backup_flags
 from .parse_client_data_json import parse_client_data_json  # noqa: F401
 from .validate_certificate_chain import validate_certificate_chain  # noqa: F401
 from .verify_safetynet_timestamp import verify_safetynet_timestamp  # noqa: F401
