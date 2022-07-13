@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+
+**Changes:**
+
+- Add new `credential_device_type` and `credential_backed_up` values to output from `verify_registration_response()` and `verify_authentication_response()` ([#136](https://github.com/duo-labs/py_webauthn/pull/136))
+- Add support for the new `"hybrid"` transport (the generalized, eventual successor to `"cable"`) ([#137](https://github.com/duo-labs/py_webauthn/pull/137))
+
 ## 1.5.2
 
 **Changes:**
