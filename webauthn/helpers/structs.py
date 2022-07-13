@@ -72,6 +72,7 @@ class AuthenticatorTransport(str, Enum):
         `BLE`: Bluetooth Low Energy
         `INTERNAL`: Direct connection (read: a platform authenticator)
         `CABLE`: Cloud Assisted Bluetooth Low Energy
+        `HYBRID`: A combination of (often separate) data-transport and proximity mechanisms
 
     https://www.w3.org/TR/webauthn-2/#enum-transport
     """
@@ -81,6 +82,7 @@ class AuthenticatorTransport(str, Enum):
     BLE = "ble"
     INTERNAL = "internal"
     CABLE = "cable"
+    HYBRID = "hybrid"
 
 
 class AuthenticatorAttachment(str, Enum):
