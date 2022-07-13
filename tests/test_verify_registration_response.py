@@ -58,6 +58,8 @@ class TestVerifyRegistrationResponse(TestCase):
         )
         assert verification.credential_type == PublicKeyCredentialType.PUBLIC_KEY
         assert verification.sign_count == 23
+        assert verification.credential_backed_up == False
+        assert verification.credential_device_type == 'single_device'
 
     def test_raises_exception_on_unsupported_attestation_type(self) -> None:
         cred_json = {

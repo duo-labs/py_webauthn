@@ -48,3 +48,7 @@ class InvalidTPMCertInfoStructure(Exception):
 
 class InvalidCertificateChain(Exception):
     pass
+
+
+class InvalidBackupFlags(Exception):
+    pass

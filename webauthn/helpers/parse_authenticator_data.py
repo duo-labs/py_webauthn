@@ -33,6 +33,8 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
     flags = AuthenticatorDataFlags(
         up=flags_bytes & (1 << 0) != 0,
         uv=flags_bytes & (1 << 2) != 0,
+        be=flags_bytes & (1 << 3) != 0,
+        bs=flags_bytes & (1 << 4) != 0,
         at=flags_bytes & (1 << 6) != 0,
         ed=flags_bytes & (1 << 7) != 0,
     )

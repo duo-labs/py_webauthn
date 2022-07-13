@@ -11,6 +11,8 @@ def _generate_auth_data(
     sign_count: int = 0,
     up: bool = True,
     uv: bool = False,
+    be: bool = False,
+    bs: bool = False,
     at: bool = False,
     ed: bool = False,
 ) -> Tuple[bytes, bytes, int, Optional[bytes], Optional[bytes], Optional[bytes]]:
@@ -20,6 +22,8 @@ def _generate_auth_data(
         `sign_count`: How many times the authenticator has been used
         `up`: Whether user was present
         `uv`: Whether user was verified
+        `be`: Whether credential can be backed up
+        `bs`: Whether credential has been backed up
         `at`: Whether attested credential data is present
         `ed`: Whether extension data is present
 
@@ -39,6 +43,10 @@ def _generate_auth_data(
         flags = flags | 1 << 0
     if uv is True:
         flags = flags | 1 << 2
+    if be is True:
+        flags = flags | 1 << 3
+    if bs is True:
+        flags = flags | 1 << 4
     if at is True:
         flags = flags | 1 << 6
     if ed is True:
@@ -90,6 +98,8 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         assert output.rp_id_hash == rp_id_hash
         assert output.flags.up is True
         assert output.flags.uv is True
+        assert output.flags.be is False
+        assert output.flags.be is False
         assert output.flags.at is False
         assert output.flags.ed is False
         assert output.sign_count == sign_count
@@ -164,3 +174,11 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
                 'example.extension': 'This is an example extension! If you read this message, you probably successfully passing conformance tests. Good job!',
             }
         )
+
+    def test_parses_backup_state_flags(self) -> None:
+        (auth_data, _, _, _, _, _) = _generate_auth_data(be=True, bs=True)
+
+        output = parse_authenticator_data(auth_data)
+
+        assert output.flags.be is True
+        assert output.flags.be is True
