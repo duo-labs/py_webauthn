@@ -66,6 +66,7 @@ registration_verification = verify_registration_response(
         },
         "type": "public-key",
         "clientExtensionResults": {},
+        "authenticatorAttachment": "platform",
         "transports": ["internal"]
     }"""
     ),

@@ -51,6 +51,7 @@ authentication_verification = verify_authentication_response(
             "userHandle": "T1RWa1l6VXdPRFV0WW1NNVlTMDBOVEkxTFRnd056Z3RabVZpWVdZNFpEVm1ZMk5p"
         },
         "type": "public-key",
+        "authenticatorAttachment": "cross-platform",
         "clientExtensionResults": {}
     }"""
     ),
