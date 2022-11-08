@@ -31,6 +31,19 @@ Two additional helper methods are also exposed:
 
 Additional data structures are available on `webauthn.helpers.structs`. These [Pydantic-powered](https://pydantic-docs.helpmanual.io/) dataclasses are useful for constructing inputs to the methods above, and for providing type hinting to help ensure consistency in the shape of data being passed around.
 
+Generally, the library makes the following assumptions about how a Relying Party implementing this library will interface with a webpage that will handle calling the WebAuthn API:
+
+- JSON is the preferred data type for transmitting registration and authentication options from the server to the webpage to feed to `navigator.credentials.create()` and `navigator.credentials.get()` respectively.
+- JSON is the preferred data type for transmitting WebAuthn responses from the browser to the server.
+- Bytes are not directly transmittable in either direction as JSON, and so should be encoded to and decoded from [base64url to avoid introducing any more dependencies than those that are specified in the WebAuthn spec](https://www.w3.org/TR/webauthn-2/#sctn-dependencies).
+  - See the [`WebAuthnBaseModel` struct](https://github.com/duo-labs/py_webauthn/blob/master/webauthn/helpers/structs.py#L13) for more information on how this is achieved
+
+The examples mentioned below include uses of the `options_to_json()` helper (see above) to show how easily `bytes` values in registration and authentication options can be encoded to base64url for transmission to the front end.
+
+The examples also include demonstrations of how to pass JSON-ified responses, using base64url encoding for `ArrayBuffer` values, into `RegistrationCredential.parse_raw()` and `AuthenticationCredential.parse_raw()` to be automatically parsed by the methods in this library. An RP can pair this with corresponding custom front end logic, or one of several frontend-specific libraries (like [@simplewebauthn/browser](https://www.npmjs.com/package/@simplewebauthn/browser), for example) to handle encoding and decoding such values to and from JSON.
+
+Other arguments into this library's methods that are defined as `bytes` are intended to be values stored entirely on the server. Such values can more easily exist as `bytes` without needing potentially extraneous encoding and decoding into other formats. Any encoding or decoding of such values in the name of storing them between steps in a WebAuthn ceremony is left up to the RP to achieve in an implementation-specific manner.
+
 ### Registration
 
 See **examples/registration.py** for practical examples of using `generate_registration_options()` and `verify_registration_response()`.
