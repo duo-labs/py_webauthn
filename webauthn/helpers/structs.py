@@ -383,6 +383,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     id: str
     raw_id: bytes
     response: AuthenticatorAttestationResponse
+    authenticator_attachment: Optional[AuthenticatorAttachment] = None
     transports: Optional[List[AuthenticatorTransport]] = None
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
@@ -545,6 +546,7 @@ class AuthenticationCredential(WebAuthnBaseModel):
     id: str
     raw_id: bytes
     response: AuthenticatorAssertionResponse
+    authenticator_attachment: Optional[AuthenticatorAttachment] = None
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
