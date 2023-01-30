@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+**Changes:**
+
+- Add new `authenticator_attachment` value to `RegistrationCredential` and `AuthenticationCredential`, defining the attachment of the authenticator that completed a corresponding ceremony, as it may be returned by the WebAuthn API ([#141](https://github.com/duo-labs/py_webauthn/pull/141))
+
 ## 1.6.0
 
 **Changes:**
