@@ -250,7 +250,7 @@ def verify_tpm(
     for obj in tcg_at_tpm_values:
         oid = obj.oid.dotted_string
         if oid == "2.23.133.2.1":
-            tcg_at_tpm_manufacturer = obj.value
+            tcg_at_tpm_manufacturer = str(obj.value)
         elif oid == "2.23.133.2.2":
             tcg_at_tpm_model = obj.value
         elif oid == "2.23.133.2.3":

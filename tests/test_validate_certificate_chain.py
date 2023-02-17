@@ -50,6 +50,7 @@ class TestValidateCertificateChain(TestCase):
         )
         mock_verify_certificate.side_effect = X509StoreContextError(
             "bad root cert",
+            [],
             root_cert_x509,
         )
 
