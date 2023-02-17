@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.7.1
+
+**Changes:**
+
+- Add support for `from webauthn import *` syntax with proper use of `__all__` ([#146](https://github.com/duo-labs/py_webauthn/pull/146))
+
 ## 1.7.0
 
 **Changes:**
