@@ -359,12 +359,15 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     Attributes:
         `client_data_json`: Information the authenticator collects about the client/browser it communicates with
         `attestation_object`: Encoded information about an attestation
+        (optional) `transports`: The authenticator's supported methods of communication with a client/browser
 
     https://www.w3.org/TR/webauthn-2/#authenticatorattestationresponse
     """
 
     client_data_json: bytes
     attestation_object: bytes
+    # Optional in L2, but becomes required in L3. Play it safe until L3 becomes Recommendation
+    transports: Optional[List[AuthenticatorTransport]] = None
 
 
 class RegistrationCredential(WebAuthnBaseModel):
@@ -375,7 +378,6 @@ class RegistrationCredential(WebAuthnBaseModel):
         `raw_id`: A byte sequence representing the credential's unique identifier
         `response`: The authenticator's attesation data
         `type`: The literal string `"public-key"`
-        (optional) `transports`: The authenticator's supported methods of communication with a client/browser
 
     https://www.w3.org/TR/webauthn-2/#publickeycredential
     """
@@ -384,7 +386,6 @@ class RegistrationCredential(WebAuthnBaseModel):
     raw_id: bytes
     response: AuthenticatorAttestationResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
-    transports: Optional[List[AuthenticatorTransport]] = None
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
