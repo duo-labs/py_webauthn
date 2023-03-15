@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.0
+
+**Changes:**
+
+- Move the `RegistrationCredential.transports` property into `RegistrationCredential.response.transports` to better conform to upcoming WebAuthn JSON serialization method output ([#150](https://github.com/duo-labs/py_webauthn/pull/150))
+
 ## v1.7.2
 
 **Changes:**
