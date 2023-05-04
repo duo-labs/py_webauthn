@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.1
+
+**Changes:**
+
+- Update dependency versions in **setup.py** ([#151](https://github.com/duo-labs/py_webauthn/pull/151))
+
 ## v1.8.0
 
 **Changes:**
