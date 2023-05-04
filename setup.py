@@ -50,8 +50,8 @@ setup(
     install_requires=[
         'asn1crypto>=1.4.0',
         'cbor2>=5.4.2.post1',
-        'cryptography>=36.0.1',
+        'cryptography>=39.0.1',
         'pydantic>=1.9.0',
-        'pyOpenSSL>=22.0.0',
+        'pyOpenSSL>=23.0.0',
     ]
 )
