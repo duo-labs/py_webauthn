@@ -51,7 +51,7 @@ setup(
         'asn1crypto>=1.4.0',
         'cbor2>=5.4.2.post1',
         'cryptography>=39.0.1',
-        'pydantic>=1.9.0,<2.0a0',
+        'pydantic>=1.10.11,<2.0a0',
         'pyOpenSSL>=23.0.0',
     ]
 )
