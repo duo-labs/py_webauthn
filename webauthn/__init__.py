@@ -8,7 +8,7 @@ from .authentication.verify_authentication_response import (
 )
 from .helpers import base64url_to_bytes, options_to_json
 
-__version__ = "1.8.1"
+__version__ = "1.9.0"
 
 __all__ = [
     "generate_registration_options",
