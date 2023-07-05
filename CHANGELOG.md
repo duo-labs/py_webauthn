@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.9.0
+
+**Changes:**
+
+- Keep using Pydantic v1.x for now ([#157](https://github.com/duo-labs/py_webauthn/pull/157))
+- Update cryptography and pyOpenSSL dependencies ([#154](https://github.com/duo-labs/py_webauthn/pull/154), [#158](https://github.com/duo-labs/py_webauthn/pull/158))
+
 ## v1.8.1
 
 **Changes:**
