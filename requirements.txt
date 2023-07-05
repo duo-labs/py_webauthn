@@ -11,11 +11,11 @@ pathspec==0.9.0
 platformdirs==2.4.0
 pycodestyle==2.8.0
 pycparser==2.20
-pydantic>=1.10.11,<2.0a0
+pydantic==1.10.11
 pyflakes==2.4.0
 pyOpenSSL==23.2.0
 regex==2021.10.8
 six==1.16.0
 toml==0.10.2
 tomli==1.2.1
-typing-extensions==3.10.0.2
+typing-extensions==4.2.0
