@@ -87,9 +87,7 @@ class TestVerifyRegistrationResponse(TestCase):
         rp_id = "localhost"
         expected_origin = "http://localhost:5000"
 
-        with self.assertRaisesRegex(
-            Exception, "value is not a valid enumeration member"
-        ):
+        with self.assertRaisesRegex(Exception, "Input should be"):
             verify_registration_response(
                 credential=credential,
                 expected_challenge=challenge,

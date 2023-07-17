@@ -12,6 +12,7 @@ from webauthn.helpers import (
     parse_client_data_json,
     verify_signature,
 )
+from webauthn.helpers.base64url_bytes import Base64URLBytes
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
 from webauthn.helpers.structs import (
     AuthenticationCredential,
@@ -28,7 +29,7 @@ class VerifiedAuthentication(WebAuthnBaseModel):
     Information about a verified authentication of which an RP can make use
     """
 
-    credential_id: bytes
+    credential_id: Base64URLBytes
     new_sign_count: int
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool

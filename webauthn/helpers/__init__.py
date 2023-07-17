@@ -14,8 +14,10 @@ from .parse_client_data_json import parse_client_data_json
 from .validate_certificate_chain import validate_certificate_chain
 from .verify_safetynet_timestamp import verify_safetynet_timestamp
 from .verify_signature import verify_signature
+from .base64url_bytes import Base64URLBytes
 
 __all__ = [
+    "Base64URLBytes",
     "aaguid_to_string",
     "base64url_to_bytes",
     "bytes_to_base64url",

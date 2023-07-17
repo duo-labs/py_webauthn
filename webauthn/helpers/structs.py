@@ -3,7 +3,8 @@ from typing import List, Literal, Optional
 
 from pydantic import ConfigDict, BaseModel, FieldValidationInfo, field_validator
 
-from .bytes_to_base64url import bytes_to_base64url
+from webauthn.helpers.base64url_bytes import Base64URLBytes
+
 from .cose import COSEAlgorithmIdentifier
 from .snake_case_to_camel_case import snake_case_to_camel_case
 
@@ -243,7 +244,7 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: bytes
+    id: Base64URLBytes
     name: str
     display_name: str
 
@@ -273,7 +274,7 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
     """
 
-    id: bytes
+    id: Base64URLBytes
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
@@ -314,7 +315,7 @@ class CollectedClientData(WebAuthnBaseModel):
     """
 
     type: ClientDataType
-    challenge: bytes
+    challenge: Base64URLBytes
     origin: str
     cross_origin: Optional[bool] = None
     token_binding: Optional[TokenBinding] = None
@@ -345,7 +346,7 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
 
     rp: PublicKeyCredentialRpEntity
     user: PublicKeyCredentialUserEntity
-    challenge: bytes
+    challenge: Base64URLBytes
     pub_key_cred_params: List[PublicKeyCredentialParameters]
     timeout: Optional[int] = None
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
@@ -364,8 +365,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorattestationresponse
     """
 
-    client_data_json: bytes
-    attestation_object: bytes
+    client_data_json: Base64URLBytes
+    attestation_object: Base64URLBytes
     # Optional in L2, but becomes required in L3. Play it safe until L3 becomes Recommendation
     transports: Optional[List[AuthenticatorTransport]] = None
 
@@ -383,7 +384,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: Base64URLBytes
     response: AuthenticatorAttestationResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
     type: Literal[
@@ -401,13 +402,13 @@ class AttestationStatement(WebAuthnBaseModel):
     attestation format.
     """
 
-    sig: Optional[bytes] = None
-    x5c: Optional[List[bytes]] = None
-    response: Optional[bytes] = None
+    sig: Optional[Base64URLBytes] = None
+    x5c: Optional[List[Base64URLBytes]] = None
+    response: Optional[Base64URLBytes] = None
     alg: Optional[COSEAlgorithmIdentifier] = None
     ver: Optional[str] = None
-    cert_info: Optional[bytes] = None
-    pub_area: Optional[bytes] = None
+    cert_info: Optional[Base64URLBytes] = None
+    pub_area: Optional[Base64URLBytes] = None
 
 
 class AuthenticatorDataFlags(WebAuthnBaseModel):
@@ -443,9 +444,9 @@ class AttestedCredentialData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#attested-credential-data
     """
 
-    aaguid: bytes
-    credential_id: bytes
-    credential_public_key: bytes
+    aaguid: Base64URLBytes
+    credential_id: Base64URLBytes
+    credential_public_key: Base64URLBytes
 
 
 class AuthenticatorData(WebAuthnBaseModel):
@@ -462,11 +463,11 @@ class AuthenticatorData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
     """
 
-    rp_id_hash: bytes
+    rp_id_hash: Base64URLBytes
     flags: AuthenticatorDataFlags
     sign_count: int
     attested_credential_data: Optional[AttestedCredentialData] = None
-    extensions: Optional[bytes] = None
+    extensions: Optional[Base64URLBytes] = None
 
 
 class AttestationObject(WebAuthnBaseModel):
@@ -505,7 +506,7 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
     """
 
-    challenge: bytes
+    challenge: Base64URLBytes
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
@@ -526,10 +527,10 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorassertionresponse
     """
 
-    client_data_json: bytes
-    authenticator_data: bytes
-    signature: bytes
-    user_handle: Optional[bytes] = None
+    client_data_json: Base64URLBytes
+    authenticator_data: Base64URLBytes
+    signature: Base64URLBytes
+    user_handle: Optional[Base64URLBytes] = None
 
 
 class AuthenticationCredential(WebAuthnBaseModel):
@@ -545,7 +546,7 @@ class AuthenticationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: Base64URLBytes
     response: AuthenticatorAssertionResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
     type: Literal[

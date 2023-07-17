@@ -6,11 +6,12 @@ from .authentication.generate_authentication_options import (
 from .authentication.verify_authentication_response import (
     verify_authentication_response,
 )
-from .helpers import base64url_to_bytes, options_to_json
+from .helpers import base64url_to_bytes, options_to_json, Base64URLBytes
 
 __version__ = "1.9.0"
 
 __all__ = [
+    "Base64URLBytes",
     "generate_registration_options",
     "verify_registration_response",
     "generate_authentication_options",

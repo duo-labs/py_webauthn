@@ -9,6 +9,7 @@ from webauthn.helpers import (
     parse_client_data_json,
     parse_backup_flags,
 )
+from webauthn.helpers.base64url_bytes import Base64URLBytes
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.structs import (
@@ -43,14 +44,14 @@ class VerifiedRegistration(WebAuthnBaseModel):
         `attestation_object`: The raw attestation object for later scrutiny
     """
 
-    credential_id: bytes
-    credential_public_key: bytes
+    credential_id: Base64URLBytes
+    credential_public_key: Base64URLBytes
     sign_count: int
     aaguid: str
     fmt: AttestationFormat
     credential_type: PublicKeyCredentialType
     user_verified: bool
-    attestation_object: bytes
+    attestation_object: Base64URLBytes
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
 
