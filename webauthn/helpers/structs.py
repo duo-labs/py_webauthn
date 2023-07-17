@@ -67,11 +67,9 @@ class WebAuthnBaseModel(BaseModel):
     when working with WebAuthn data structures
 
     `modelInstance.json()` (to JSON):
-    - Encodes bytes to URLSafeBase64
     - Converts snake_case properties to camelCase
 
-    `Model.parse_raw()` (from JSON):
-    - Decodes URLSafeBase64 to bytes
+    `Model.model_validate_json()` (from JSON):
     - Converts camelCase properties to snake_case
     """
 

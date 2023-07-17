@@ -18,7 +18,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         # Mocked because these certs actually expired and started failing this test
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "AePltP2wAoNYwG5XGc9sfleGgDxQRHdkX8vphNIHv3HylIj_nZo9ncs7bLL65AGmVAc69pS4l64hgOBJU9o2jCQ",
             "rawId": "AePltP2wAoNYwG5XGc9sfleGgDxQRHdkX8vphNIHv3HylIj_nZo9ncs7bLL65AGmVAc69pS4l64hgOBJU9o2jCQ",

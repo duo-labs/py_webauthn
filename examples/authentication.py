@@ -40,7 +40,7 @@ print(options_to_json(complex_authentication_options))
 
 # Authentication Response Verification
 authentication_verification = verify_authentication_response(
-    credential=AuthenticationCredential.parse_raw(
+    credential=AuthenticationCredential.model_validate_json(
         """{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
@@ -67,5 +67,5 @@ authentication_verification = verify_authentication_response(
     require_user_verification=True,
 )
 print("\n[Authentication Verification]")
-print(authentication_verification.json(indent=2))
+print(authentication_verification.model_dump_json(indent=2))
 assert authentication_verification.new_sign_count == 1

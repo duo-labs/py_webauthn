@@ -87,8 +87,8 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-    payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))
+    payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))
     signature_bytes_str: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the

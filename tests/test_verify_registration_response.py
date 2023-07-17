@@ -16,7 +16,7 @@ from webauthn import verify_registration_response
 
 class TestVerifyRegistrationResponse(TestCase):
     def test_verifies_none_attestation_response(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
@@ -81,7 +81,7 @@ class TestVerifyRegistrationResponse(TestCase):
         parsed_atte_obj["fmt"] = "not_real_fmt"
         cred_json["response"]["attestationObject"] = bytes_to_base64url(cbor2.dumps(parsed_atte_obj))  # type: ignore
 
-        credential = RegistrationCredential.parse_raw(json.dumps(cred_json))
+        credential = RegistrationCredential.model_validate_json(json.dumps(cred_json))
         challenge = base64url_to_bytes(
             "pDRmkdduAi-AU2x6o-FqqhI3XK2nlVlsCSr04zWkNtv84JwrMHtElRHHUWLEDhkrEaQ8B1lBcIH_VSRqp_RAAw"
         )
@@ -97,7 +97,7 @@ class TestVerifyRegistrationResponse(TestCase):
             )
 
     def test_supports_multiple_expected_origins(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
@@ -133,7 +133,7 @@ class TestVerifyRegistrationResponse(TestCase):
 
     def test_raises_when_root_cert_invalid_for_response(self) -> None:
         # "packed"
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "rawId": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
@@ -169,7 +169,7 @@ class TestVerifyRegistrationResponse(TestCase):
             )
 
     def test_verifies_registration_over_cable(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
