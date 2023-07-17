@@ -1,12 +1,10 @@
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, validator
-from pydantic.fields import ModelField
+from pydantic import ConfigDict, BaseModel, FieldValidationInfo, field_validator
 
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .snake_case_to_camel_case import snake_case_to_camel_case
 
 
@@ -24,20 +22,22 @@ class WebAuthnBaseModel(BaseModel):
     - Converts camelCase properties to snake_case
     """
 
-    class Config:
-        json_encoders = {bytes: bytes_to_base64url}
-        json_loads = json_loads_base64url_to_bytes
-        alias_generator = snake_case_to_camel_case
-        allow_population_by_field_name = True
+    model_config = ConfigDict(
+        alias_generator=snake_case_to_camel_case,
+        populate_by_name=True,
+    )
 
-    @validator("*", pre=True, allow_reuse=True)
-    def _validate_bytes_fields(cls, v, field: ModelField):
+    @field_validator("*", mode="before")
+    def _validate_bytes_fields(cls, v, info: FieldValidationInfo):
         """
         Allow for Pydantic models to define fields as `bytes`, but allow consuming projects to
         specify bytes-adjacent values (bytes subclasses, memoryviews, etc...) that otherwise
         function like `bytes`. Keeps the library Pythonic.
         """
-        if field.type_ != bytes:
+
+        field = cls.model_fields[info.field_name]
+
+        if field.annotation != bytes:
             return v
 
         if isinstance(v, bytes):
