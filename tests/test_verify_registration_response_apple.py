@@ -16,7 +16,7 @@ class TestVerifyRegistrationResponseApple(TestCase):
         # Mocked because these certs actually expired and started failing this test
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
             "rawId": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",

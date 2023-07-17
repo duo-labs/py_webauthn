@@ -198,7 +198,7 @@ def verify_registration_response(
     if attestation_object.fmt == AttestationFormat.NONE:
         # A "none" attestation should not contain _anything_ in its attestation
         # statement
-        num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)
         if num_att_stmt_fields_set > 0:
             raise InvalidRegistrationResponse(
                 "None attestation had unexpected attestation statement"

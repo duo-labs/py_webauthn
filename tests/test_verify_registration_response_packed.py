@@ -7,7 +7,7 @@ from webauthn import verify_registration_response
 
 class TestVerifyRegistrationResponsePacked(TestCase):
     def test_verify_attestation_from_yubikey_firefox(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "rawId": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
@@ -43,7 +43,7 @@ class TestVerifyRegistrationResponsePacked(TestCase):
         )
 
     def test_verify_attestation_with_okp_public_key(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "WlHiMqH6UhUs-d43z-aGlE3nsXuEOQpa9P9pwpqb4tmvtBMBfGvAV2wUrqBCDENjkkxd6kIRzZQKcluyOFlyW_vXVZSAEgod1xj-1QmFpuwyBVnlkQGefRbmUjbEt5iE4q3tdjy65EWIekO0SNjCQx3LxIJMzi25fgUkI9Y-gg0",
             "rawId": "WlHiMqH6UhUs-d43z-aGlE3nsXuEOQpa9P9pwpqb4tmvtBMBfGvAV2wUrqBCDENjkkxd6kIRzZQKcluyOFlyW_vXVZSAEgod1xj-1QmFpuwyBVnlkQGefRbmUjbEt5iE4q3tdjy65EWIekO0SNjCQx3LxIJMzi25fgUkI9Y-gg0",

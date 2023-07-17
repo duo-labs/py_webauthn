@@ -8,7 +8,7 @@ from webauthn.helpers.structs import AuthenticationCredential
 
 class TestVerifyAuthenticationResponse(TestCase):
     def test_verify_authentication_response_with_EC2_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
             "id": "EDx9FfAbp4obx6oll2oC4-CZuDidRVV4gZhxC529ytlnqHyqCStDUwfNdm1SNHAe3X5KvueWQdAX3x9R1a2b9Q",
             "rawId": "EDx9FfAbp4obx6oll2oC4-CZuDidRVV4gZhxC529ytlnqHyqCStDUwfNdm1SNHAe3X5KvueWQdAX3x9R1a2b9Q",
@@ -48,7 +48,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.credential_device_type == 'single_device'
 
     def test_verify_authentication_response_with_RSA_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
                 "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
                 "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
@@ -85,7 +85,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 1
 
     def test_raises_exception_on_incorrect_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
             "id": "FviUBZA3FGMxEm3A1K2T8MhuEBLp4qQsV9ScAKYrpdw2kbGnqx24tF4ev6PEHEYC3g8z6HMJh7dYHe3Uuq7_8Q",
             "rawId": "FviUBZA3FGMxEm3A1K2T8MhuEBLp4qQsV9ScAKYrpdw2kbGnqx24tF4ev6PEHEYC3g8z6HMJh7dYHe3Uuq7_8Q",
@@ -123,7 +123,7 @@ class TestVerifyAuthenticationResponse(TestCase):
             )
 
     def test_raises_exception_on_uv_required_but_false(self):
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
             "id": "4-5MZF69j3n2B6Z99dUN0fNrAQmrjELJIebWVw8aKfw1EQKg28Tx40R_kw-1pcrfSgJFKm3mCtAtBgSRWgDMng",
             "rawId": "4-5MZF69j3n2B6Z99dUN0fNrAQmrjELJIebWVw8aKfw1EQKg28Tx40R_kw-1pcrfSgJFKm3mCtAtBgSRWgDMng",
@@ -161,7 +161,7 @@ class TestVerifyAuthenticationResponse(TestCase):
             )
 
     def test_verify_authentication_response_with_OKP_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
                 "id": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
                 "rawId": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
@@ -196,7 +196,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 7
 
     def test_supports_multiple_expected_origins(self) -> None:
-        credential = AuthenticationCredential.parse_raw(
+        credential = AuthenticationCredential.model_validate_json(
             """{
             "id": "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q",
             "rawId": "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q",

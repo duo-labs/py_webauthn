@@ -12,7 +12,7 @@ class TestVerifyRegistrationResponseTPM(TestCase):
         Mfgr Version: 500.5.0.0
         TPM Version: 2.0
         """
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "2O_TSbHXS3KJwx5uwajcqbKwWCBeHjOBCXXb7vrPfUU",
             "rawId": "2O_TSbHXS3KJwx5uwajcqbKwWCBeHjOBCXXb7vrPfUU",
@@ -48,7 +48,7 @@ class TestVerifyRegistrationResponseTPM(TestCase):
         Mfgr Version: 1.3.2.8
         TPM Version: 2.0
         """
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "56iW7RC7YLiknnNU70kO5Bb-jip9-WTUbohh_Aqq1q4",
             "rawId": "56iW7RC7YLiknnNU70kO5Bb-jip9-WTUbohh_Aqq1q4",
@@ -84,7 +84,7 @@ class TestVerifyRegistrationResponseTPM(TestCase):
         Mfgr Version: 73.8.17568.5511
         TPM Version: 2.0
         """
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "kU6oEC95fTXAtpI6b2w69fQrKGntFFt1l_2ySjmndYM",
             "rawId": "kU6oEC95fTXAtpI6b2w69fQrKGntFFt1l_2ySjmndYM",
@@ -115,7 +115,7 @@ class TestVerifyRegistrationResponseTPM(TestCase):
         )
 
     def test_verify_tpm_with_ecc_public_area_type(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "hsS2ywFz_LWf9-lC35vC9uJTVD3ZCVdweZvESUbjXnQ",
             "rawId": "hsS2ywFz_LWf9-lC35vC9uJTVD3ZCVdweZvESUbjXnQ",

@@ -56,7 +56,7 @@ print(options_to_json(complex_registration_options))
 
 # Registration Response Verification
 registration_verification = verify_registration_response(
-    credential=RegistrationCredential.parse_raw(
+    credential=RegistrationCredential.model_validate_json(
         """{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",

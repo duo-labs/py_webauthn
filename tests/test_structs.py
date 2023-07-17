@@ -8,12 +8,12 @@ from webauthn.helpers.structs import (
 
 
 class TestStructsRegistrationCredential(TestCase):
-    def test_registration_credential_parse_raw(self):
+    def test_registration_credential_model_validate_json(self):
         """
         Check that we can properly parse some values that aren't really here-or-there for response
         verification, but can still be useful to RP's to fine-tune the WebAuthn experience.
         """
-        parsed = RegistrationCredential.parse_raw(
+        parsed = RegistrationCredential.model_validate_json(
             """{
                 "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
                 "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",

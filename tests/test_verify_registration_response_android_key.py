@@ -15,7 +15,7 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
         # Mocked because response is from FIDO Conformance with unknown root certs
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "V51GE29tGbhby7sbg1cZ_qL8V8njqEsXpAnwQBobvgw",
             "rawId": "V51GE29tGbhby7sbg1cZ_qL8V8njqEsXpAnwQBobvgw",

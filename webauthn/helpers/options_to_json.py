@@ -15,7 +15,7 @@ def options_to_json(
     """
     Prepare options for transmission to the front end as JSON
     """
-    return options.json(
+    return options.model_dump_json(
         by_alias=True,
         exclude_unset=False,
         exclude_none=True,

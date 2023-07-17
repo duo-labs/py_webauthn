@@ -7,7 +7,7 @@ from webauthn import verify_registration_response
 
 class TestVerifyRegistrationResponseFIDOU2F(TestCase):
     def test_verify_attestation_from_yubikey_firefox(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "lrjqbPdLbWXTJ2sFIreka9aWd2ED-SDx_VAgBAh4XmCJgjCjudEjoi42pGQd-_Bi6nNPQ3T7-xOEgty2I3m7cw",
             "rawId": "lrjqbPdLbWXTJ2sFIreka9aWd2ED-SDx_VAgBAh4XmCJgjCjudEjoi42pGQd-_Bi6nNPQ3T7-xOEgty2I3m7cw",
@@ -39,7 +39,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
         )
 
     def test_verify_attestation_from_fido_conformance(self) -> None:
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "2i53XtAuBVv2ztu9hdTkG_I4_zc-MhmYOjM2HWDCIlk",
             "rawId": "2i53XtAuBVv2ztu9hdTkG_I4_zc-MhmYOjM2HWDCIlk",
@@ -72,7 +72,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
 
     def test_verify_attestation_with_unsupported_token_binding_status(self) -> None:
         # Credential contains `clientDataJSON: { tokenBinding: { status: "not-supported" } }`
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "JeC3qgQjIVysq88GxhGUYyDl4oZeW8mLWd7luJWQvnrm-wxGZ5mzf2bBCaUDq7D2qr4aQezvzfoFIF880ciAsQ",
             "rawId": "JeC3qgQjIVysq88GxhGUYyDl4oZeW8mLWd7luJWQvnrm-wxGZ5mzf2bBCaUDq7D2qr4aQezvzfoFIF880ciAsQ",
@@ -104,7 +104,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
 
     def test_verify_attestation_with_unsupported_token_binding(self) -> None:
         # Credential contains `clientDataJSON: { tokenBinding: "unused" }`
-        credential = RegistrationCredential.parse_raw(
+        credential = RegistrationCredential.model_validate_json(
             """{
             "id": "jXFBv0gxr-DvGP58Oz3qfxMydiZM2RFlRoItoHyeAhdLNbmR7aPkzPVSKWO9VOZ4A2EEUQz8nsLtsP5EOqeNiQ",
             "rawId": "jXFBv0gxr-DvGP58Oz3qfxMydiZM2RFlRoItoHyeAhdLNbmR7aPkzPVSKWO9VOZ4A2EEUQz8nsLtsP5EOqeNiQ",

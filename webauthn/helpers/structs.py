@@ -17,7 +17,7 @@ class WebAuthnBaseModel(BaseModel):
     - Encodes bytes to Base64URL
     - Converts snake_case properties to camelCase
 
-    `Model.parse_raw()` (from JSON):
+    `Model.model_validate_json()` (from JSON):
     - Decodes Base64URL to bytes
     - Converts camelCase properties to snake_case
     """
