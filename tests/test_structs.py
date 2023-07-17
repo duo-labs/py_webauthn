@@ -35,4 +35,6 @@ class TestStructsRegistrationCredential(TestCase):
                 AuthenticatorTransport.HYBRID,
             ],
         )
-        self.assertEqual(parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM)
+        self.assertEqual(
+            parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM
+        )

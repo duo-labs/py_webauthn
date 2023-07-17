@@ -3,7 +3,14 @@ from enum import Enum
 from typing import List, Literal, Optional
 from typing_extensions import Annotated
 
-from pydantic import ConfigDict, BaseModel, EncodedBytes, EncoderProtocol, FieldValidationInfo, field_validator
+from pydantic import (
+    ConfigDict,
+    BaseModel,
+    EncodedBytes,
+    EncoderProtocol,
+    FieldValidationInfo,
+    field_validator,
+)
 from pydantic_core import PydanticCustomError
 
 from .cose import COSEAlgorithmIdentifier
@@ -30,7 +37,9 @@ class URLSafeBase64Encoder(EncoderProtocol):
             return base64.urlsafe_b64decode(data + b"====")
         except ValueError as e:
             print(f"Got a value error: ", e)
-            raise PydanticCustomError('base64_decode', "Base64 decoding error: '{error}'", {'error': str(e)})
+            raise PydanticCustomError(
+                "base64_decode", "Base64 decoding error: '{error}'", {"error": str(e)}
+            )
 
     @classmethod
     def encode(cls, value: bytes) -> bytes:
@@ -48,17 +57,16 @@ class URLSafeBase64Encoder(EncoderProtocol):
         return base64.urlsafe_b64encode(value).replace(b"=", b"")
 
     @classmethod
-    def get_json_format(cls) -> Literal['base64']:
+    def get_json_format(cls) -> Literal["base64"]:
         """Get the JSON format for the encoded data.
 
         Returns:
             The JSON format for the encoded data.
         """
-        return 'base64'
+        return "base64"
 
 
 URLSafeBase64 = Annotated[bytes, EncodedBytes(encoder=URLSafeBase64Encoder)]
-
 
 
 class WebAuthnBaseModel(BaseModel):
@@ -73,7 +81,9 @@ class WebAuthnBaseModel(BaseModel):
     - Converts camelCase properties to snake_case
     """
 
-    model_config = ConfigDict( alias_generator=snake_case_to_camel_case, populate_by_name=True)
+    model_config = ConfigDict(
+        alias_generator=snake_case_to_camel_case, populate_by_name=True
+    )
 
     @field_validator("*", mode="before")
     def _validate_bytes_fields(cls, v, info: FieldValidationInfo):
@@ -87,7 +97,7 @@ class WebAuthnBaseModel(BaseModel):
 
         if field.annotation != bytes:
             return v
-        
+
         # print(f"Running validation, {v=}, {info=}, {field=}")
         print(f"Running validation on {info.field_name}")
 

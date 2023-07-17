@@ -45,7 +45,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         )
         assert verification.new_sign_count == 78
         assert verification.credential_backed_up == False
-        assert verification.credential_device_type == 'single_device'
+        assert verification.credential_device_type == "single_device"
 
     def test_verify_authentication_response_with_RSA_public_key(self):
         credential = AuthenticationCredential.model_validate_json(

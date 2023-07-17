@@ -272,7 +272,9 @@ def verify_registration_response(
 
     return VerifiedRegistration(
         credential_id=urlsafe_b64encode(attested_credential_data.credential_id),
-        credential_public_key=urlsafe_b64encode(attested_credential_data.credential_public_key),
+        credential_public_key=urlsafe_b64encode(
+            attested_credential_data.credential_public_key
+        ),
         sign_count=auth_data.sign_count,
         aaguid=aaguid_to_string(attested_credential_data.aaguid),
         fmt=attestation_object.fmt,

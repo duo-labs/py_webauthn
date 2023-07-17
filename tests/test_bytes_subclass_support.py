@@ -20,7 +20,9 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
 
         class CustomBytes(bytes):
             def __new__(cls, data: Union[str, bytes]):
-                return bytes.__new__(cls, data.encode("ascii") if isinstance(data, str) else data)
+                return bytes.__new__(
+                    cls, data.encode("ascii") if isinstance(data, str) else data
+                )
 
         verification = verify_authentication_response(
             credential=AuthenticationCredential(
@@ -41,12 +43,16 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
                 ),
             ),
             expected_challenge=CustomBytes(
-                base64url_to_bytes("eZ4eeA3O4jy5FIzqDaSJ6JDNGu0bBc5zI1DjQ_kLso1WNqkG6k5mCYf1dtQhVUiBWZWlZkzR5MFeeWCpJRUNXw")
+                base64url_to_bytes(
+                    "eZ4eeA3O4jy5FIzqDaSJ6JDNGu0bBc5zI1DjQ_kLso1WNqkG6k5mCYf1dtQhVUiBWZWlZkzR5MFeeWCpJRUNXw"
+                )
             ),
             expected_rp_id="localhost",
             expected_origin="http://localhost:5000",
             credential_public_key=CustomBytes(
-                base64url_to_bytes("pAEBAycgBiFYIMz6_SUFLiDid2Yhlq0YboyJ-CDrIrNpkPUGmJp4D3Dp")
+                base64url_to_bytes(
+                    "pAEBAycgBiFYIMz6_SUFLiDid2Yhlq0YboyJ-CDrIrNpkPUGmJp4D3Dp"
+                )
             ),
             credential_current_sign_count=3,
         )
@@ -80,12 +86,16 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
                 ),
             ),
             expected_challenge=as_memoryview(
-                base64url_to_bytes("eZ4eeA3O4jy5FIzqDaSJ6JDNGu0bBc5zI1DjQ_kLso1WNqkG6k5mCYf1dtQhVUiBWZWlZkzR5MFeeWCpJRUNXw")
+                base64url_to_bytes(
+                    "eZ4eeA3O4jy5FIzqDaSJ6JDNGu0bBc5zI1DjQ_kLso1WNqkG6k5mCYf1dtQhVUiBWZWlZkzR5MFeeWCpJRUNXw"
+                )
             ),
             expected_rp_id="localhost",
             expected_origin="http://localhost:5000",
             credential_public_key=as_memoryview(
-                base64url_to_bytes("pAEBAycgBiFYIMz6_SUFLiDid2Yhlq0YboyJ-CDrIrNpkPUGmJp4D3Dp")
+                base64url_to_bytes(
+                    "pAEBAycgBiFYIMz6_SUFLiDid2Yhlq0YboyJ-CDrIrNpkPUGmJp4D3Dp"
+                )
             ),
             credential_current_sign_count=3,
         )
@@ -100,7 +110,7 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
             authenticator_data=bytes(),
             client_data_json=bytes(),
             signature=bytes(),
-            user_handle=urlsafe_b64encode(b'some_user_handle_string').decode('ascii'), # type: ignore
+            user_handle=urlsafe_b64encode(b"some_user_handle_string").decode("ascii"),  # type: ignore
         )
 
-        self.assertEqual(response.user_handle, b'some_user_handle_string')
+        self.assertEqual(response.user_handle, b"some_user_handle_string")
