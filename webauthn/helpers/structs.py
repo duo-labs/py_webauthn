@@ -22,7 +22,7 @@ class URLSafeBase64Encoder(EncoderProtocol):
 
     @classmethod
     def decode(cls, data: bytes) -> bytes:
-        """Decode the data from base64 encoded bytes to original bytes data.
+        """Decode the data from URL safe base64 encoded bytes to original bytes data.
 
         Args:
             data: The data to decode.
@@ -31,19 +31,16 @@ class URLSafeBase64Encoder(EncoderProtocol):
             The decoded data.
         """
 
-        print(f"Decode {data=}")
-
         try:
             return base64.urlsafe_b64decode(data + b"====")
         except ValueError as e:
-            print(f"Got a value error: ", e)
             raise PydanticCustomError(
                 "base64_decode", "Base64 decoding error: '{error}'", {"error": str(e)}
             )
 
     @classmethod
     def encode(cls, value: bytes) -> bytes:
-        """Encode the data from bytes to a base64 encoded bytes.
+        """Encode the data from bytes to a URL safe base64 encoded bytes.
 
         Args:
             value: The data to encode.
@@ -51,8 +48,6 @@ class URLSafeBase64Encoder(EncoderProtocol):
         Returns:
             The encoded data.
         """
-
-        print(f"Encode {value=}")
 
         return base64.urlsafe_b64encode(value).replace(b"=", b"")
 
