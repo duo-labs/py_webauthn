@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 import hashlib
 from typing import List, Mapping, Optional, Union
 
@@ -18,6 +19,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialType,
     RegistrationCredential,
     TokenBindingStatus,
+    URLSafeBase64,
     WebAuthnBaseModel,
 )
 from .formats.android_key import verify_android_key
@@ -43,14 +45,14 @@ class VerifiedRegistration(WebAuthnBaseModel):
         `attestation_object`: The raw attestation object for later scrutiny
     """
 
-    credential_id: bytes
-    credential_public_key: bytes
+    credential_id: URLSafeBase64
+    credential_public_key: URLSafeBase64
     sign_count: int
     aaguid: str
     fmt: AttestationFormat
     credential_type: PublicKeyCredentialType
     user_verified: bool
-    attestation_object: bytes
+    attestation_object: URLSafeBase64
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
 
@@ -269,14 +271,14 @@ def verify_registration_response(
     parsed_backup_flags = parse_backup_flags(auth_data.flags)
 
     return VerifiedRegistration(
-        credential_id=attested_credential_data.credential_id,
-        credential_public_key=attested_credential_data.credential_public_key,
+        credential_id=urlsafe_b64encode(attested_credential_data.credential_id),
+        credential_public_key=urlsafe_b64encode(attested_credential_data.credential_public_key),
         sign_count=auth_data.sign_count,
         aaguid=aaguid_to_string(attested_credential_data.aaguid),
         fmt=attestation_object.fmt,
         credential_type=credential.type,
         user_verified=auth_data.flags.uv,
-        attestation_object=response.attestation_object,
+        attestation_object=urlsafe_b64encode(response.attestation_object),
         credential_device_type=parsed_backup_flags.credential_device_type,
         credential_backed_up=parsed_backup_flags.credential_backed_up,
     )

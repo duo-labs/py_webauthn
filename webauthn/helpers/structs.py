@@ -1,13 +1,64 @@
+import base64
 from enum import Enum
 from typing import List, Literal, Optional
+from typing_extensions import Annotated
 
-from pydantic import BaseModel, validator
-from pydantic.fields import ModelField
+from pydantic import ConfigDict, BaseModel, EncodedBytes, EncoderProtocol, FieldValidationInfo, field_validator
+from pydantic_core import PydanticCustomError
 
-from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .snake_case_to_camel_case import snake_case_to_camel_case
+
+
+class URLSafeBase64Encoder(EncoderProtocol):
+    """Base64 encoder."""
+
+    @classmethod
+    def decode(cls, data: bytes) -> bytes:
+        """Decode the data from base64 encoded bytes to original bytes data.
+
+        Args:
+            data: The data to decode.
+
+        Returns:
+            The decoded data.
+        """
+
+        print(f"Decode {data=}")
+
+        try:
+            return base64.urlsafe_b64decode(data + b"====")
+        except ValueError as e:
+            print(f"Got a value error: ", e)
+            raise PydanticCustomError('base64_decode', "Base64 decoding error: '{error}'", {'error': str(e)})
+
+    @classmethod
+    def encode(cls, value: bytes) -> bytes:
+        """Encode the data from bytes to a base64 encoded bytes.
+
+        Args:
+            value: The data to encode.
+
+        Returns:
+            The encoded data.
+        """
+
+        print(f"Encode {value=}")
+
+        return base64.urlsafe_b64encode(value).replace(b"=", b"")
+
+    @classmethod
+    def get_json_format(cls) -> Literal['base64']:
+        """Get the JSON format for the encoded data.
+
+        Returns:
+            The JSON format for the encoded data.
+        """
+        return 'base64'
+
+
+URLSafeBase64 = Annotated[bytes, EncodedBytes(encoder=URLSafeBase64Encoder)]
+
 
 
 class WebAuthnBaseModel(BaseModel):
@@ -16,29 +67,31 @@ class WebAuthnBaseModel(BaseModel):
     when working with WebAuthn data structures
 
     `modelInstance.json()` (to JSON):
-    - Encodes bytes to Base64URL
+    - Encodes bytes to URLSafeBase64
     - Converts snake_case properties to camelCase
 
     `Model.parse_raw()` (from JSON):
-    - Decodes Base64URL to bytes
+    - Decodes URLSafeBase64 to bytes
     - Converts camelCase properties to snake_case
     """
 
-    class Config:
-        json_encoders = {bytes: bytes_to_base64url}
-        json_loads = json_loads_base64url_to_bytes
-        alias_generator = snake_case_to_camel_case
-        allow_population_by_field_name = True
+    model_config = ConfigDict( alias_generator=snake_case_to_camel_case, populate_by_name=True)
 
-    @validator("*", pre=True, allow_reuse=True)
-    def _validate_bytes_fields(cls, v, field: ModelField):
+    @field_validator("*", mode="before")
+    def _validate_bytes_fields(cls, v, info: FieldValidationInfo):
         """
         Allow for Pydantic models to define fields as `bytes`, but allow consuming projects to
         specify bytes-adjacent values (bytes subclasses, memoryviews, etc...) that otherwise
         function like `bytes`. Keeps the library Pythonic.
         """
-        if field.type_ != bytes:
+
+        field = cls.model_fields[info.field_name]
+
+        if field.annotation != bytes:
             return v
+        
+        # print(f"Running validation, {v=}, {info=}, {field=}")
+        print(f"Running validation on {info.field_name}")
 
         if isinstance(v, bytes):
             """
@@ -243,7 +296,7 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: bytes
+    id: URLSafeBase64
     name: str
     display_name: str
 
@@ -273,7 +326,7 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
     """
 
-    id: bytes
+    id: URLSafeBase64
     type: Literal[
         PublicKeyCredentialType.PUBLIC_KEY
     ] = PublicKeyCredentialType.PUBLIC_KEY
@@ -314,7 +367,7 @@ class CollectedClientData(WebAuthnBaseModel):
     """
 
     type: ClientDataType
-    challenge: bytes
+    challenge: URLSafeBase64
     origin: str
     cross_origin: Optional[bool] = None
     token_binding: Optional[TokenBinding] = None
@@ -345,7 +398,7 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
 
     rp: PublicKeyCredentialRpEntity
     user: PublicKeyCredentialUserEntity
-    challenge: bytes
+    challenge: URLSafeBase64
     pub_key_cred_params: List[PublicKeyCredentialParameters]
     timeout: Optional[int] = None
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
@@ -364,8 +417,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorattestationresponse
     """
 
-    client_data_json: bytes
-    attestation_object: bytes
+    client_data_json: URLSafeBase64
+    attestation_object: URLSafeBase64
     # Optional in L2, but becomes required in L3. Play it safe until L3 becomes Recommendation
     transports: Optional[List[AuthenticatorTransport]] = None
 
@@ -374,7 +427,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     """A registration-specific subclass of PublicKeyCredential returned from `navigator.credentials.create()`
 
     Attributes:
-        `id`: The Base64URL-encoded representation of raw_id
+        `id`: The URLSafeBase64-encoded representation of raw_id
         `raw_id`: A byte sequence representing the credential's unique identifier
         `response`: The authenticator's attesation data
         `type`: The literal string `"public-key"`
@@ -383,7 +436,7 @@ class RegistrationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: URLSafeBase64
     response: AuthenticatorAttestationResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
     type: Literal[
@@ -401,13 +454,13 @@ class AttestationStatement(WebAuthnBaseModel):
     attestation format.
     """
 
-    sig: Optional[bytes] = None
-    x5c: Optional[List[bytes]] = None
-    response: Optional[bytes] = None
+    sig: Optional[URLSafeBase64] = None
+    x5c: Optional[List[URLSafeBase64]] = None
+    response: Optional[URLSafeBase64] = None
     alg: Optional[COSEAlgorithmIdentifier] = None
     ver: Optional[str] = None
-    cert_info: Optional[bytes] = None
-    pub_area: Optional[bytes] = None
+    cert_info: Optional[URLSafeBase64] = None
+    pub_area: Optional[URLSafeBase64] = None
 
 
 class AuthenticatorDataFlags(WebAuthnBaseModel):
@@ -443,9 +496,9 @@ class AttestedCredentialData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#attested-credential-data
     """
 
-    aaguid: bytes
-    credential_id: bytes
-    credential_public_key: bytes
+    aaguid: URLSafeBase64
+    credential_id: URLSafeBase64
+    credential_public_key: URLSafeBase64
 
 
 class AuthenticatorData(WebAuthnBaseModel):
@@ -462,11 +515,11 @@ class AuthenticatorData(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
     """
 
-    rp_id_hash: bytes
+    rp_id_hash: URLSafeBase64
     flags: AuthenticatorDataFlags
     sign_count: int
     attested_credential_data: Optional[AttestedCredentialData] = None
-    extensions: Optional[bytes] = None
+    extensions: Optional[URLSafeBase64] = None
 
 
 class AttestationObject(WebAuthnBaseModel):
@@ -505,7 +558,7 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
     """
 
-    challenge: bytes
+    challenge: URLSafeBase64
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
@@ -526,17 +579,17 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     https://www.w3.org/TR/webauthn-2/#authenticatorassertionresponse
     """
 
-    client_data_json: bytes
-    authenticator_data: bytes
-    signature: bytes
-    user_handle: Optional[bytes] = None
+    client_data_json: URLSafeBase64
+    authenticator_data: URLSafeBase64
+    signature: URLSafeBase64
+    user_handle: Optional[URLSafeBase64] = None
 
 
 class AuthenticationCredential(WebAuthnBaseModel):
     """An authentication-specific subclass of PublicKeyCredential. Returned from `navigator.credentials.get()`
 
     Attributes:
-        `id`: The Base64URL-encoded representation of raw_id
+        `id`: The URLSafeBase64-encoded representation of raw_id
         `raw_id`: A byte sequence representing the credential's unique identifier
         `response`: The authenticator's assertion data
         `type`: The literal string `"public-key"`
@@ -545,7 +598,7 @@ class AuthenticationCredential(WebAuthnBaseModel):
     """
 
     id: str
-    raw_id: bytes
+    raw_id: URLSafeBase64
     response: AuthenticatorAssertionResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
     type: Literal[

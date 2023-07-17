@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -33,7 +34,7 @@ class TestGenerateRegistrationOptions(TestCase):
         )
         assert options.challenge == b"12345"
         assert options.user == PublicKeyCredentialUserEntity(
-            id=b"ABAV6QWPBEY9WOTOA1A4",
+            id=urlsafe_b64encode(b"ABAV6QWPBEY9WOTOA1A4"),
             name="lee",
             display_name="lee",
         )
@@ -60,7 +61,7 @@ class TestGenerateRegistrationOptions(TestCase):
             ),
             challenge=b"1234567890",
             exclude_credentials=[
-                PublicKeyCredentialDescriptor(id=b"1234567890"),
+                PublicKeyCredentialDescriptor(id=urlsafe_b64encode(b"1234567890"))
             ],
             supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
             timeout=120000,
@@ -71,7 +72,7 @@ class TestGenerateRegistrationOptions(TestCase):
         )
         assert options.challenge == b"1234567890"
         assert options.user == PublicKeyCredentialUserEntity(
-            id=b"ABAV6QWPBEY9WOTOA1A4",
+            id=urlsafe_b64encode(b"ABAV6QWPBEY9WOTOA1A4"),
             name="lee",
             display_name="Lee",
         )
@@ -81,7 +82,7 @@ class TestGenerateRegistrationOptions(TestCase):
         )
         assert options.timeout == 120000
         assert options.exclude_credentials == [
-            PublicKeyCredentialDescriptor(id=b"1234567890")
+            PublicKeyCredentialDescriptor(id=urlsafe_b64encode(b"1234567890"))
         ]
         assert options.authenticator_selection == AuthenticatorSelectionCriteria(
             authenticator_attachment=AuthenticatorAttachment.PLATFORM,

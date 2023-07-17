@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -25,7 +26,7 @@ class TestWebAuthnGenerateAttestationOptions(TestCase):
         options = generate_authentication_options(
             rp_id="example.com",
             allow_credentials=[
-                PublicKeyCredentialDescriptor(id=b"12345"),
+                PublicKeyCredentialDescriptor(id=urlsafe_b64encode(b"12345")),
             ],
             challenge=b"this_is_a_challenge",
             timeout=12000,
@@ -36,6 +37,6 @@ class TestWebAuthnGenerateAttestationOptions(TestCase):
         assert options.timeout == 12000
         assert options.rp_id == "example.com"
         assert options.allow_credentials == [
-            PublicKeyCredentialDescriptor(id=b"12345"),
+            PublicKeyCredentialDescriptor(id=urlsafe_b64encode(b"12345")),
         ]
         assert options.user_verification == UserVerificationRequirement.REQUIRED

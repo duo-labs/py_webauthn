@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 import hashlib
 from typing import List, Union
 
@@ -19,6 +20,7 @@ from webauthn.helpers.structs import (
     CredentialDeviceType,
     PublicKeyCredentialType,
     TokenBindingStatus,
+    URLSafeBase64,
     WebAuthnBaseModel,
 )
 
@@ -28,7 +30,7 @@ class VerifiedAuthentication(WebAuthnBaseModel):
     Information about a verified authentication of which an RP can make use
     """
 
-    credential_id: bytes
+    credential_id: URLSafeBase64
     new_sign_count: int
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
@@ -164,7 +166,7 @@ def verify_authentication_response(
     parsed_backup_flags = parse_backup_flags(auth_data.flags)
 
     return VerifiedAuthentication(
-        credential_id=credential.raw_id,
+        credential_id=urlsafe_b64encode(credential.raw_id),
         new_sign_count=auth_data.sign_count,
         credential_device_type=parsed_backup_flags.credential_device_type,
         credential_backed_up=parsed_backup_flags.credential_backed_up,

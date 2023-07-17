@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 import json
 from unittest import TestCase
 
@@ -29,7 +30,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
             ),
             challenge=b"1234567890",
             exclude_credentials=[
-                PublicKeyCredentialDescriptor(id=b"1234567890"),
+                PublicKeyCredentialDescriptor(id=urlsafe_b64encode(b"1234567890")),
             ],
             supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
             timeout=120000,
@@ -65,7 +66,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
             user_name="lee",
             exclude_credentials=[
                 PublicKeyCredentialDescriptor(
-                    id=b"1234567890",
+                    id=urlsafe_b64encode(b"1234567890"),
                     transports=[AuthenticatorTransport.USB],
                 )
             ],

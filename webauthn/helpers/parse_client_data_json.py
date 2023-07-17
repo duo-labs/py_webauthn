@@ -3,7 +3,6 @@ from json.decoder import JSONDecodeError
 
 from pydantic import ValidationError
 
-from .base64url_to_bytes import base64url_to_bytes
 from .exceptions import InvalidClientDataJSONStructure
 from .structs import CollectedClientData, TokenBinding
 
@@ -35,7 +34,7 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
 
     client_data = CollectedClientData(
         type=json_dict["type"],
-        challenge=base64url_to_bytes(json_dict["challenge"]),
+        challenge=json_dict["challenge"],
         origin=json_dict["origin"],
     )
 

@@ -1,4 +1,7 @@
+from base64 import urlsafe_b64encode
 import cbor2
+
+from webauthn.helpers.bytes_to_base64url import bytes_to_base64url
 
 from .exceptions import InvalidAuthenticatorDataStructure
 from .structs import AttestedCredentialData, AuthenticatorData, AuthenticatorDataFlags
@@ -41,7 +44,7 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
 
     # The value to return
     authenticator_data = AuthenticatorData(
-        rp_id_hash=rp_id_hash,
+        rp_id_hash=bytes_to_base64url(rp_id_hash).encode("ascii"),
         flags=flags,
         sign_count=int.from_bytes(sign_count, "big"),
     )
@@ -63,9 +66,9 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         pointer += len(credential_public_key_bytes)
 
         attested_cred_data = AttestedCredentialData(
-            aaguid=aaguid,
-            credential_id=credential_id,
-            credential_public_key=credential_public_key_bytes,
+            aaguid=urlsafe_b64encode(aaguid),
+            credential_id=urlsafe_b64encode(credential_id),
+            credential_public_key=urlsafe_b64encode(credential_public_key_bytes),
         )
         authenticator_data.attested_credential_data = attested_cred_data
 

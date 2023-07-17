@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 from typing import List, Optional
 
 from webauthn.helpers import generate_challenge
@@ -102,11 +103,11 @@ def generate_registration_options(
             id=rp_id,
         ),
         user=PublicKeyCredentialUserEntity(
-            id=user_id.encode("utf-8"),
+            id=urlsafe_b64encode(user_id.encode("utf-8")),
             name=user_name,
             display_name=user_display_name,
         ),
-        challenge=challenge,
+        challenge=urlsafe_b64encode(challenge),
         pub_key_cred_params=pub_key_cred_params,
         timeout=timeout,
         exclude_credentials=exclude_credentials,

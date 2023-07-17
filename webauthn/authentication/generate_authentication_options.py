@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode
 from typing import List, Optional
 
 from webauthn.helpers import generate_challenge
@@ -41,7 +42,7 @@ def generate_authentication_options(
 
     return PublicKeyCredentialRequestOptions(
         rp_id=rp_id,
-        challenge=challenge,
+        challenge=urlsafe_b64encode(challenge),
         timeout=timeout,
         allow_credentials=allow_credentials,
         user_verification=user_verification,
