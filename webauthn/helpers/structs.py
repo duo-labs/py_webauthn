@@ -1,8 +1,12 @@
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, validator
-from pydantic.fields import ModelField
+try:
+    from pydantic.v1 import BaseModel, validator
+    from pydantic.v1.fields import ModelField
+except:
+    from pydantic import BaseModel, validator
+    from pydantic.fields import ModelField
 
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier

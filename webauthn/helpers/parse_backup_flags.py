@@ -1,5 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
 
 from .structs import AuthenticatorDataFlags, CredentialDeviceType
 from .exceptions import InvalidBackupFlags
