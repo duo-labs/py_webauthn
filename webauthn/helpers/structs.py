@@ -5,8 +5,8 @@ try:
     from pydantic.v1 import BaseModel, validator
     from pydantic.v1.fields import ModelField
 except:
-    from pydantic import BaseModel, validator
-    from pydantic.fields import ModelField
+    from pydantic import BaseModel, validator  # type: ignore
+    from pydantic.fields import ModelField  # type: ignore
 
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier

@@ -4,7 +4,7 @@ from cbor2 import decoder
 try:
     from pydantic.v1 import BaseModel
 except ImportError:
-    from pydantic import BaseModel
+    from pydantic import BaseModel  # type: ignore
 
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType

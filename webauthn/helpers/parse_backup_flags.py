@@ -2,7 +2,7 @@ from enum import Enum
 try:
     from pydantic.v1 import BaseModel
 except ImportError:
-    from pydantic import BaseModel
+    from pydantic import BaseModel  # type: ignore
 
 from .structs import AuthenticatorDataFlags, CredentialDeviceType
 from .exceptions import InvalidBackupFlags

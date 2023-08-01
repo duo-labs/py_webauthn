@@ -4,7 +4,7 @@ from json.decoder import JSONDecodeError
 try:
     from pydantic.v1 import ValidationError
 except ImportError:
-    from pydantic import ValidationError
+    from pydantic import ValidationError  # type: ignore
 
 from .base64url_to_bytes import base64url_to_bytes
 from .exceptions import InvalidClientDataJSONStructure
