@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import List, Literal, Optional, Any
 
-from webauthn.helpers.base64url_to_bytes import base64url_to_bytes
-
 
 try:
     from pydantic import BaseModel, field_validator, ConfigDict, ValidationInfo
@@ -14,6 +12,7 @@ except ImportError:
 
     PYDANTIC_V2 = False
 
+from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
 from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
