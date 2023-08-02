@@ -4,7 +4,7 @@ from typing import List, Union
 from cryptography.exceptions import InvalidSignature
 
 from webauthn.helpers import (
-    bytes_to_base64url,
+    base64url_to_bytes,
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
     parse_authenticator_data,
@@ -69,7 +69,7 @@ def verify_authentication_response(
     """
 
     # FIDO-specific check
-    if bytes_to_base64url(credential.raw_id) != credential.id:
+    if credential.raw_id != base64url_to_bytes(credential.id):
         raise InvalidAuthenticationResponse("id and raw_id were not equivalent")
 
     # FIDO-specific check

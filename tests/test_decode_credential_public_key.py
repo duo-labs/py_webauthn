@@ -24,12 +24,12 @@ class TestDecodeCredentialPublicKey(TestCase):
         assert (
             decoded.x
             and bytes_to_base64url(decoded.x)
-            == "MMcEPFOpY_jJlmcBrnbgvq4-7CGKt5TBEPmxdjpTaDE"
+            == "MMcEPFOpY_jJlmcBrnbgvq4-7CGKt5TBEPmxdjpTaDE="
         )
         assert (
             decoded.y
             and bytes_to_base64url(decoded.y)
-            == "xuwbECbDdNfTTegnc174oYdusZiMmJgct0yI_ulrJGI"
+            == "xuwbECbDdNfTTegnc174oYdusZiMmJgct0yI_ulrJGI="
         )
 
     def test_decode_rsa_public_key(self) -> None:
@@ -46,7 +46,7 @@ class TestDecodeCredentialPublicKey(TestCase):
         assert (
             decoded.n
             and bytes_to_base64url(decoded.n)
-            == "8X6V649G2vwB99CSf_luwR0jj7oDg_GhA3TQSnNYIwfQJldxT5dmi9H8IjjCrTP28iNuKl29hc3Mowux1FZB0bc5AEJ2oV3JCOMGP9NZKGmOosF7iBN2GtGY7Nomcs-ruBv2mxp1nTm6mv5B8XNwh0e18uTA5AJCsl-k6lNLYB2XBIQ3fy2-TjSQ8IOMLypWQbWWBJXzLmepaJ6EWe6kf_NaxpA2chWsaekZcr8xG6OIo3iGh0Mpags_qBZtN4n2TDn0R2LheLk4yQ0R_oOAVtX963Yuw0x5NYSZyMNSMi_1RSEPTYn5AILmIzQskglDaWJYtnjKz4QLuXWCRRYyDQ"
+            == "8X6V649G2vwB99CSf_luwR0jj7oDg_GhA3TQSnNYIwfQJldxT5dmi9H8IjjCrTP28iNuKl29hc3Mowux1FZB0bc5AEJ2oV3JCOMGP9NZKGmOosF7iBN2GtGY7Nomcs-ruBv2mxp1nTm6mv5B8XNwh0e18uTA5AJCsl-k6lNLYB2XBIQ3fy2-TjSQ8IOMLypWQbWWBJXzLmepaJ6EWe6kf_NaxpA2chWsaekZcr8xG6OIo3iGh0Mpags_qBZtN4n2TDn0R2LheLk4yQ0R_oOAVtX963Yuw0x5NYSZyMNSMi_1RSEPTYn5AILmIzQskglDaWJYtnjKz4QLuXWCRRYyDQ=="
         )
 
     def test_decode_uncompressed_ec2_public_key(self) -> None:
@@ -63,10 +63,10 @@ class TestDecodeCredentialPublicKey(TestCase):
         assert (
             decoded.x
             and bytes_to_base64url(decoded.x)
-            == "FrEpm55XKvkgIN-izKDHBF-VJ09Rw2F5mFOFcJ5MVM0"
+            == "FrEpm55XKvkgIN-izKDHBF-VJ09Rw2F5mFOFcJ5MVM0="
         )
         assert (
             decoded.y
             and bytes_to_base64url(decoded.y)
-            == "o0EM9dj0V-xJ1JwpE2XZ_8NRIt5KVvr71Zl0rB8BWOs"
+            == "o0EM9dj0V-xJ1JwpE2XZ_8NRIt5KVvr71Zl0rB8BWOs="
         )

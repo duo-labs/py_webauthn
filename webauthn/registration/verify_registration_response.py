@@ -3,7 +3,7 @@ from typing import List, Mapping, Optional, Union
 
 from webauthn.helpers import (
     aaguid_to_string,
-    bytes_to_base64url,
+    base64url_to_bytes,
     decode_credential_public_key,
     parse_attestation_object,
     parse_client_data_json,
@@ -95,7 +95,7 @@ def verify_registration_response(
     verified = False
 
     # FIDO-specific check
-    if bytes_to_base64url(credential.raw_id) != credential.id:
+    if credential.raw_id != base64url_to_bytes(credential.id):
         raise InvalidRegistrationResponse("id and raw_id were not equivalent")
 
     # FIDO-specific check

@@ -19,7 +19,7 @@ class TestVerifyAuthenticationResponse(TestCase):
             },
             "type": "public-key",
             "clientExtensionResults": {}
-        }"""
+        }""",
         )
         challenge = base64url_to_bytes(
             "xi30GPGAFYRxVDpY1sM10DaLzVQG66nv-_7RUazH0vI2YvG8LYgDEnvN5fZZNVuvEDuMi9te3VLqb42N0fkLGA"
@@ -45,7 +45,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         )
         assert verification.new_sign_count == 78
         assert verification.credential_backed_up == False
-        assert verification.credential_device_type == 'single_device'
+        assert verification.credential_device_type == "single_device"
 
     def test_verify_authentication_response_with_RSA_public_key(self):
         credential = AuthenticationCredential.parse_raw(
@@ -60,7 +60,7 @@ class TestVerifyAuthenticationResponse(TestCase):
                 },
                 "type": "public-key",
                 "clientExtensionResults": {}
-            }"""
+            }""",
         )
         challenge = base64url_to_bytes(
             "iPmAi1Pp1XL6oAgq3PWZtZPnZa1zFUDoGbaQ0_KvVG1lF2s3Rt_3o4uSzccy0tmcTIpTTT4BU1T-I4maavndjQ"
@@ -96,7 +96,7 @@ class TestVerifyAuthenticationResponse(TestCase):
             },
             "type": "public-key",
             "clientExtensionResults": {}
-        }"""
+        }""",
         )
         challenge = base64url_to_bytes(
             "zsfiMZj16TUVCrT5tDRYXdYlUrJp7zn_UNd5NmBocPc4I2dKZbeEWpwBAwA4s6oHkVX6_ly_jgp743dyiWHYYw"
