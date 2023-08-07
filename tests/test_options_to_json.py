@@ -40,14 +40,14 @@ class TestWebAuthnOptionsToJSON(TestCase):
         assert json.loads(output) == {
             "rp": {"name": "Example Co", "id": "example.com"},
             "user": {
-                "id": "QUJBVjZRV1BCRVk5V09UT0ExQTQ=",
+                "id": "QUJBVjZRV1BCRVk5V09UT0ExQTQ",
                 "name": "lee",
                 "displayName": "Lee",
             },
-            "challenge": "MTIzNDU2Nzg5MA==",
+            "challenge": "MTIzNDU2Nzg5MA",
             "pubKeyCredParams": [{"type": "public-key", "alg": -36}],
             "timeout": 120000,
-            "excludeCredentials": [{"type": "public-key", "id": "MTIzNDU2Nzg5MA=="}],
+            "excludeCredentials": [{"type": "public-key", "id": "MTIzNDU2Nzg5MA"}],
             "authenticatorSelection": {
                 "authenticatorAttachment": "platform",
                 "residentKey": "required",
@@ -75,7 +75,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
 
         assert json.loads(output)["excludeCredentials"] == [
             {
-                "id": "MTIzNDU2Nzg5MA==",
+                "id": "MTIzNDU2Nzg5MA",
                 "transports": ["usb"],
                 "type": "public-key",
             }

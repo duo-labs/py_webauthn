@@ -1,5 +1,7 @@
 from enum import Enum
-from typing import List, Literal, Optional, Any
+from typing import Callable, List, Literal, Optional, Any, Dict
+
+from pydantic import model_serializer
 
 
 try:
@@ -74,6 +76,23 @@ class WebAuthnBaseModel(BaseModel):
                 return base64url_to_bytes(v)
 
             return _to_bytes(v)
+
+        @model_serializer(mode="wrap", when_used="json")
+        def clean_up_base64(
+            self, serializer: Callable[..., Dict[str, Any]]
+        ) -> Dict[str, Any]:
+            """
+            Remove trailing "=" from bytes fields serialized as base64 encoded strings.
+            """
+
+            serialized = serializer(self)
+
+            for name, field_info in self.model_fields.items():
+                value = serialized.get(name)
+                if field_info.annotation is bytes and isinstance(value, str):
+                    serialized[name] = value.rstrip("=")
+
+            return serialized
 
     else:
 
