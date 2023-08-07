@@ -1,11 +1,15 @@
 from enum import Enum
 from typing import Callable, List, Literal, Optional, Any, Dict
 
-from pydantic import model_serializer
-
 
 try:
-    from pydantic import BaseModel, field_validator, ConfigDict, ValidationInfo
+    from pydantic import (
+        BaseModel,
+        field_validator,
+        ConfigDict,
+        ValidationInfo,
+        model_serializer,
+    )
 
     PYDANTIC_V2 = True
 except ImportError:
