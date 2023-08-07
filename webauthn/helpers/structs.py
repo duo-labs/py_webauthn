@@ -3,18 +3,18 @@ from typing import Callable, List, Literal, Optional, Any, Dict
 
 
 try:
-    from pydantic import (
+    from pydantic import (  # type: ignore[attr-defined]
         BaseModel,
         field_validator,
         ConfigDict,
-        ValidationInfo,
+        FieldValidationInfo,
         model_serializer,
     )
 
     PYDANTIC_V2 = True
 except ImportError:
     from pydantic import BaseModel, validator
-    from pydantic.fields import ModelField
+    from pydantic.fields import ModelField  # type: ignore[attr-defined]
 
     PYDANTIC_V2 = False
 
@@ -58,7 +58,7 @@ class WebAuthnBaseModel(BaseModel):
     """
 
     if PYDANTIC_V2:
-        model_config = ConfigDict(
+        model_config = ConfigDict(  # type: ignore[typeddict-unknown-key]
             alias_generator=snake_case_to_camel_case,
             populate_by_name=True,
             ser_json_bytes="base64",
@@ -66,9 +66,9 @@ class WebAuthnBaseModel(BaseModel):
 
         @field_validator("*", mode="before")
         def _pydantic_v2_validate_bytes_fields(
-            cls, v: Any, info: ValidationInfo
+            cls, v: Any, info: FieldValidationInfo
         ) -> Any:
-            field = cls.model_fields[info.field_name]
+            field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
             if field.annotation != bytes:
                 return v
@@ -91,7 +91,7 @@ class WebAuthnBaseModel(BaseModel):
 
             serialized = serializer(self)
 
-            for name, field_info in self.model_fields.items():
+            for name, field_info in self.model_fields.items():  # type: ignore[attr-defined]
                 value = serialized.get(name)
                 if field_info.annotation is bytes and isinstance(value, str):
                     serialized[name] = value.rstrip("=")
@@ -106,7 +106,7 @@ class WebAuthnBaseModel(BaseModel):
             alias_generator = snake_case_to_camel_case
             allow_population_by_field_name = True
 
-        @validator("*", pre=True, allow_reuse=True)
+        @validator("*", pre=True, allow_reuse=True)  # type: ignore[type-var]
         def _pydantic_v1_validate_bytes_fields(cls, v: Any, field: ModelField) -> Any:
             """
             Allow for Pydantic models to define fields as `bytes`, but allow consuming projects to
