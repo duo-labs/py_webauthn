@@ -82,7 +82,7 @@ class WebAuthnBaseModel(BaseModel):
             return _to_bytes(v)
 
         @model_serializer(mode="wrap", when_used="json")
-        def clean_up_base64(
+        def _pydantic_v2_serialize_bytes_fields(
             self, serializer: Callable[..., Dict[str, Any]]
         ) -> Dict[str, Any]:
             """
