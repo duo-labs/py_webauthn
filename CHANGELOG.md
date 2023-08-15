@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.10.0
+
+**Changes:**
+
+- Support use in projects using either Pydantic v1 or v2 ([#166](https://github.com/duo-labs/py_webauthn/pull/166))
+
 ## v1.9.0
 
 **Changes:**
