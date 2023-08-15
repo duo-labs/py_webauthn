@@ -2,6 +2,7 @@ import json
 from unittest import TestCase
 
 import cbor2
+from pydantic import ValidationError
 from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.known_root_certs import globalsign_r2
@@ -87,9 +88,7 @@ class TestVerifyRegistrationResponse(TestCase):
         rp_id = "localhost"
         expected_origin = "http://localhost:5000"
 
-        with self.assertRaisesRegex(
-            Exception, "value is not a valid enumeration member"
-        ):
+        with self.assertRaises(ValidationError):
             verify_registration_response(
                 credential=credential,
                 expected_challenge=challenge,
