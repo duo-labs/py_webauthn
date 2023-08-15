@@ -64,12 +64,12 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         detect when this happens and gracefully handle it.
         """
         # Decodes to `{1: "OKP", 3: -8, -1: "Ed25519"}` (it's missing key -2 a.k.a. COSEKey.X)
-        bad_eddsa = bytearray.fromhex("a301634f4b500327206745643235353139")
-        # If we find the bytes here then fix the bad data
-        if val[pointer : pointer + len(bad_eddsa)] == bad_eddsa:
-            # Make a mutable copy of `bytes`...
+        bad_eddsa_cbor = bytearray.fromhex("a301634f4b500327206745643235353139")
+        # If we find the bytes here then let's fix the bad data
+        if val[pointer : pointer + len(bad_eddsa_cbor)] == bad_eddsa_cbor:
+            # Make a mutable copy of the bytes...
             _val = bytearray(val)
-            # ...Fix the bad bytes...
+            # ...Fix the bad byte...
             _val[pointer] = 0xA4
             # ...Then replace `val` with the fixed bytes
             val = bytes(_val)
