@@ -182,3 +182,29 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
 
         assert output.flags.be is True
         assert output.flags.be is True
+
+    def test_parses_bad_eddsa_auth_data(self) -> None:
+        """
+        Help out particular YubiKeys that incorrectly CBOR-encode authData when they use Ed25519
+        for their public key.
+
+        See https://github.com/duo-labs/py_webauthn/issues/160
+        """
+        auth_data = bytearray.fromhex(
+            "16B02DFBC3D4CCA37EBC2F6516659B12210DB9E1018AB9F13A9690638EA6FDA845000000012FC0579F811347EAB116BB5A8DB9202A0080E82FE6BDE300E4ECC93E0016448AD00FA6F28A011A6F87FF7B0CFCA499BEAF83344C3660B5ECABF72A3B2838A0CC7D87D3FA58292B53449CFF13AD69732D7521649D365CCBC5D0A0FA4B4E09EAE99537261F2F44093F8F4FD4CF5796E0FE58FF0615FFC5882836BBE7B99B08BE2986721C1C5A6AC7F32D3220D9B34D8DEE2FC9A301634F4B5003272067456432353531392198201618F6185918FA182E141875183A18841718521874187A18C51318D918C51883182D18ED181818EA188F182E187407185E18F41518CC18C9186D"
+        )
+
+        output = parse_authenticator_data(auth_data)
+
+        cred_data = output.attested_credential_data
+        self.assertIsNotNone(cred_data)
+        assert cred_data  # Make mypy happy
+
+        self.assertEqual(
+            cred_data.credential_id.hex(),
+            "e82fe6bde300e4ecc93e0016448ad00fa6f28a011a6f87ff7b0cfca499beaf83344c3660b5ecabf72a3b2838a0cc7d87d3fa58292b53449cff13ad69732d7521649d365ccbc5d0a0fa4b4e09eae99537261f2f44093f8f4fd4cf5796e0fe58ff0615ffc5882836bbe7b99b08be2986721c1c5a6ac7f32d3220d9b34d8dee2fc9"
+        )
+        self.assertEqual(
+            cred_data.credential_public_key.hex(),
+            "a401634f4b5003272067456432353531392198201618f6185918fa182e141875183a18841718521874187a18c51318d918c51883182d18ed181818ea188f182e187407185e18f41518cc18c9186d",
+        )

@@ -57,6 +57,23 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         credential_id = val[pointer : pointer + credential_id_len]
         pointer += credential_id_len
 
+        """
+        Some authenticators incorrectly compose authData when using EdDSA for their public keys.
+        A CBOR "Map of 3 items" (0xA3) should be "Map of 4 items" (0xA4), and if we manually adjust
+        the single byte there's a good chance the authData can be correctly parsed. Let's try to
+        detect when this happens and gracefully handle it.
+        """
+        # Decodes to `{1: "OKP", 3: -8, -1: "Ed25519"}` (it's missing key -2 a.k.a. COSEKey.X)
+        bad_eddsa_cbor = bytearray.fromhex("a301634f4b500327206745643235353139")
+        # If we find the bytes here then let's fix the bad data
+        if val[pointer : pointer + len(bad_eddsa_cbor)] == bad_eddsa_cbor:
+            # Make a mutable copy of the bytes...
+            _val = bytearray(val)
+            # ...Fix the bad byte...
+            _val[pointer] = 0xA4
+            # ...Then replace `val` with the fixed bytes
+            val = bytes(_val)
+
         # Load the next CBOR-encoded value
         credential_public_key = cbor2.loads(val[pointer:])
         credential_public_key_bytes = cbor2.dumps(credential_public_key)
