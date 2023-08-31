@@ -29,7 +29,7 @@ simple_registration_options = generate_registration_options(
 )
 
 print("\n[Registration Options - Simple]")
-print(options_to_json(simple_registration_options))
+print(options_to_json(simple_registration_options, indent=2))
 
 # Complex Options
 complex_registration_options = generate_registration_options(
@@ -52,11 +52,11 @@ complex_registration_options = generate_registration_options(
 )
 
 print("\n[Registration Options - Complex]")
-print(options_to_json(complex_registration_options))
+print(options_to_json(complex_registration_options, indent=2))
 
 # Registration Response Verification
 registration_verification = verify_registration_response(
-    credential=RegistrationCredential.parse_raw(
+    credential=RegistrationCredential.model_validate_json(
         """{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
@@ -79,7 +79,7 @@ registration_verification = verify_registration_response(
 )
 
 print("\n[Registration Verification - None]")
-print(registration_verification.json(indent=2))
+print(registration_verification.model_dump_json(indent=2))
 assert registration_verification.credential_id == base64url_to_bytes(
     "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s"
 )

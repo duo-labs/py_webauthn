@@ -10,13 +10,15 @@ def options_to_json(
     options: Union[
         PublicKeyCredentialCreationOptions,
         PublicKeyCredentialRequestOptions,
-    ]
+    ],
+    indent: int|None=None,
 ) -> str:
     """
     Prepare options for transmission to the front end as JSON
     """
-    return options.json(
+    return options.model_dump_json(
         by_alias=True,
         exclude_unset=False,
         exclude_none=True,
+        indent=indent,
     )
