@@ -17,7 +17,7 @@ def options_to_json(
     Prepare options for transmission to the front end as JSON
     """
     if PYDANTIC_V2:
-        json_options = options.model_dump_json(
+        json_options = options.model_dump_json(  # type: ignore[union-attr]
             by_alias=True,
             exclude_unset=False,
             exclude_none=True,

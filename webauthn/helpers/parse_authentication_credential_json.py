@@ -1,3 +1,4 @@
+from typing import Callable
 from pydantic import ValidationError
 
 from .exceptions import InvalidAuthenticationResponse
@@ -6,7 +7,7 @@ from .structs import PYDANTIC_V2, AuthenticationCredential
 
 def parse_authentication_credential_json(json_val: str) -> AuthenticationCredential:
     if PYDANTIC_V2:
-        parsing_method = AuthenticationCredential.model_validate_json
+        parsing_method: Callable = AuthenticationCredential.model_validate_json
     else:  # assuming V1
         parsing_method = AuthenticationCredential.parse_raw
 
