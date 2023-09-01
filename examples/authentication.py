@@ -5,9 +5,9 @@ from webauthn import (
     base64url_to_bytes,
 )
 from webauthn.helpers.structs import (
+    PYDANTIC_V2,
     PublicKeyCredentialDescriptor,
     UserVerificationRequirement,
-    AuthenticationCredential,
 )
 
 ################
@@ -40,8 +40,7 @@ print(options_to_json(complex_authentication_options))
 
 # Authentication Response Verification
 authentication_verification = verify_authentication_response(
-    credential=AuthenticationCredential.parse_raw(
-        """{
+    credential="""{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "response": {
@@ -53,8 +52,7 @@ authentication_verification = verify_authentication_response(
         "type": "public-key",
         "authenticatorAttachment": "cross-platform",
         "clientExtensionResults": {}
-    }"""
-    ),
+    }""",
     expected_challenge=base64url_to_bytes(
         "iPmAi1Pp1XL6oAgq3PWZtZPnZa1zFUDoGbaQ0_KvVG1lF2s3Rt_3o4uSzccy0tmcTIpTTT4BU1T-I4maavndjQ"
     ),
@@ -67,5 +65,8 @@ authentication_verification = verify_authentication_response(
     require_user_verification=True,
 )
 print("\n[Authentication Verification]")
-print(authentication_verification.json(indent=2))
+if PYDANTIC_V2:
+    print(authentication_verification.model_dump_json(indent=2))
+else:
+    print(authentication_verification.json(indent=2))
 assert authentication_verification.new_sign_count == 1

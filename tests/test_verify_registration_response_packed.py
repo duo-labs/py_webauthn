@@ -1,14 +1,13 @@
 from unittest import TestCase
 
 from webauthn.helpers import base64url_to_bytes
-from webauthn.helpers.structs import AttestationFormat, RegistrationCredential
+from webauthn.helpers.structs import AttestationFormat
 from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponsePacked(TestCase):
     def test_verify_attestation_from_yubikey_firefox(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "rawId": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "response": {
@@ -21,9 +20,7 @@ class TestVerifyRegistrationResponsePacked(TestCase):
                 "nfc",
                 "usb"
             ]
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "8LBCiOY3q1cBZHFAWtS4AZZChzGphy67lK7I70zKi4yC7pgrQ2Pch7nAjLk1wq9greshIAsW2AjibhXjjI0TmQ"
         )
@@ -43,8 +40,7 @@ class TestVerifyRegistrationResponsePacked(TestCase):
         )
 
     def test_verify_attestation_with_okp_public_key(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "WlHiMqH6UhUs-d43z-aGlE3nsXuEOQpa9P9pwpqb4tmvtBMBfGvAV2wUrqBCDENjkkxd6kIRzZQKcluyOFlyW_vXVZSAEgod1xj-1QmFpuwyBVnlkQGefRbmUjbEt5iE4q3tdjy65EWIekO0SNjCQx3LxIJMzi25fgUkI9Y-gg0",
             "rawId": "WlHiMqH6UhUs-d43z-aGlE3nsXuEOQpa9P9pwpqb4tmvtBMBfGvAV2wUrqBCDENjkkxd6kIRzZQKcluyOFlyW_vXVZSAEgod1xj-1QmFpuwyBVnlkQGefRbmUjbEt5iE4q3tdjy65EWIekO0SNjCQx3LxIJMzi25fgUkI9Y-gg0",
             "response": {
@@ -56,9 +52,7 @@ class TestVerifyRegistrationResponsePacked(TestCase):
             "transports": [
                 "usb"
             ]
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "7JUBjWZFdFozulxb71DvHkh3P6WKUG4ElUo7wEkKic2JETJMAIKCf7rBE9YksI5oNjDzQ6Hqh6E73Oy6SPcMnw"
         )

@@ -20,7 +20,7 @@ from webauthn.helpers.exceptions import (
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.structs import PYDANTIC_V2, AttestationStatement, WebAuthnBaseModel
 
 
 class SafetyNetJWSHeader(WebAuthnBaseModel):
@@ -87,8 +87,13 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-    payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    if PYDANTIC_V2:
+        header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))
+        payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))
+    else:
+        header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
+        payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+
     signature_bytes_str: str = jws_parts[2]
 
     # Verify that the nonce attribute in the payload of response is identical to the

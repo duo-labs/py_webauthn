@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import base64url_to_bytes
-from webauthn.helpers.structs import AttestationFormat, RegistrationCredential
+from webauthn.helpers.structs import AttestationFormat
 from webauthn import verify_registration_response
 
 
@@ -16,8 +16,7 @@ class TestVerifyRegistrationResponseApple(TestCase):
         # Mocked because these certs actually expired and started failing this test
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
             "rawId": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
             "response": {
@@ -26,9 +25,7 @@ class TestVerifyRegistrationResponseApple(TestCase):
             },
             "type": "public-key",
             "clientExtensionResults": {}
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "1nhqyMkfGAQL-tTcsfpuoyq8hqeoHr0d9tDmjv1BuJ97YTA3FLWS5EdY4qUg-Mzruc2siBdyVlnFIPB1g0Hh2A"
         )

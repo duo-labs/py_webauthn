@@ -3,21 +3,19 @@ from unittest import TestCase
 
 import cbor2
 from pydantic import ValidationError
-from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
+from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, parse_registration_credential
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.known_root_certs import globalsign_r2
 from webauthn.helpers.structs import (
     AttestationFormat,
     PublicKeyCredentialType,
-    RegistrationCredential,
 )
 from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponse(TestCase):
     def test_verifies_none_attestation_response(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "response": {
@@ -31,7 +29,6 @@ class TestVerifyRegistrationResponse(TestCase):
                 "usb"
             ]
         }"""
-        )
 
         challenge = base64url_to_bytes(
             "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
@@ -81,7 +78,7 @@ class TestVerifyRegistrationResponse(TestCase):
         parsed_atte_obj["fmt"] = "not_real_fmt"
         cred_json["response"]["attestationObject"] = bytes_to_base64url(cbor2.dumps(parsed_atte_obj))  # type: ignore
 
-        credential = RegistrationCredential.parse_raw(json.dumps(cred_json))
+        credential = json.dumps(cred_json)
         challenge = base64url_to_bytes(
             "pDRmkdduAi-AU2x6o-FqqhI3XK2nlVlsCSr04zWkNtv84JwrMHtElRHHUWLEDhkrEaQ8B1lBcIH_VSRqp_RAAw"
         )
@@ -97,8 +94,7 @@ class TestVerifyRegistrationResponse(TestCase):
             )
 
     def test_supports_multiple_expected_origins(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "response": {
@@ -112,7 +108,6 @@ class TestVerifyRegistrationResponse(TestCase):
                 "usb"
             ]
         }"""
-        )
 
         challenge = base64url_to_bytes(
             "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
@@ -133,8 +128,7 @@ class TestVerifyRegistrationResponse(TestCase):
 
     def test_raises_when_root_cert_invalid_for_response(self) -> None:
         # "packed"
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "rawId": "syGQPDZRUYdb4m3rdWeyPaIMYlbmydGp1TP_33vE_lqJ3PHNyTd0iKsnKr5WjnCcBzcesZrDEfB_RBLFzU3k4w",
             "response": {
@@ -147,9 +141,7 @@ class TestVerifyRegistrationResponse(TestCase):
                 "nfc",
                 "usb"
             ]
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "8LBCiOY3q1cBZHFAWtS4AZZChzGphy67lK7I70zKi4yC7pgrQ2Pch7nAjLk1wq9greshIAsW2AjibhXjjI0TmQ"
         )
@@ -169,8 +161,7 @@ class TestVerifyRegistrationResponse(TestCase):
             )
 
     def test_verifies_registration_over_cable(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
             "response": {
@@ -183,7 +174,6 @@ class TestVerifyRegistrationResponse(TestCase):
                 "cable"
             ]
         }"""
-        )
 
         challenge = base64url_to_bytes(
             "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
@@ -193,6 +183,38 @@ class TestVerifyRegistrationResponse(TestCase):
 
         verification = verify_registration_response(
             credential=credential,
+            expected_challenge=challenge,
+            expected_origin=expected_origin,
+            expected_rp_id=rp_id,
+        )
+
+        assert verification.fmt == AttestationFormat.NONE
+
+    def test_supports_already_parsed_credential(self) -> None:
+        parsed_credential = parse_registration_credential(
+            """{
+                "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+                "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+                "response": {
+                    "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAFwAAAAAAAAAAAAAAAAAAAAAAQPctcQPE5oNRRJk_nO_371mf7qE7qIodzr0eOf6ACvnMB1oQG165dqutoi1U44shGezu5_gkTjmOPeJO0N8a7P-lAQIDJiABIVggSFbUJF-42Ug3pdM8rDRFu_N5oiVEysPDB6n66r_7dZAiWCDUVnB39FlGypL-qAoIO9xWHtJygo2jfDmHl-_eKFRLDA",
+                    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiVHdON240V1R5R0tMYzRaWS1xR3NGcUtuSE00bmdscXN5VjBJQ0psTjJUTzlYaVJ5RnRya2FEd1V2c3FsLWdrTEpYUDZmbkYxTWxyWjUzTW00UjdDdnciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
+                },
+                "type": "public-key",
+                "clientExtensionResults": {},
+                "transports": [
+                    "cable"
+                ]
+            }"""
+        )
+
+        challenge = base64url_to_bytes(
+            "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
+        )
+        rp_id = "localhost"
+        expected_origin = "http://localhost:5000"
+
+        verification = verify_registration_response(
+            credential=parsed_credential,
             expected_challenge=challenge,
             expected_origin=expected_origin,
             expected_rp_id=rp_id,
