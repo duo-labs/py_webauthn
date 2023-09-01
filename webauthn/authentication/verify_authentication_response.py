@@ -68,7 +68,7 @@ def verify_authentication_response(
     Raises:
         `helpers.exceptions.InvalidAuthenticationResponse` if the response cannot be verified
     """
-    if isinstance(credential, (str, bytes, bytearray)):
+    if isinstance(credential, str):
         credential = parse_authentication_credential_json(credential)
 
     # FIDO-specific check
