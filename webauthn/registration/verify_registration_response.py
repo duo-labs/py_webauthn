@@ -93,7 +93,7 @@ def verify_registration_response(
     Raises:
         `helpers.exceptions.InvalidRegistrationResponse` if the response cannot be verified
     """
-    if isinstance(credential, (str, bytes, bytearray)):
+    if isinstance(credential, str):
         credential = parse_registration_credential_json(credential)
 
     verified = False
