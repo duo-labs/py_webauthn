@@ -7,7 +7,7 @@ from .structs import PYDANTIC_V2, AuthenticationCredential
 
 def parse_authentication_credential_json(json_val: str) -> AuthenticationCredential:
     if PYDANTIC_V2:
-        parsing_method: Callable = AuthenticationCredential.model_validate_json
+        parsing_method: Callable = AuthenticationCredential.model_validate_json  # type: ignore[attr-defined]
     else:  # assuming V1
         parsing_method = AuthenticationCredential.parse_raw
 

@@ -88,8 +88,8 @@ def verify_android_safetynet(
         )
 
     if PYDANTIC_V2:
-        header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))
-        payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))
+        header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))  # type: ignore[attr-defined]
+        payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))  # type: ignore[attr-defined]
     else:
         header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
         payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))

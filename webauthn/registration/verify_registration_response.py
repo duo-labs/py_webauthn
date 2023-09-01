@@ -203,7 +203,7 @@ def verify_registration_response(
         # A "none" attestation should not contain _anything_ in its attestation
         # statement
         if PYDANTIC_V2:
-            num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)
+            num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)  # type: ignore[attr-defined]
         else:
             num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
 
