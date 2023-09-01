@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import Callable, List, Literal, Optional, Any, Dict
-
+from typing import Callable, List, Literal, Optional, Any, Dict, TypeVar
+import typing_extensions
 
 try:
     from pydantic import (  # type: ignore[attr-defined]
@@ -10,6 +10,7 @@ try:
         FieldValidationInfo,
         model_serializer,
     )
+    from pydantic.deprecated import parse as _deprecated_parse
 
     PYDANTIC_V2 = True
 except ImportError:
@@ -17,6 +18,9 @@ except ImportError:
     from pydantic.fields import ModelField  # type: ignore[attr-defined]
 
     PYDANTIC_V2 = False
+
+Model = TypeVar('Model', bound='BaseModel')
+IncEx: typing_extensions.TypeAlias = 'set[int] | set[str] | dict[int, Any] | dict[str, Any] | None'
 
 from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
@@ -98,6 +102,40 @@ class WebAuthnBaseModel(BaseModel):
 
             return serialized
 
+        @classmethod
+        def parse_raw(  # noqa: D102
+            cls: type[Model],
+            b: str | bytes,
+            *,
+            content_type: str | None = None,
+            encoding: str = 'utf8',
+            proto: _deprecated_parse.Protocol | None = None,
+            allow_pickle: bool = False,
+        ) -> Model:
+            return super().model_validate_json(b)
+        
+        def json(  # noqa: D102
+            self,
+            *,
+            include: IncEx = None,
+            exclude: IncEx = None,
+            by_alias: bool = False,
+            exclude_unset: bool = False,
+            exclude_defaults: bool = False,
+            exclude_none: bool = False,
+            encoder: Callable[[Any], Any] | None = None,  # type: ignore[assignment]
+            models_as_dict: bool = None,  # type: ignore[assignment]
+            **dumps_kwargs: Any,
+        ) -> str:
+            return self.model_dump_json(
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+        )
+            
     else:
 
         class Config:
