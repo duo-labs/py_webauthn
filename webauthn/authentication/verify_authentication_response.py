@@ -115,7 +115,7 @@ def verify_authentication_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    auth_data = parse_authenticator_data(response.authenticator_data)  # would be nice to enclose this one in try - except ValidationError and raise InvalidAuthenticationResponse
+    auth_data = parse_authenticator_data(response.authenticator_data)  # TODO: Issue #173
 
     # Generate a hash of the expected RP ID for comparison
     expected_rp_id_hash = hashlib.sha256()
