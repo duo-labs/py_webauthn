@@ -142,7 +142,7 @@ def verify_registration_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    attestation_object = parse_attestation_object(response.attestation_object)  # would be nice to enclose this one in try - except ValidationError and raise InvalidRegistrationResponse
+    attestation_object = parse_attestation_object(response.attestation_object)  # TODO: Issue #173
 
     auth_data = attestation_object.auth_data
 
