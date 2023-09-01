@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import base64url_to_bytes
-from webauthn.helpers.structs import AttestationFormat, RegistrationCredential
+from webauthn.helpers.structs import AttestationFormat
 from webauthn import verify_registration_response
 
 
@@ -15,8 +15,7 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
         # Mocked because response is from FIDO Conformance with unknown root certs
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "V51GE29tGbhby7sbg1cZ_qL8V8njqEsXpAnwQBobvgw",
             "rawId": "V51GE29tGbhby7sbg1cZ_qL8V8njqEsXpAnwQBobvgw",
             "response": {
@@ -25,9 +24,8 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
             },
             "type": "public-key",
             "clientExtensionResults": {}
-        }
-        """
-        )
+        }"""
+
         challenge = base64url_to_bytes("4ab7dfd1-a695-4777-985f-ad2993828e99")
         rp_id = "dev.dontneeda.pw"
         expected_origin = "https://dev.dontneeda.pw"

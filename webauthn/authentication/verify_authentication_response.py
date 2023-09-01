@@ -10,6 +10,7 @@ from webauthn.helpers import (
     parse_authenticator_data,
     parse_backup_flags,
     parse_client_data_json,
+    parse_authentication_credential,
     verify_signature,
 )
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
@@ -42,7 +43,7 @@ expected_token_binding_statuses = [
 
 def verify_authentication_response(
     *,
-    credential: AuthenticationCredential,
+    credential: Union[str, bytes, bytearray, AuthenticationCredential],
     expected_challenge: bytes,
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
@@ -67,6 +68,8 @@ def verify_authentication_response(
     Raises:
         `helpers.exceptions.InvalidAuthenticationResponse` if the response cannot be verified
     """
+    if isinstance(credential, (str, bytes, bytearray)):
+        credential = parse_authentication_credential(credential)
 
     # FIDO-specific check
     if bytes_to_base64url(credential.raw_id) != credential.id:
@@ -112,7 +115,7 @@ def verify_authentication_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    auth_data = parse_authenticator_data(response.authenticator_data)
+    auth_data = parse_authenticator_data(response.authenticator_data)  # would be nice to enclose this one in try - except ValidationError and raise InvalidAuthenticationResponse
 
     # Generate a hash of the expected RP ID for comparison
     expected_rp_id_hash = hashlib.sha256()

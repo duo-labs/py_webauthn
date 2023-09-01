@@ -6,12 +6,12 @@ from webauthn import (
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.structs import (
+    PYDANTIC_V2,
     AttestationConveyancePreference,
     AuthenticatorAttachment,
     AuthenticatorSelectionCriteria,
     PublicKeyCredentialDescriptor,
     ResidentKeyRequirement,
-    RegistrationCredential,
 )
 
 ################
@@ -56,8 +56,7 @@ print(options_to_json(complex_registration_options))
 
 # Registration Response Verification
 registration_verification = verify_registration_response(
-    credential=RegistrationCredential.parse_raw(
-        """{
+    credential="""{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "response": {
@@ -68,8 +67,7 @@ registration_verification = verify_registration_response(
         "type": "public-key",
         "clientExtensionResults": {},
         "authenticatorAttachment": "platform"
-    }"""
-    ),
+    }""",
     expected_challenge=base64url_to_bytes(
         "CeTWogmg0cchuiYuFrv8DXXdMZSIQRVZJOga_xayVVEcBj0Cw3y73yhD4FkGSe-RrP6hPJJAIm3LVien4hXELg"
     ),
@@ -79,7 +77,10 @@ registration_verification = verify_registration_response(
 )
 
 print("\n[Registration Verification - None]")
-print(registration_verification.json(indent=2))
+if PYDANTIC_V2:
+    print(registration_verification.model_dump_json(indent=2))
+else:
+    print(registration_verification.json(indent=2))
 assert registration_verification.credential_id == base64url_to_bytes(
     "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s"
 )

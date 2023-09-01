@@ -1,14 +1,13 @@
 from unittest import TestCase
 
 from webauthn.helpers import base64url_to_bytes
-from webauthn.helpers.structs import AttestationFormat, RegistrationCredential
+from webauthn.helpers.structs import AttestationFormat
 from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseFIDOU2F(TestCase):
     def test_verify_attestation_from_yubikey_firefox(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "lrjqbPdLbWXTJ2sFIreka9aWd2ED-SDx_VAgBAh4XmCJgjCjudEjoi42pGQd-_Bi6nNPQ3T7-xOEgty2I3m7cw",
             "rawId": "lrjqbPdLbWXTJ2sFIreka9aWd2ED-SDx_VAgBAh4XmCJgjCjudEjoi42pGQd-_Bi6nNPQ3T7-xOEgty2I3m7cw",
             "response": {
@@ -17,9 +16,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
             },
             "type": "public-key",
             "clientExtensionResults": {}
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "ZJVNlmOrXwwgQkd1gDMly8BIiIMV4IQDDsCr6KPbCIHcOZ5waKHm-MZtuY748SCqg-NZVpRrYFyFrc36gQoFtw"
         )
@@ -39,8 +36,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
         )
 
     def test_verify_attestation_from_fido_conformance(self) -> None:
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "2i53XtAuBVv2ztu9hdTkG_I4_zc-MhmYOjM2HWDCIlk",
             "rawId": "2i53XtAuBVv2ztu9hdTkG_I4_zc-MhmYOjM2HWDCIlk",
             "response": {
@@ -49,9 +45,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
             },
             "type": "public-key",
             "transports": null
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "c0WxorWwEToOxlbb5MsDZPWKdNiUhyOJL8s-MIcjI-Q5SFJOnoWe_q2ZhgYKHykv4PGw3L-_plgNBnKgww3dAw"
         )
@@ -72,8 +66,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
 
     def test_verify_attestation_with_unsupported_token_binding_status(self) -> None:
         # Credential contains `clientDataJSON: { tokenBinding: { status: "not-supported" } }`
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "JeC3qgQjIVysq88GxhGUYyDl4oZeW8mLWd7luJWQvnrm-wxGZ5mzf2bBCaUDq7D2qr4aQezvzfoFIF880ciAsQ",
             "rawId": "JeC3qgQjIVysq88GxhGUYyDl4oZeW8mLWd7luJWQvnrm-wxGZ5mzf2bBCaUDq7D2qr4aQezvzfoFIF880ciAsQ",
             "response": {
@@ -81,9 +74,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
                 "attestationObject": "o2NmbXRoZmlkby11MmZnYXR0U3RtdKJjc2lnWEgwRgIhAJB-eYnY106PNDhEVM8QLuZnVCxBX0Khp9vzdj-kjw1CAiEA0PlEdDtH4GKG3eY_1YC4sIZR2ZPg-9SsLgODDWUDYnRjeDVjgVkCUzCCAk8wggE3oAMCAQICBDxoKU0wDQYJKoZIhvcNAQELBQAwLjEsMCoGA1UEAxMjWXViaWNvIFUyRiBSb290IENBIFNlcmlhbCA0NTcyMDA2MzEwIBcNMTQwODAxMDAwMDAwWhgPMjA1MDA5MDQwMDAwMDBaMDExLzAtBgNVBAMMJll1YmljbyBVMkYgRUUgU2VyaWFsIDIzOTI1NzM0ODExMTE3OTAxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvd9nk9t3lMNQMXHtLE1FStlzZnUaSLql2fm1ajoggXlrTt8rzXuSehSTEPvEaEdv_FeSqX22L6Aoa8ajIAIOY6M7MDkwIgYJKwYBBAGCxAoCBBUxLjMuNi4xLjQuMS40MTQ4Mi4xLjUwEwYLKwYBBAGC5RwCAQEEBAMCBSAwDQYJKoZIhvcNAQELBQADggEBAKrADVEJfuwVpIazebzEg0D4Z9OXLs5qZ_ukcONgxkRZ8K04QtP_CB5x6olTlxsj-SXArQDCRzEYUgbws6kZKfuRt2a1P-EzUiqDWLjRILSr-3_o7yR7ZP_GpiFKwdm-czb94POoGD-TS1IYdfXj94mAr5cKWx4EKjh210uovu_pLdLjc8xkQciUrXzZpPR9rT2k_q9HkZhHU-NaCJzky-PTyDbq0KKnzqVhWtfkSBCGw3ezZkTS-5lrvOKbIa24lfeTgu7FST5OwTPCFn8HcfWZMXMSD_KNU-iBqJdAwTLPPDRoLLvPTl29weCAIh-HUpmBQd0UltcPOrA_LFvAf61oYXV0aERhdGFYxEvYNAXQphWPDADgZiwL4n_m5OggKcxKctshspIdTVKXQQAAAAAAAAAAAAAAAAAAAAAAAAAAAEAl4LeqBCMhXKyrzwbGEZRjIOXihl5byYtZ3uW4lZC-eub7DEZnmbN_ZsEJpQOrsPaqvhpB7O_N-gUgXzzRyICxpQECAyYgASFYIJH525xGEk1oYXXxejoHvYcBrIwDbwcC_Kptwg6m5hArIlggvPFJ43EBPjkPK7aCIkiA3mtk_b6mkmzR8C_Fgjq3-xQ"
             },
             "type": "public-key"
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "aGFGCbL0VkPf1FcCVnSAZp4ZUJTcfF9v",
         )
@@ -104,8 +95,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
 
     def test_verify_attestation_with_unsupported_token_binding(self) -> None:
         # Credential contains `clientDataJSON: { tokenBinding: "unused" }`
-        credential = RegistrationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "jXFBv0gxr-DvGP58Oz3qfxMydiZM2RFlRoItoHyeAhdLNbmR7aPkzPVSKWO9VOZ4A2EEUQz8nsLtsP5EOqeNiQ",
             "rawId": "jXFBv0gxr-DvGP58Oz3qfxMydiZM2RFlRoItoHyeAhdLNbmR7aPkzPVSKWO9VOZ4A2EEUQz8nsLtsP5EOqeNiQ",
             "response": {
@@ -113,9 +103,7 @@ class TestVerifyRegistrationResponseFIDOU2F(TestCase):
                 "attestationObject": "o2NmbXRoZmlkby11MmZnYXR0U3RtdKJjc2lnWEYwRAIgZNXeJymCt3MaODbi40dqksHQmfjvOajH4Th3qHK4nboCIEemlbhtg6g549fk5f6xU901qYeowKQ4lDOxwBisVo-RY3g1Y4FZAlMwggJPMIIBN6ADAgECAgQ8aClNMA0GCSqGSIb3DQEBCwUAMC4xLDAqBgNVBAMTI1l1YmljbyBVMkYgUm9vdCBDQSBTZXJpYWwgNDU3MjAwNjMxMCAXDTE0MDgwMTAwMDAwMFoYDzIwNTAwOTA0MDAwMDAwWjAxMS8wLQYDVQQDDCZZdWJpY28gVTJGIEVFIFNlcmlhbCAyMzkyNTczNDgxMTExNzkwMTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABL3fZ5Pbd5TDUDFx7SxNRUrZc2Z1Gki6pdn5tWo6IIF5a07fK817knoUkxD7xGhHb_xXkql9ti-gKGvGoyACDmOjOzA5MCIGCSsGAQQBgsQKAgQVMS4zLjYuMS40LjEuNDE0ODIuMS41MBMGCysGAQQBguUcAgEBBAQDAgUgMA0GCSqGSIb3DQEBCwUAA4IBAQCqwA1RCX7sFaSGs3m8xINA-GfTly7Oamf7pHDjYMZEWfCtOELT_wgeceqJU5cbI_klwK0AwkcxGFIG8LOpGSn7kbdmtT_hM1Iqg1i40SC0q_t_6O8ke2T_xqYhSsHZvnM2_eDzqBg_k0tSGHX14_eJgK-XClseBCo4dtdLqL7v6S3S43PMZEHIlK182aT0fa09pP6vR5GYR1PjWgic5Mvj08g26tCip86lYVrX5EgQhsN3s2ZE0vuZa7zimyGtuJX3k4LuxUk-TsEzwhZ_B3H1mTFzEg_yjVPogaiXQMEyzzw0aCy7z05dvcHggCIfh1KZgUHdFJbXDzqwPyxbwH-taGF1dGhEYXRhWMRL2DQF0KYVjwwA4GYsC-J_5uToICnMSnLbIbKSHU1Sl0EAAAAAAAAAAAAAAAAAAAAAAAAAAABAjXFBv0gxr-DvGP58Oz3qfxMydiZM2RFlRoItoHyeAhdLNbmR7aPkzPVSKWO9VOZ4A2EEUQz8nsLtsP5EOqeNiaUBAgMmIAEhWCD2BOHjcogovRtFtYbJpxctnRdgL-GL_Dwh0Pje7wUJ7yJYIACvXapVQbM5vEurQkI4096yU5dXv6CA-PftVTiTj-LT"
             },
             "type": "public-key"
-        }
-        """
-        )
+        }"""
         challenge = base64url_to_bytes(
             "B20LZQA6vmohW2pvCTi3ylUNGet856po",
         )
