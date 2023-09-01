@@ -8,7 +8,7 @@ from webauthn.helpers import (
     parse_attestation_object,
     parse_client_data_json,
     parse_backup_flags,
-    parse_registration_credential,
+    parse_registration_credential_json,
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
@@ -65,7 +65,7 @@ expected_token_binding_statuses = [
 
 def verify_registration_response(
     *,
-    credential: Union[str, bytes, bytearray, RegistrationCredential],
+    credential: Union[str, RegistrationCredential],
     expected_challenge: bytes,
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
@@ -94,7 +94,7 @@ def verify_registration_response(
         `helpers.exceptions.InvalidRegistrationResponse` if the response cannot be verified
     """
     if isinstance(credential, (str, bytes, bytearray)):
-        credential = parse_registration_credential(credential)
+        credential = parse_registration_credential_json(credential)
 
     verified = False
 

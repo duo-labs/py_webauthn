@@ -1,11 +1,10 @@
-from typing import Union
 from pydantic import ValidationError
 
 from .exceptions import InvalidRegistrationResponse
 from .structs import PYDANTIC_V2, RegistrationCredential
 
 
-def parse_registration_credential(json_val: Union[str, bytes, bytearray]) -> RegistrationCredential:
+def parse_registration_credential_json(json_val: str) -> RegistrationCredential:
     if PYDANTIC_V2:
         parsing_method = RegistrationCredential.model_validate_json
     else:  # assuming V1

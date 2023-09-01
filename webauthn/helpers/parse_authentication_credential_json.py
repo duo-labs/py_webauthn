@@ -1,11 +1,10 @@
-from typing import Union
 from pydantic import ValidationError
 
 from .exceptions import InvalidAuthenticationResponse
 from .structs import PYDANTIC_V2, AuthenticationCredential
 
 
-def parse_authentication_credential(json_val: Union[str, bytes, bytearray]) -> AuthenticationCredential:
+def parse_authentication_credential_json(json_val: str) -> AuthenticationCredential:
     if PYDANTIC_V2:
         parsing_method = AuthenticationCredential.model_validate_json
     else:  # assuming V1

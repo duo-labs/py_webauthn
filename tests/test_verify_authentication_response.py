@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from webauthn import verify_authentication_response
-from webauthn.helpers import base64url_to_bytes, parse_authentication_credential
+from webauthn.helpers import base64url_to_bytes, parse_authentication_credential_json
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
 
 
@@ -222,7 +222,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         )
 
     def test_supports_already_parsed_credential(self) -> None:
-        parsed_credential = parse_authentication_credential("""{
+        parsed_credential = parse_authentication_credential_json("""{
             "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
             "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
             "response": {
