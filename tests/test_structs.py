@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from webauthn.helpers import parse_registration_credential
+from webauthn.helpers import parse_registration_credential_json
 from webauthn.helpers.structs import (
     AuthenticatorTransport,
     AuthenticatorAttachment,
@@ -8,12 +8,12 @@ from webauthn.helpers.structs import (
 
 
 class TestStructsRegistrationCredential(TestCase):
-    def test_parse_registration_credential(self):
+    def test_parse_registration_credential_json(self):
         """
         Check that we can properly parse some values that aren't really here-or-there for response
         verification, but can still be useful to RP's to fine-tune the WebAuthn experience.
         """
-        parsed = parse_registration_credential(
+        parsed = parse_registration_credential_json(
             """{
                 "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
                 "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",

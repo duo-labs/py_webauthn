@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import cbor2
 from pydantic import ValidationError
-from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, parse_registration_credential
+from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, parse_registration_credential_json
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.known_root_certs import globalsign_r2
 from webauthn.helpers.structs import (
@@ -191,7 +191,7 @@ class TestVerifyRegistrationResponse(TestCase):
         assert verification.fmt == AttestationFormat.NONE
 
     def test_supports_already_parsed_credential(self) -> None:
-        parsed_credential = parse_registration_credential(
+        parsed_credential = parse_registration_credential_json(
             """{
                 "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
                 "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
