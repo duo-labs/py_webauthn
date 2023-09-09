@@ -85,33 +85,17 @@ class WebAuthnBaseModel(BaseModel):
             """
             field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
-            if field.annotation != bytes:
+            # UserHandle is defined as Optional[bytes]
+            if field.annotation != bytes and info.field_name != 'user_handle':
                 return v
+
+            if isinstance(v, str) and info.mode == "json":
+                # NOTE:
+                # Ideally we should only do this when info.mode == "json", but
+                # that does not work when using the deprecated parse_raw method
+                return base64url_to_bytes(v)
 
             return _to_bytes(v)
-
-        @field_validator(
-            "user_handle",
-            "raw_id",
-            "client_data_json",
-            "authenticator_data",
-            "signature",
-            "attestation_object",
-            mode="before",
-            check_fields=False,
-        )
-        @classmethod
-        def _pydantic_v2_convert_b64_fields(cls, v: Any, info: FieldValidationInfo):
-            # The spec defines various fields as base64URL encoded. These need to be
-            # decoded to bytes prior to validation.
-            if isinstance(v, str):
-                return base64url_to_bytes(v)
-            if isinstance(v, bytes):
-                # It isn't clear this should be needed for the real world since the
-                # spec says these fields should be b64 encoded - but there are
-                # unit tests that do this.
-                return v
-            raise ValueError(f"Field {info.field_name} must be base64url encoded")
 
         @model_serializer(mode="wrap", when_used="json")
         def _pydantic_v2_serialize_bytes_fields(
