@@ -196,6 +196,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 7
 
     def test_supports_multiple_expected_origins(self) -> None:
+        # userHandle generated via: base64.urlsafe_b64encode("My User Handle".encode())
         credential = AuthenticationCredential.parse_raw(
             """{
             "id": "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q",
@@ -204,7 +205,7 @@ class TestVerifyAuthenticationResponse(TestCase):
                 "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFYN-Mog",
                 "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiNnpyU1JYOEN4d1BTWEVBclh5WEwydHBiNnJCN1N0YXIwckxWSWo1cnZmNzRtWktGNWlyNzE1WG1nejV0QV9HeUhleE40b1hmclE4ODlBclZDTGFSZEEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
                 "signature": "MEUCIQDBqeI274exaKWGQz37g7yo1--TVcZSCcYVftZ1AnEJkQIgNw-nlx-_U9rVfFfER8oX6BlYZTuPFyGaL_wCDY23s0E",
-                "userHandle": "TldNMFlqYzNOVFF0WW1NNE5DMDBaakprTFRrME9EVXROR05rTnpreVkyTTROVEUz"
+                "userHandle": "TXkgVXNlciBIYW5kbGU="
             },
             "type": "public-key",
             "clientExtensionResults": {}
@@ -233,3 +234,4 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.credential_id == base64url_to_bytes(
             "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q"
         )
+        assert credential.response.user_handle == "My User Handle".encode()

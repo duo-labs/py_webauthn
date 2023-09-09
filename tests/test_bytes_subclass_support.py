@@ -1,3 +1,4 @@
+import base64
 from unittest import TestCase
 
 from webauthn import verify_authentication_response, base64url_to_bytes
@@ -53,7 +54,7 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
 
     def test_handles_memoryviews(self) -> None:
         """
-        Ensure support for libraries that leverage memoryviews
+        Ensure support for libraries that leverage memoryviews for stored RP data
         """
 
         def base64url_to_memoryview(data: str) -> memoryview:
@@ -63,19 +64,19 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
         verification = verify_authentication_response(
             credential=AuthenticationCredential(
                 id="fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
-                raw_id=base64url_to_memoryview(
+                raw_id=
                     "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA"
-                ),
+                ,
                 response=AuthenticatorAssertionResponse(
-                    authenticator_data=base64url_to_memoryview(
+                    authenticator_data=
                         "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAABw"
-                    ),
-                    client_data_json=base64url_to_memoryview(
+                    ,
+                    client_data_json=
                         "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZVo0ZWVBM080ank1Rkl6cURhU0o2SkROR3UwYkJjNXpJMURqUV9rTHNvMVdOcWtHNms1bUNZZjFkdFFoVlVpQldaV2xaa3pSNU1GZWVXQ3BKUlVOWHciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
-                    ),
-                    signature=base64url_to_memoryview(
+                    ,
+                    signature=
                         "RRWV8mYDRvK7YdQgdtZD4pJ2dh1D_IWZ_D6jsZo6FHJBoenbj0CVT5nA20vUzlRhN4R6dOEUHmUwP1F8eRBhBg"
-                    ),
+                    ,
                 ),
             ),
             expected_challenge=base64url_to_memoryview(
@@ -90,16 +91,3 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
         )
 
         assert verification.new_sign_count == 7
-
-    def test_supports_strings_for_bytes(self) -> None:
-        """
-        Preserve the ability to pass strings for `bytes` fields
-        """
-        response = AuthenticatorAssertionResponse(
-            authenticator_data=bytes(),
-            client_data_json=bytes(),
-            signature=bytes(),
-            user_handle='some_user_handle_string'  # type: ignore
-        )
-
-        self.assertEqual(response.user_handle, b'some_user_handle_string')
