@@ -4,7 +4,7 @@ from unittest import TestCase
 import cbor2
 from pydantic import ValidationError
 from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, parse_registration_credential_json
-from webauthn.helpers.exceptions import InvalidRegistrationResponse
+from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidCBORData
 from webauthn.helpers.known_root_certs import globalsign_r2
 from webauthn.helpers.structs import (
     AttestationFormat,
@@ -251,3 +251,32 @@ class TestVerifyRegistrationResponse(TestCase):
         )
 
         assert verification.fmt == AttestationFormat.NONE
+
+    def test_raises_useful_error_on_bad_attestation_object(self) -> None:
+        credential = {
+            "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+            "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+            "response": {
+                "attestationObject": "",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiVHdON240V1R5R0tMYzRaWS1xR3NGcUtuSE00bmdscXN5VjBJQ0psTjJUTzlYaVJ5RnRya2FEd1V2c3FsLWdrTEpYUDZmbkYxTWxyWjUzTW00UjdDdnciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {},
+            "transports": [
+                "cable"
+            ]
+        }
+
+        challenge = base64url_to_bytes(
+            "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
+        )
+        rp_id = "localhost"
+        expected_origin = "http://localhost:5000"
+
+        with self.assertRaises(InvalidCBORData):
+            verify_registration_response(
+                credential=credential,
+                expected_challenge=challenge,
+                expected_origin=expected_origin,
+                expected_rp_id=rp_id,
+            )

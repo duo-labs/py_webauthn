@@ -18,6 +18,7 @@ from cryptography.x509.oid import ExtensionOID
 from webauthn.helpers import (
     decode_credential_public_key,
     hash_by_alg,
+    parse_cbor,
     validate_certificate_chain,
     verify_signature,
 )
@@ -153,7 +154,7 @@ def verify_tpm(
         )
 
     # Concatenate authenticatorData and clientDataHash to form attToBeSigned.
-    attestation_dict = cbor2.loads(attestation_object)
+    attestation_dict = parse_cbor(attestation_object)
     authenticator_data_bytes: bytes = attestation_dict["authData"]
     client_data_hash = hash_by_alg(client_data_json)
     att_to_be_signed = b"".join(
