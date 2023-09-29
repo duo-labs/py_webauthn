@@ -12,6 +12,7 @@ from .parse_attestation_object import parse_attestation_object
 from .parse_authentication_credential_json import parse_authentication_credential_json
 from .parse_authenticator_data import parse_authenticator_data
 from .parse_backup_flags import parse_backup_flags
+from .parse_cbor import parse_cbor
 from .parse_client_data_json import parse_client_data_json
 from .parse_registration_credential_json import parse_registration_credential_json
 from .validate_certificate_chain import validate_certificate_chain
@@ -33,6 +34,7 @@ __all__ = [
     "parse_authenticator_data",
     "parse_authentication_credential_json",
     "parse_backup_flags",
+    "parse_cbor",
     "parse_client_data_json",
     "parse_registration_credential_json",
     "validate_certificate_chain",
