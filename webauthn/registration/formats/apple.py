@@ -15,6 +15,7 @@ from cryptography.x509 import (
 from webauthn.helpers import (
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
+    parse_cbor,
     validate_certificate_chain,
 )
 from webauthn.helpers.exceptions import (
@@ -55,7 +56,7 @@ def verify_apple(
         raise InvalidRegistrationResponse(f"{err} (Apple)")
 
     # Concatenate authenticatorData and clientDataHash to form nonceToHash.
-    attestation_dict = cbor2.loads(attestation_object)
+    attestation_dict = parse_cbor(attestation_object)
     authenticator_data_bytes = attestation_dict["authData"]
 
     client_data_hash = hashlib.sha256()

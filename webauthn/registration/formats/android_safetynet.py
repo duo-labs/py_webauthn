@@ -2,7 +2,6 @@ import base64
 import hashlib
 from typing import List
 
-import cbor2
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -11,6 +10,7 @@ from cryptography.x509.oid import NameOID
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers import (
     base64url_to_bytes,
+    parse_cbor,
     validate_certificate_chain,
     verify_safetynet_timestamp,
     verify_signature,
@@ -101,7 +101,7 @@ def verify_android_safetynet(
     # clientDataHash.
 
     # Extract attStmt bytes from attestation_object
-    attestation_dict = cbor2.loads(attestation_object)
+    attestation_dict = parse_cbor(attestation_object)
     authenticator_data_bytes = attestation_dict["authData"]
 
     # Generate a hash of client_data_json
