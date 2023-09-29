@@ -9,7 +9,7 @@ from .structs import PYDANTIC_V2, AuthenticationCredential
 def parse_authentication_credential_json(json_val: Union[str, dict]) -> AuthenticationCredential:
     """
     Parse a JSON form of an authentication credential, as either a stringified JSON object or a
-    plain dict, into an instance of RegistrationCredential
+    plain dict, into an instance of AuthenticationCredential
     """
     if PYDANTIC_V2:
         parsing_method: Callable = AuthenticationCredential.model_validate_json  # type: ignore[attr-defined]
