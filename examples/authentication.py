@@ -40,6 +40,7 @@ print(options_to_json(complex_authentication_options))
 
 # Authentication Response Verification
 authentication_verification = verify_authentication_response(
+    # Demonstrating the ability to handle a stringified JSON version of the WebAuthn response
     credential="""{
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",

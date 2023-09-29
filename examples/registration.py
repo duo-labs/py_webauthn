@@ -56,7 +56,8 @@ print(options_to_json(complex_registration_options))
 
 # Registration Response Verification
 registration_verification = verify_registration_response(
-    credential="""{
+    # Demonstrating the ability to handle a plain dict version of the WebAuthn response
+    credential={
         "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
         "response": {
@@ -67,7 +68,7 @@ registration_verification = verify_registration_response(
         "type": "public-key",
         "clientExtensionResults": {},
         "authenticatorAttachment": "platform"
-    }""",
+    },
     expected_challenge=base64url_to_bytes(
         "CeTWogmg0cchuiYuFrv8DXXdMZSIQRVZJOga_xayVVEcBj0Cw3y73yhD4FkGSe-RrP6hPJJAIm3LVien4hXELg"
     ),
