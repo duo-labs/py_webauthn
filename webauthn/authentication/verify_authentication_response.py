@@ -43,7 +43,7 @@ expected_token_binding_statuses = [
 
 def verify_authentication_response(
     *,
-    credential: Union[str, AuthenticationCredential],
+    credential: Union[str, dict, AuthenticationCredential],
     expected_challenge: bytes,
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
@@ -54,13 +54,20 @@ def verify_authentication_response(
     """Verify a response from navigator.credentials.get()
 
     Args:
-        `credential`: The value returned from `navigator.credentials.get()`.
-        `expected_challenge`: The challenge passed to the authenticator within the preceding authentication options.
-        `expected_rp_id`: The Relying Party's unique identifier as specified in the precending authentication options.
-        `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which the authentication ceremony should have occurred.
-        `credential_public_key`: The public key for the credential's ID as provided in a preceding authenticator registration ceremony.
-        `credential_current_sign_count`: The current known number of times the authenticator was used.
-        (optional) `require_user_verification`: Whether or not to require that the authenticator verified the user.
+        - `credential`: The value returned from `navigator.credentials.get()`. Can be either a
+          stringified JSON object, a plain dict, or an instance of RegistrationCredential
+        - `expected_challenge`: The challenge passed to the authenticator within the preceding
+          authentication options.
+        - `expected_rp_id`: The Relying Party's unique identifier as specified in the preceding
+          authentication options.
+        - `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which
+          the authentication ceremony should have occurred.
+        - `credential_public_key`: The public key for the credential's ID as provided in a
+          preceding authenticator registration ceremony.
+        - `credential_current_sign_count`: The current known number of times the authenticator was
+          used.
+        - (optional) `require_user_verification`: Whether or not to require that the authenticator
+          verified the user.
 
     Returns:
         Information about the authenticator
@@ -68,7 +75,7 @@ def verify_authentication_response(
     Raises:
         `helpers.exceptions.InvalidAuthenticationResponse` if the response cannot be verified
     """
-    if isinstance(credential, str):
+    if isinstance(credential, str) or isinstance(credential, dict):
         credential = parse_authentication_credential_json(credential)
 
     # FIDO-specific check
