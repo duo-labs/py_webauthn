@@ -2,6 +2,7 @@ import cbor2
 
 from .exceptions import InvalidAuthenticatorDataStructure
 from .structs import AttestedCredentialData, AuthenticatorData, AuthenticatorDataFlags
+from .parse_cbor import parse_cbor
 
 
 def parse_authenticator_data(val: bytes) -> AuthenticatorData:
@@ -75,7 +76,7 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
             val = bytes(_val)
 
         # Load the next CBOR-encoded value
-        credential_public_key = cbor2.loads(val[pointer:])
+        credential_public_key = parse_cbor(val[pointer:])
         credential_public_key_bytes = cbor2.dumps(credential_public_key)
         pointer += len(credential_public_key_bytes)
 
@@ -87,7 +88,7 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
         authenticator_data.attested_credential_data = attested_cred_data
 
     if flags.ed is True:
-        extension_object = cbor2.loads(val[pointer:])
+        extension_object = parse_cbor(val[pointer:])
         extension_bytes = cbor2.dumps(extension_object)
         pointer += len(extension_bytes)
         authenticator_data.extensions = extension_bytes

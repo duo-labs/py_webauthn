@@ -1,8 +1,7 @@
-import cbor2
-
 from .parse_attestation_statement import parse_attestation_statement
 from .parse_authenticator_data import parse_authenticator_data
 from .structs import AttestationObject
+from .parse_cbor import parse_cbor
 
 
 def parse_attestation_object(val: bytes) -> AttestationObject:
@@ -10,7 +9,7 @@ def parse_attestation_object(val: bytes) -> AttestationObject:
     Decode and peel apart the CBOR-encoded blob `response.attestationObject` into
     structured data.
     """
-    attestation_dict = cbor2.loads(val)
+    attestation_dict = parse_cbor(val)
 
     decoded_attestation_object = AttestationObject(
         fmt=attestation_dict["fmt"],
