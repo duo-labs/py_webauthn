@@ -66,8 +66,23 @@ class WebAuthnBaseModel(BaseModel):
 
         @field_validator("*", mode="before")
         def _pydantic_v2_validate_bytes_fields(
-            cls, v: Any, info: FieldValidationInfo
+            cls, v: Any, info: FieldValidationInfo  # type: ignore[valid-type]
         ) -> Any:
+            """
+            `FieldValidationInfo` above is being deprecated for `ValidationInfo`, see the following:
+
+            - https://github.com/pydantic/pydantic-core/issues/994
+            - https://github.com/pydantic/pydantic/issues/7667
+
+            There are now docs for the new way to access `field_name` that's only available in
+            Pydantic v2.4+...
+
+            https://docs.pydantic.dev/latest/concepts/types/#access-to-field-name
+
+            This use of `FieldValidationInfo` will continue to work for now, but when it gets
+            removed from Pydantic the `info.field_name` below will need to get updated to
+            `info.data.field_name` after changing the type of `info` above to `ValidationInfo`
+            """
             field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
             if field.annotation != bytes:
