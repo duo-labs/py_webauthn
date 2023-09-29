@@ -52,3 +52,7 @@ class InvalidCertificateChain(Exception):
 
 class InvalidBackupFlags(Exception):
     pass
+
+
+class InvalidCBORData(Exception):
+    pass
