@@ -8,10 +8,12 @@ from webauthn.helpers import (
     parse_attestation_object,
     parse_client_data_json,
     parse_backup_flags,
+    parse_registration_credential_json,
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.structs import (
+    PYDANTIC_V2,
     AttestationFormat,
     ClientDataType,
     CredentialDeviceType,
@@ -63,7 +65,7 @@ expected_token_binding_statuses = [
 
 def verify_registration_response(
     *,
-    credential: RegistrationCredential,
+    credential: Union[str, RegistrationCredential],
     expected_challenge: bytes,
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
@@ -91,6 +93,8 @@ def verify_registration_response(
     Raises:
         `helpers.exceptions.InvalidRegistrationResponse` if the response cannot be verified
     """
+    if isinstance(credential, str):
+        credential = parse_registration_credential_json(credential)
 
     verified = False
 
@@ -138,7 +142,7 @@ def verify_registration_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    attestation_object = parse_attestation_object(response.attestation_object)
+    attestation_object = parse_attestation_object(response.attestation_object)  # TODO: Issue #173
 
     auth_data = attestation_object.auth_data
 
@@ -198,7 +202,11 @@ def verify_registration_response(
     if attestation_object.fmt == AttestationFormat.NONE:
         # A "none" attestation should not contain _anything_ in its attestation
         # statement
-        num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        if PYDANTIC_V2:
+            num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)  # type: ignore[attr-defined]
+        else:
+            num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+
         if num_att_stmt_fields_set > 0:
             raise InvalidRegistrationResponse(
                 "None attestation had unexpected attestation statement"

@@ -1,4 +1,10 @@
 # Changelog
+## Unreleased
+
+**Changes:**
+
+- Avoid reliance on pydantic symbols in the public interface ([#172](https://github.com/duo-labs/py_webauthn/pull/172))
+- Allow `verify_registration_response` and `verify_authentication_response` to receive credentials in JSON format
 
 ## v1.10.1
 

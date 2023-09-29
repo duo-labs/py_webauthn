@@ -1,8 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from webauthn.helpers import parse_attestation_object
-from webauthn.helpers.structs import RegistrationCredential
+from webauthn.helpers import parse_attestation_object, parse_registration_credential_json
 from webauthn.registration.formats.android_safetynet import (
     verify_android_safetynet,
 )
@@ -18,7 +17,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         # Mocked because these certs actually expired and started failing this test
         mock_verify_certificate.return_value = True
 
-        credential = RegistrationCredential.parse_raw(
+        credential = parse_registration_credential_json(
             """{
             "id": "AePltP2wAoNYwG5XGc9sfleGgDxQRHdkX8vphNIHv3HylIj_nZo9ncs7bLL65AGmVAc69pS4l64hgOBJU9o2jCQ",
             "rawId": "AePltP2wAoNYwG5XGc9sfleGgDxQRHdkX8vphNIHv3HylIj_nZo9ncs7bLL65AGmVAc69pS4l64hgOBJU9o2jCQ",

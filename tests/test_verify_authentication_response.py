@@ -1,15 +1,13 @@
 from unittest import TestCase
 
 from webauthn import verify_authentication_response
-from webauthn.helpers import base64url_to_bytes
+from webauthn.helpers import base64url_to_bytes, parse_authentication_credential_json
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
-from webauthn.helpers.structs import AuthenticationCredential
 
 
 class TestVerifyAuthenticationResponse(TestCase):
     def test_verify_authentication_response_with_EC2_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "EDx9FfAbp4obx6oll2oC4-CZuDidRVV4gZhxC529ytlnqHyqCStDUwfNdm1SNHAe3X5KvueWQdAX3x9R1a2b9Q",
             "rawId": "EDx9FfAbp4obx6oll2oC4-CZuDidRVV4gZhxC529ytlnqHyqCStDUwfNdm1SNHAe3X5KvueWQdAX3x9R1a2b9Q",
             "response": {
@@ -20,7 +18,6 @@ class TestVerifyAuthenticationResponse(TestCase):
             "type": "public-key",
             "clientExtensionResults": {}
         }"""
-        )
         challenge = base64url_to_bytes(
             "xi30GPGAFYRxVDpY1sM10DaLzVQG66nv-_7RUazH0vI2YvG8LYgDEnvN5fZZNVuvEDuMi9te3VLqb42N0fkLGA"
         )
@@ -48,20 +45,18 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.credential_device_type == 'single_device'
 
     def test_verify_authentication_response_with_RSA_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
-            """{
-                "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
-                "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
-                "response": {
-                    "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAQ",
-                    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiaVBtQWkxUHAxWEw2b0FncTNQV1p0WlBuWmExekZVRG9HYmFRMF9LdlZHMWxGMnMzUnRfM280dVN6Y2N5MHRtY1RJcFRUVDRCVTFULUk0bWFhdm5kalEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
-                    "signature": "iOHKX3erU5_OYP_r_9HLZ-CexCE4bQRrxM8WmuoKTDdhAnZSeTP0sjECjvjfeS8MJzN1ArmvV0H0C3yy_FdRFfcpUPZzdZ7bBcmPh1XPdxRwY747OrIzcTLTFQUPdn1U-izCZtP_78VGw9pCpdMsv4CUzZdJbEcRtQuRS03qUjqDaovoJhOqEBmxJn9Wu8tBi_Qx7A33RbYjlfyLm_EDqimzDZhyietyop6XUcpKarKqVH0M6mMrM5zTjp8xf3W7odFCadXEJg-ERZqFM0-9Uup6kJNLbr6C5J4NDYmSm3HCSA6lp2iEiMPKU8Ii7QZ61kybXLxsX4w4Dm3fOLjmDw",
-                    "userHandle": "T1RWa1l6VXdPRFV0WW1NNVlTMDBOVEkxTFRnd056Z3RabVZpWVdZNFpEVm1ZMk5p"
-                },
-                "type": "public-key",
-                "clientExtensionResults": {}
-            }"""
-        )
+        credential = """{
+            "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
+            "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
+            "response": {
+                "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAQ",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiaVBtQWkxUHAxWEw2b0FncTNQV1p0WlBuWmExekZVRG9HYmFRMF9LdlZHMWxGMnMzUnRfM280dVN6Y2N5MHRtY1RJcFRUVDRCVTFULUk0bWFhdm5kalEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                "signature": "iOHKX3erU5_OYP_r_9HLZ-CexCE4bQRrxM8WmuoKTDdhAnZSeTP0sjECjvjfeS8MJzN1ArmvV0H0C3yy_FdRFfcpUPZzdZ7bBcmPh1XPdxRwY747OrIzcTLTFQUPdn1U-izCZtP_78VGw9pCpdMsv4CUzZdJbEcRtQuRS03qUjqDaovoJhOqEBmxJn9Wu8tBi_Qx7A33RbYjlfyLm_EDqimzDZhyietyop6XUcpKarKqVH0M6mMrM5zTjp8xf3W7odFCadXEJg-ERZqFM0-9Uup6kJNLbr6C5J4NDYmSm3HCSA6lp2iEiMPKU8Ii7QZ61kybXLxsX4w4Dm3fOLjmDw",
+                "userHandle": "T1RWa1l6VXdPRFV0WW1NNVlTMDBOVEkxTFRnd056Z3RabVZpWVdZNFpEVm1ZMk5p"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {}
+        }"""
         challenge = base64url_to_bytes(
             "iPmAi1Pp1XL6oAgq3PWZtZPnZa1zFUDoGbaQ0_KvVG1lF2s3Rt_3o4uSzccy0tmcTIpTTT4BU1T-I4maavndjQ"
         )
@@ -85,8 +80,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 1
 
     def test_raises_exception_on_incorrect_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "FviUBZA3FGMxEm3A1K2T8MhuEBLp4qQsV9ScAKYrpdw2kbGnqx24tF4ev6PEHEYC3g8z6HMJh7dYHe3Uuq7_8Q",
             "rawId": "FviUBZA3FGMxEm3A1K2T8MhuEBLp4qQsV9ScAKYrpdw2kbGnqx24tF4ev6PEHEYC3g8z6HMJh7dYHe3Uuq7_8Q",
             "response": {
@@ -97,7 +91,6 @@ class TestVerifyAuthenticationResponse(TestCase):
             "type": "public-key",
             "clientExtensionResults": {}
         }"""
-        )
         challenge = base64url_to_bytes(
             "zsfiMZj16TUVCrT5tDRYXdYlUrJp7zn_UNd5NmBocPc4I2dKZbeEWpwBAwA4s6oHkVX6_ly_jgp743dyiWHYYw"
         )
@@ -123,8 +116,7 @@ class TestVerifyAuthenticationResponse(TestCase):
             )
 
     def test_raises_exception_on_uv_required_but_false(self):
-        credential = AuthenticationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "4-5MZF69j3n2B6Z99dUN0fNrAQmrjELJIebWVw8aKfw1EQKg28Tx40R_kw-1pcrfSgJFKm3mCtAtBgSRWgDMng",
             "rawId": "4-5MZF69j3n2B6Z99dUN0fNrAQmrjELJIebWVw8aKfw1EQKg28Tx40R_kw-1pcrfSgJFKm3mCtAtBgSRWgDMng",
             "response": {
@@ -135,7 +127,6 @@ class TestVerifyAuthenticationResponse(TestCase):
             "type": "public-key",
             "clientExtensionResults": {}
         }"""
-        )
         challenge = base64url_to_bytes(
             "umGemXJIPBXPxkD8Hjanuv9BDor8Z7O3aPdtOgMCdW4PAfqDX43EFlhrsF0PW90df5zrgbt7YVMRAa27tCdHzw"
         )
@@ -161,19 +152,17 @@ class TestVerifyAuthenticationResponse(TestCase):
             )
 
     def test_verify_authentication_response_with_OKP_public_key(self):
-        credential = AuthenticationCredential.parse_raw(
-            """{
-                "id": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
-                "rawId": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
-                "response": {
-                    "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAABw",
-                    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZVo0ZWVBM080ank1Rkl6cURhU0o2SkROR3UwYkJjNXpJMURqUV9rTHNvMVdOcWtHNms1bUNZZjFkdFFoVlVpQldaV2xaa3pSNU1GZWVXQ3BKUlVOWHciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
-                    "signature": "RRWV8mYDRvK7YdQgdtZD4pJ2dh1D_IWZ_D6jsZo6FHJBoenbj0CVT5nA20vUzlRhN4R6dOEUHmUwP1F8eRBhBg"
-                },
-                "type": "public-key",
-                "clientExtensionResults": {}
-            }"""
-        )
+        credential = """{
+            "id": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
+            "rawId": "fq9Nj0nS24B5y6Pkw_h3-9GEAEA3-0LBPxE2zvTdLjDqtSeCSNYFe9VMRueSpAZxT3YDc6L1lWXdQNwI-sVNYrefEcRR1Nsb_0jpHE955WEtFud2xxZg3MvoLMxHLet63i5tajd1fHtP7I-00D6cehM8ZWlLp2T3s9lfZgVIFcA",
+            "response": {
+                "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MBAAAABw",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZVo0ZWVBM080ank1Rkl6cURhU0o2SkROR3UwYkJjNXpJMURqUV9rTHNvMVdOcWtHNms1bUNZZjFkdFFoVlVpQldaV2xaa3pSNU1GZWVXQ3BKUlVOWHciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                "signature": "RRWV8mYDRvK7YdQgdtZD4pJ2dh1D_IWZ_D6jsZo6FHJBoenbj0CVT5nA20vUzlRhN4R6dOEUHmUwP1F8eRBhBg"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {}
+        }"""
         challenge = base64url_to_bytes(
             "eZ4eeA3O4jy5FIzqDaSJ6JDNGu0bBc5zI1DjQ_kLso1WNqkG6k5mCYf1dtQhVUiBWZWlZkzR5MFeeWCpJRUNXw"
         )
@@ -196,8 +185,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 7
 
     def test_supports_multiple_expected_origins(self) -> None:
-        credential = AuthenticationCredential.parse_raw(
-            """{
+        credential = """{
             "id": "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q",
             "rawId": "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q",
             "response": {
@@ -209,7 +197,6 @@ class TestVerifyAuthenticationResponse(TestCase):
             "type": "public-key",
             "clientExtensionResults": {}
         }"""
-        )
 
         challenge = base64url_to_bytes(
             "6zrSRX8CxwPSXEArXyXL2tpb6rB7Star0rLVIj5rvf74mZKF5ir715Xmgz5tA_GyHexN4oXfrQ889ArVCLaRdA"
@@ -233,3 +220,38 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.credential_id == base64url_to_bytes(
             "AXmOjWWZH67pgl5_gAbKVBqoL2dyHHGEWZLspIsCwULG0hZ3HyuGgvkaRcSOLq9W72XtegcvFYXIdlafrilbtVnx2Q14gNbfSQQP2sgNEAif4MjHtGpeVB0BfFawCs85Y3XY_j4sxthVnyTY_Q"
         )
+
+    def test_supports_already_parsed_credential(self) -> None:
+        parsed_credential = parse_authentication_credential_json("""{
+            "id": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
+            "rawId": "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s",
+            "response": {
+                "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAQ",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiaVBtQWkxUHAxWEw2b0FncTNQV1p0WlBuWmExekZVRG9HYmFRMF9LdlZHMWxGMnMzUnRfM280dVN6Y2N5MHRtY1RJcFRUVDRCVTFULUk0bWFhdm5kalEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                "signature": "iOHKX3erU5_OYP_r_9HLZ-CexCE4bQRrxM8WmuoKTDdhAnZSeTP0sjECjvjfeS8MJzN1ArmvV0H0C3yy_FdRFfcpUPZzdZ7bBcmPh1XPdxRwY747OrIzcTLTFQUPdn1U-izCZtP_78VGw9pCpdMsv4CUzZdJbEcRtQuRS03qUjqDaovoJhOqEBmxJn9Wu8tBi_Qx7A33RbYjlfyLm_EDqimzDZhyietyop6XUcpKarKqVH0M6mMrM5zTjp8xf3W7odFCadXEJg-ERZqFM0-9Uup6kJNLbr6C5J4NDYmSm3HCSA6lp2iEiMPKU8Ii7QZ61kybXLxsX4w4Dm3fOLjmDw",
+                "userHandle": "T1RWa1l6VXdPRFV0WW1NNVlTMDBOVEkxTFRnd056Z3RabVZpWVdZNFpEVm1ZMk5p"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {}
+        }""")
+        challenge = base64url_to_bytes(
+            "iPmAi1Pp1XL6oAgq3PWZtZPnZa1zFUDoGbaQ0_KvVG1lF2s3Rt_3o4uSzccy0tmcTIpTTT4BU1T-I4maavndjQ"
+        )
+        expected_rp_id = "localhost"
+        expected_origin = "http://localhost:5000"
+        credential_public_key = base64url_to_bytes(
+            "pAEDAzkBACBZAQDfV20epzvQP-HtcdDpX-cGzdOxy73WQEvsU7Dnr9UWJophEfpngouvgnRLXaEUn_d8HGkp_HIx8rrpkx4BVs6X_B6ZjhLlezjIdJbLbVeb92BaEsmNn1HW2N9Xj2QM8cH-yx28_vCjf82ahQ9gyAr552Bn96G22n8jqFRQKdVpO-f-bvpvaP3IQ9F5LCX7CUaxptgbog1SFO6FI6ob5SlVVB00lVXsaYg8cIDZxCkkENkGiFPgwEaZ7995SCbiyCpUJbMqToLMgojPkAhWeyktu7TlK6UBWdJMHc3FPAIs0lH_2_2hKS-mGI1uZAFVAfW1X-mzKL0czUm2P1UlUox7IUMBAAE"
+        )
+        sign_count = 0
+
+        verification = verify_authentication_response(
+            credential=parsed_credential,
+            expected_challenge=challenge,
+            expected_rp_id=expected_rp_id,
+            expected_origin=expected_origin,
+            credential_public_key=credential_public_key,
+            credential_current_sign_count=sign_count,
+            require_user_verification=True,
+        )
+
+        assert verification.new_sign_count == 1
