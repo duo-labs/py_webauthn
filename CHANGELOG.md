@@ -1,10 +1,11 @@
 # Changelog
-## Unreleased
+## v1.11.0
 
 **Changes:**
 
-- Avoid reliance on pydantic symbols in the public interface ([#172](https://github.com/duo-labs/py_webauthn/pull/172))
-- Allow `verify_registration_response` and `verify_authentication_response` to receive credentials in JSON format
+- The `credential` argument in `verify_registration_response()` and `verify_authentication_response()` can now also be a stringified JSON `str` or a plain JSON `dict` version of a WebAuthn response ([#172](https://github.com/duo-labs/py_webauthn/pull/172), [#178](https://github.com/duo-labs/py_webauthn/pull/178))
+- Various methods will now raise `webauthn.helpers.exceptions.InvalidCBORData` when there is a problem parsing CBOR-encoded data ([#179](https://github.com/duo-labs/py_webauthn/pull/179))
+- Updated dependencies to `cbor2==5.4.6` and `cryptography==41.0.4` ([#178](https://github.com/duo-labs/py_webauthn/pull/178))
 
 ## v1.10.1
 
