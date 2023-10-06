@@ -85,13 +85,14 @@ class WebAuthnBaseModel(BaseModel):
             """
             field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
-            if field.annotation != bytes:
+            # UserHandle is defined as Optional[bytes] which is represented as:
+            # field.annotation = typing.Optional[bytes]. So we handle that explicitly here.
+            if field.annotation != bytes and info.field_name != 'user_handle':  # type: ignore[attr-defined]
                 return v
 
-            if isinstance(v, str):
-                # NOTE:
-                # Ideally we should only do this when info.mode == "json", but
-                # that does not work when using the deprecated parse_raw method
+            # base64 encoding is the standard used when serializing bytes for JSON
+            # requests. For direct python the field value is assumed to already be bytes.
+            if isinstance(v, str) and info.mode == "json":  # type: ignore[attr-defined]
                 return base64url_to_bytes(v)
 
             return _to_bytes(v)
