@@ -1,6 +1,6 @@
 from typing import Union
 
-from cbor2 import decoder
+import cbor2
 from pydantic import BaseModel
 
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
@@ -53,7 +53,7 @@ def decode_credential_public_key(
             y=key[33:65],
         )
 
-    decoded_key: dict = decoder.loads(key)
+    decoded_key: dict = cbor2.loads(key)
 
     kty = decoded_key[COSEKey.KTY]
     alg = decoded_key[COSEKey.ALG]
