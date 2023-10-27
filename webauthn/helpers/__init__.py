@@ -16,6 +16,7 @@ from .parse_cbor import parse_cbor
 from .parse_client_data_json import parse_client_data_json
 from .parse_registration_credential_json import parse_registration_credential_json
 from .validate_certificate_chain import validate_certificate_chain
+from .validate_expected_origin import validate_expected_origin
 from .verify_safetynet_timestamp import verify_safetynet_timestamp
 from .verify_signature import verify_signature
 
@@ -38,6 +39,7 @@ __all__ = [
     "parse_client_data_json",
     "parse_registration_credential_json",
     "validate_certificate_chain",
+    "validate_expected_origin",
     "verify_safetynet_timestamp",
     "verify_signature",
 ]

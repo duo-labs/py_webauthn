@@ -7,10 +7,11 @@ from webauthn.helpers import (
     bytes_to_base64url,
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
+    parse_authentication_credential_json,
     parse_authenticator_data,
     parse_backup_flags,
     parse_client_data_json,
-    parse_authentication_credential_json,
+    validate_expected_origin,
     verify_signature,
 )
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
@@ -102,18 +103,10 @@ def verify_authentication_response(
             "Client data challenge was not expected challenge"
         )
 
-    if isinstance(expected_origin, str):
-        if expected_origin != client_data.origin:
-            raise InvalidAuthenticationResponse(
-                f'Unexpected client data origin "{client_data.origin}", expected "{expected_origin}"'
-            )
-    else:
-        try:
-            expected_origin.index(client_data.origin)
-        except ValueError:
-            raise InvalidAuthenticationResponse(
-                f'Unexpected client data origin "{client_data.origin}", expected one of {expected_origin}'
-            )
+    if not validate_expected_origin(expected_origin, client_data.origin):
+        raise InvalidAuthenticationResponse(
+            f'Unexpected client data origin "{client_data.origin}", expected "{expected_origin}"'
+        )
 
     if client_data.token_binding:
         status = client_data.token_binding.status

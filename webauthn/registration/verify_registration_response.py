@@ -6,9 +6,10 @@ from webauthn.helpers import (
     bytes_to_base64url,
     decode_credential_public_key,
     parse_attestation_object,
-    parse_client_data_json,
     parse_backup_flags,
+    parse_client_data_json,
     parse_registration_credential_json,
+    validate_expected_origin,
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
@@ -22,6 +23,7 @@ from webauthn.helpers.structs import (
     TokenBindingStatus,
     WebAuthnBaseModel,
 )
+
 from .formats.android_key import verify_android_key
 from .formats.android_safetynet import verify_android_safetynet
 from .formats.apple import verify_apple
@@ -130,18 +132,10 @@ def verify_registration_response(
             "Client data challenge was not expected challenge"
         )
 
-    if isinstance(expected_origin, str):
-        if expected_origin != client_data.origin:
-            raise InvalidRegistrationResponse(
-                f'Unexpected client data origin "{client_data.origin}", expected "{expected_origin}"'
-            )
-    else:
-        try:
-            expected_origin.index(client_data.origin)
-        except ValueError:
-            raise InvalidRegistrationResponse(
-                f'Unexpected client data origin "{client_data.origin}", expected one of {expected_origin}'
-            )
+    if not validate_expected_origin(expected_origin, client_data.origin):
+        raise InvalidRegistrationResponse(
+            f'Unexpected client data origin "{client_data.origin}", expected "{expected_origin}"'
+        )
 
     if client_data.token_binding:
         status = client_data.token_binding.status
