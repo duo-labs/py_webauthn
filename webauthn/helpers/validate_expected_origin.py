@@ -18,7 +18,11 @@ def match_origin(expected_origin: str, origin: str) -> bool:
     origin2 = normalize_origin(origin)
     if "*" not in origin1:
         return origin1 == origin2
-    # we have a wildcard, so we need to do some extra work.
+    # we have a wildcard, so we check for subdomains.
+    # this is a very blunt check - we make no attempt to
+    # parse the url, we just check that the origin ends with
+    # the expected origin after the wildcard - so will hoover
+    # up port numbers as well. See tests for examples.
     return origin2.endswith(origin1.split("*")[1])
 
 

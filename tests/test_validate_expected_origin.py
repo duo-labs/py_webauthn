@@ -19,6 +19,12 @@ class TestValidateExpectedOrigin(TestCase):
         ("https://www.example.com", "https://*.example.com", True),
         # subdomain allowed becuase of wildcard, no scheme in expected
         ("https://www.example.com", "*.example.com", True),
+        # subdomain allowed becuase of wildcard, no scheme in expected
+        ("https://www.example.com", "*.example.com", True),
+        # match with port number
+        ("https://example.com:8000", ["example.com:8000","example.com:8001"], True),
+        # no match with port number
+        ("https://example.com:8001", "example.com:8000", False),
     ]
 
     def  test_validate_origins(self):
