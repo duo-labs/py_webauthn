@@ -46,9 +46,9 @@ from urllib.parse import urlparse
 WILDCARD_DELIMITER = "*."
 
 
-def match_wildcard_origin(origin1: str, origin2: str) -> bool:
+def match_root_domain(origin1: str, origin2: str) -> bool:
     """
-    Perform wildcard match of two origins.
+    Perform wildcard match of two http(s) origins.
 
     This covers the case where the expected origin has a "*." prefix
     on the domain, allowing subdomains to match.
@@ -67,11 +67,11 @@ def match_wildcard_origin(origin1: str, origin2: str) -> bool:
 
     """
     if WILDCARD_DELIMITER not in origin1:
-        return False
+        raise ValueError("Expected origin must include wildcard")
 
     parts1 = urlparse(origin1)
-    if not parts1.scheme:
-        raise ValueError("Expected origin must include a scheme")
+    if not parts1.scheme.startswith("http"):
+        raise ValueError("Wildcard matches only supported for http/https schemes")
 
     parts2 = urlparse(origin2)
 
@@ -96,6 +96,8 @@ def match_origin(expected_origin: str, origin: str) -> bool:
     This function handles the subdomain wildcard, so that an expected
     origin of "https://*.example.com" will match "https://foo.example.com".
 
+    NB wildcard matches are only supported for http/https schemes.
+
     Args:
         `expected_origin`: The origin that is expected - which may include
             the "*" wildcard to match any subdomain. Must include scheme.
@@ -107,8 +109,12 @@ def match_origin(expected_origin: str, origin: str) -> bool:
     if origin == expected_origin:
         return True
 
-    # check for a wildcard match - involves parsing url
-    return match_wildcard_origin(expected_origin, origin)
+    # check for a wildcard match - involves parsing url - NB this
+    # means that non-URL origins will not match wildcards.
+    if origin.startswith("http") and WILDCARD_DELIMITER in expected_origin:
+        return match_root_domain(expected_origin, origin)
+
+    return False
 
 
 def validate_expected_origin(
