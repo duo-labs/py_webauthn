@@ -27,7 +27,9 @@ class TestValidateExpectedOrigin(TestCase):
             ("https://example.org", "https://*.example.org", False),
         ]
         for origin, expected_origin, result in test_data:
-            assert validate_expected_origin(expected_origin, origin) == result, (
+            self.assertEqual(
+                validate_expected_origin(expected_origin, origin),
+                result,
                 "Expected {} to match {}".format(origin, expected_origin)
             )
 
@@ -45,7 +47,9 @@ class TestValidateExpectedOrigin(TestCase):
             ("https://fail.example.org:8000", "https://*.example.org:8001", False),
         ]
         for origin, wildcard, result in test_data:
-            assert match_root_domain(wildcard, origin) == result, (
+            self.assertEqual(
+                match_root_domain(wildcard, origin),
+                result,
                 "Expected {} to match {}".format(origin, wildcard)
             )
 
