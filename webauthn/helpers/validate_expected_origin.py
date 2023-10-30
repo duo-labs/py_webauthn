@@ -98,16 +98,13 @@ def match_origin(expected_origin: str, origin: str) -> bool:
 
     Args:
         `expected_origin`: The origin that is expected - which may include
-            the "*" wildcard to match any subdomain.
-        `origin`: The (fully-qualified) origin to validate.
+            the "*" wildcard to match any subdomain. Must include scheme.
+        `origin`: The (fully-qualified) origin to validate, as returned by
+            the browser in the ClientDataJSON.
 
     """
     # straight match
     if origin == expected_origin:
-        return True
-
-    # expected origin doesn't have a scheme, check for suffix
-    if origin.endswith(expected_origin):
         return True
 
     # check for a wildcard match - involves parsing url
