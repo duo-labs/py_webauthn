@@ -13,20 +13,16 @@ class TestValidateExpectedOrigin(TestCase):
         matches = [
             # straight match
             ("https://example.com", "https://example.com", True),
-            # straight match with a list
-            ("https://example.com", ["https://foo.bar.com", "https://example.com"], True),
             # subdomain does not match
             ("https://www.example.com", "https://example.com", False),
+            # straight match with a list
+            ("https://example.com", ["https://foo.bar.com", "https://example.com"], True),
             # subdomain does not match with a list
             ("https://www.example.com", ["https://foo.bar.com", "https://example.com"], False),
             # subdomain allowed because of wildcard
             ("https://www.example.com", "https://*.example.com", True),
-            # subdomain allowed because of wildcard, no scheme in expected
-            ("https://www.example.com", "*.example.com", True),
-            # match with port number
-            ("https://example.com:8000", ["example.com:8000","example.com:8001"], True),
-            # no match with port number
-            ("https://example.com:8001", "example.com:8000", False),
+            # scheme mismatch
+            ("http://www.example.com", "https://www.example.com", False),
         ]
         for origin, expected_origin, result in matches:
             is_match = validate_expected_origin(expected_origin, origin)
@@ -51,8 +47,7 @@ class TestValidateExpectedOrigin(TestCase):
     def test_match_wildcard_origin(self):
         matches = (
             ("https://*.example.com", "https://foo.example.com", True),
-            ("*.example.com", "https://foo.example.com",True),
-            ("*.example.com:8000", "https://foo.example.com:8000",True),
+            ("https://*.example.com:8000", "https://foo.example.com:8000",True),
             # wildcard does not match if there is no subdomain
             ("https://*.example.com", "https://example.com", False),
         )

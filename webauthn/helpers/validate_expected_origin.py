@@ -54,11 +54,7 @@ def match_wildcard_origin(origin1: str, origin2: str) -> bool:
     on the domain, allowing subdomains to match.
 
     e.g. https://*.example.com will match https://foo.example.com, but
-    not https://example.com. The expected origin may also be a bare
-    domain, e.g. example.com, which will match https://example.com.
-
-    If the scheme is missing from the expected origin, it will be
-    inferred from the origin2 parameter.
+    not https://example.com.
 
     If the port number is supplied for either origin then they must
     match.
@@ -73,13 +69,14 @@ def match_wildcard_origin(origin1: str, origin2: str) -> bool:
     if WILDCARD_DELIMITER not in origin1:
         return False
 
-    # urlparse will not parse a hostname without a scheme, so we need to
-    # add the "//" prefix if scheme is missing.
-    parts1 = urlparse(origin1) if "//" in origin1 else urlparse("//" + origin1)
+    parts1 = urlparse(origin1)
+    if not parts1.scheme:
+        raise ValueError("Expected origin must include a scheme")
+
     parts2 = urlparse(origin2)
 
-    # if we have a scheme for both origins, they must match
-    if (parts1.scheme and parts2.scheme) and parts1.scheme != parts2.scheme:
+    # schemes must match
+    if parts1.scheme != parts2.scheme:
         return False
 
     # if either origin has a port number, they must match
@@ -87,9 +84,9 @@ def match_wildcard_origin(origin1: str, origin2: str) -> bool:
         return False
 
     # split off wildcard part of origin1 and check origin2 ends with it
-    suffix = origin1.rsplit(WILDCARD_DELIMITER, 1)[1]
-    # NB "*.example.com" should not match "example.com"
-    return origin2.endswith(suffix) and not origin2 == suffix
+    suffix = parts1.netloc.rsplit(WILDCARD_DELIMITER, 1)[1]
+    # NB "*.example.com" should not match "example.com" exactly
+    return parts2.netloc.endswith(suffix) and parts2.netloc != suffix
 
 
 def match_origin(expected_origin: str, origin: str) -> bool:
