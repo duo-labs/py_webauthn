@@ -1,8 +1,95 @@
+"""
+Validation of the origin passed in via ClientDataJSON.
+
+See https://www.w3.org/TR/webauthn-3/#sctn-validating-origin
+
+---
+The Relying Party MUST NOT accept unexpected values of origin, as doing
+so could allow a malicious website to obtain valid credentials. Although
+the scope of WebAuthn credentials prevents their use on domains outside
+the RP ID they were registered for, the Relying Party's origin
+validation serves as an additional layer of protection in case a faulty
+authenticator fails to enforce credential scope. See also §13.4.8 Code
+injection attacks for discussion of potentially malicious subdomains.
+
+Validation MAY be performed by exact string matching or any other method
+as needed by the Relying Party. For example:
+
+- A web application served only at https://example.org SHOULD require
+origin to exactly equal https://example.org.
+
+This is the simplest case, where origin is expected to be the string
+https:// followed by the RP ID.
+
+- A web application served at a small number of domains might require
+origin to exactly equal some element of a list of allowed origins, for
+example the list ["https://example.org", "https://login.example.org"].
+
+- A web application served at a large set of domains that changes often
+might parse origin structurally and require that the URL scheme is https
+and that the authority equals or is any subdomain of the RP ID - for
+example, example.org or any subdomain of example.org).
+
+NOTE: See §13.4.8 Code injection attacks for a discussion of the risks
+of allowing any subdomain of the RP ID.
+
+A web application with a companion native application might allow origin
+to be an operating system dependent identifier for the native
+application. For example, such a Relying Party might require that origin
+exactly equals some element of the list ["https://example.org",
+"example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7a"].
+
+"""
 from typing import List, Union
+from urllib.parse import urlparse
+
+WILDCARD_DELIMITER = "*."
 
 
-def normalize_origin(origin: str) -> str:
-    return origin.lower().lstrip("https://")
+def match_wildcard_origin(origin1: str, origin2: str) -> bool:
+    """
+    Perform wildcard match of two origins.
+
+    This covers the case where the expected origin has a "*." prefix
+    on the domain, allowing subdomains to match.
+
+    e.g. https://*.example.com will match https://foo.example.com, but
+    not https://example.com. The expected origin may also be a bare
+    domain, e.g. example.com, which will match https://example.com.
+
+    If the scheme is missing from the expected origin, it will be
+    inferred from the origin2 parameter.
+
+    If the port number is supplied for either origin then they must
+    match.
+
+    See tests for more examples.
+
+    Args:
+        `origin1`: The origin that contains the wildcard ("*").
+        `origin2`: The (fully-qualified) origin to match with.
+
+    """
+    if WILDCARD_DELIMITER not in origin1:
+        return False
+
+    # urlparse will not parse a hostname without a scheme, so we need to
+    # add the "//" prefix if scheme is missing.
+    parts1 = urlparse(origin1) if "//" in origin1 else urlparse("//" + origin1)
+    parts2 = urlparse(origin2)
+
+    # if we have a scheme for both origins, they must match
+    if (parts1.scheme and parts2.scheme) and parts1.scheme != parts2.scheme:
+        return False
+
+    # if either origin has a port number, they must match
+    if (parts1.port or parts2.port) and parts1.port != parts2.port:
+        return False
+
+    # split off wildcard part of origin1 and check origin2 ends with it
+    suffix = origin1.rsplit(WILDCARD_DELIMITER, 1)[1]
+    # NB "*.example.com" should not match "example.com"
+    return origin2.endswith(suffix) and not origin2 == suffix
 
 
 def match_origin(expected_origin: str, origin: str) -> bool:
@@ -12,18 +99,22 @@ def match_origin(expected_origin: str, origin: str) -> bool:
     This function handles the subdomain wildcard, so that an expected
     origin of "https://*.example.com" will match "https://foo.example.com".
 
+    Args:
+        `expected_origin`: The origin that is expected - which may include
+            the "*" wildcard to match any subdomain.
+        `origin`: The (fully-qualified) origin to validate.
+
     """
-    # normalize both origins to make it easier to compare
-    origin1 = normalize_origin(expected_origin)
-    origin2 = normalize_origin(origin)
-    if "*" not in origin1:
-        return origin1 == origin2
-    # we have a wildcard, so we check for subdomains.
-    # this is a very blunt check - we make no attempt to
-    # parse the url, we just check that the origin ends with
-    # the expected origin after the wildcard - so will hoover
-    # up port numbers as well. See tests for examples.
-    return origin2.endswith(origin1.split("*")[1])
+    # straight match
+    if origin == expected_origin:
+        return True
+
+    # expected origin doesn't have a scheme, check for suffix
+    if origin.endswith(expected_origin):
+        return True
+
+    # check for a wildcard match - involves parsing url
+    return match_wildcard_origin(expected_origin, origin)
 
 
 def validate_expected_origin(
@@ -33,21 +124,15 @@ def validate_expected_origin(
     """
     Validate that the origin matches the expected origin.
 
+    See https://www.w3.org/TR/webauthn-3/#sctn-validating-origin
+
     Args:
         `expected_origin`: The origin that is expected - may be a string
             or list of strings, any of which may include the "*"
             wildcard to match any subdomain.
-        `origin`: The origin to validate, must be HTTPS.
-
-    Raises:
-        `ValueError` if origin does not match expected origin, or if
-        origin is not HTTPS.
+        `origin`: The (fully-qualified) origin to validate.
 
     """
-    # TODO: Breaks tests - need to regenerate test data
-    # if not origin.startswith("https://"):
-    #     raise ValueError(f"Origin '{origin}' must start with https://")
-
     # convert single string to list so we can treat all the same
     if isinstance(expected_origin, str):
         return match_origin(expected_origin, origin)

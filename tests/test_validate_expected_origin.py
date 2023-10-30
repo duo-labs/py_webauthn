@@ -1,39 +1,62 @@
 from unittest import TestCase
 
-from webauthn.helpers.validate_expected_origin import validate_expected_origin
+from webauthn.helpers.validate_expected_origin import (
+    match_wildcard_origin,
+    validate_expected_origin,
+)
 
 
 class TestValidateExpectedOrigin(TestCase):
 
-    # orgin, expected_origin, result
-    TEST_PARAMS = [
-        # straight match
-        ("https://example.com", "https://example.com", True),
-        # straight match with a list
-        ("https://example.com", ["https://foo.bar.com", "https://example.com"], True),
-        # subdomain does not match
-        ("https://www.example.com", "https://example.com", False),
-        # subdomain does not match with a list
-        ("https://www.example.com", ["https://foo.bar.com", "https://example.com"], False),
-        # subdomain allowed becuase of wildcard
-        ("https://www.example.com", "https://*.example.com", True),
-        # subdomain allowed becuase of wildcard, no scheme in expected
-        ("https://www.example.com", "*.example.com", True),
-        # subdomain allowed becuase of wildcard, no scheme in expected
-        ("https://www.example.com", "*.example.com", True),
-        # match with port number
-        ("https://example.com:8000", ["example.com:8000","example.com:8001"], True),
-        # no match with port number
-        ("https://example.com:8001", "example.com:8000", False),
-    ]
-
     def  test_validate_origins(self):
-        for origin, expected_origin, result in self.TEST_PARAMS:
+        # orgin, expected_origin, result
+        matches = [
+            # straight match
+            ("https://example.com", "https://example.com", True),
+            # straight match with a list
+            ("https://example.com", ["https://foo.bar.com", "https://example.com"], True),
+            # subdomain does not match
+            ("https://www.example.com", "https://example.com", False),
+            # subdomain does not match with a list
+            ("https://www.example.com", ["https://foo.bar.com", "https://example.com"], False),
+            # subdomain allowed because of wildcard
+            ("https://www.example.com", "https://*.example.com", True),
+            # subdomain allowed because of wildcard, no scheme in expected
+            ("https://www.example.com", "*.example.com", True),
+            # match with port number
+            ("https://example.com:8000", ["example.com:8000","example.com:8001"], True),
+            # no match with port number
+            ("https://example.com:8001", "example.com:8000", False),
+        ]
+        for origin, expected_origin, result in matches:
             is_match = validate_expected_origin(expected_origin, origin)
-            self.assertEqual(is_match, result)
+            assert is_match == result, "Expected {} to match {}".format(
+                origin, expected_origin
+            )
 
-    # TODO: add test for invalid expected_origin once we have regenerated the
-    #       test data
-    # def  test_invalid_origins(self):
-    #     # should raise ValueError as it's not HTTPS
-    #     validate_expected_origin("example.com", "example.com")
+    def  test_match_origin(self):
+       # Test the match_origin function handles strings and lists of strings
+        matches = [
+            # straight match
+            ("https://example.com", "https://example.com", True),
+            # straight match with a list
+            ("https://example.com", ["https://foo.bar.com", "https://example.com"], True),
+        ]
+        for origin, expected_origin, result in matches:
+            is_match = validate_expected_origin(expected_origin, origin)
+            assert is_match == result, (
+                "Expected {} to match {}".format(origin, expected_origin)
+            )
+
+    def test_match_wildcard_origin(self):
+        matches = (
+            ("https://*.example.com", "https://foo.example.com", True),
+            ("*.example.com", "https://foo.example.com",True),
+            ("*.example.com:8000", "https://foo.example.com:8000",True),
+            # wildcard does not match if there is no subdomain
+            ("https://*.example.com", "https://example.com", False),
+        )
+        for expected_origin, origin, result in matches:
+            assert result == match_wildcard_origin(expected_origin, origin), (
+                "Expected {} to match {}".format(origin, expected_origin)
+            )
