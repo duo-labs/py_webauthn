@@ -43,12 +43,22 @@ exactly equals some element of the list ["https://example.org",
 from typing import List, Union
 from urllib.parse import urlparse
 
-WILDCARD_DELIMITER = "*."
 
-
-def match_root_domain(origin1: str, origin2: str) -> bool:
+def is_exact_match(expected_origin: str, origin: str) -> bool:
     """
-    Perform wildcard match of two http(s) origins.
+    Return True for a case-insensitive match of two origins.
+
+    Args:
+        `expected_origin`: The origin that contains the wildcard ("*").
+        `origin`: The (fully-qualified) origin to match against.
+
+    """
+    return expected_origin.lower() == origin.lower()
+
+
+def is_wildcard_match(expected_origin: str, origin: str) -> bool:
+    """
+    Perform subdomain-agnostic match of two http(s) origins.
 
     This covers the case where the expected origin has a "*." prefix
     on the domain, allowing subdomains to match.
@@ -62,18 +72,21 @@ def match_root_domain(origin1: str, origin2: str) -> bool:
     See tests for more examples.
 
     Args:
-        `origin1`: The origin that contains the wildcard ("*").
-        `origin2`: The (fully-qualified) origin to match with.
+        `expected_origin`: The origin that contains the wildcard ("*").
+        `origin`: The (fully-qualified) origin to match against.
 
     """
-    if WILDCARD_DELIMITER not in origin1:
-        raise ValueError("Expected origin must include wildcard")
+    # if this isn't a wildcard origin, do an exact match
+    if "*" not in expected_origin:
+        return is_exact_match(expected_origin, origin)
 
-    parts1 = urlparse(origin1)
-    if not parts1.scheme.startswith("http"):
-        raise ValueError("Wildcard matches only supported for http/https schemes")
+    # wildcards only (currently) supported with http(s) schemes
+    if not expected_origin.startswith("http"):
+        return False
 
-    parts2 = urlparse(origin2)
+    # split the origins so we can compare scheme and port
+    parts1 = urlparse(expected_origin)
+    parts2 = urlparse(origin)
 
     # schemes must match
     if parts1.scheme != parts2.scheme:
@@ -84,37 +97,17 @@ def match_root_domain(origin1: str, origin2: str) -> bool:
         return False
 
     # split off wildcard part of origin1 and check origin2 ends with it
-    suffix = parts1.netloc.rsplit(WILDCARD_DELIMITER, 1)[1]
+    suffix = parts1.netloc.rsplit("*", 1)[1]
     # NB "*.example.com" should not match "example.com" exactly
     return parts2.netloc.endswith(suffix) and parts2.netloc != suffix
 
 
-def match_origin(expected_origin: str, origin: str) -> bool:
-    """
-    Match a single origin against an expected origin.
-
-    This function handles the subdomain wildcard, so that an expected
-    origin of "https://*.example.com" will match "https://foo.example.com".
-
-    NB wildcard matches are only supported for http/https schemes.
-
-    Args:
-        `expected_origin`: The origin that is expected - which may include
-            the "*" wildcard to match any subdomain. Must include scheme.
-        `origin`: The (fully-qualified) origin to validate, as returned by
-            the browser in the ClientDataJSON.
-
-    """
-    # straight match
-    if origin == expected_origin:
-        return True
-
-    # check for a wildcard match - involves parsing url - NB this
-    # means that non-URL origins will not match wildcards.
-    if origin.startswith("http") and WILDCARD_DELIMITER in expected_origin:
-        return match_root_domain(expected_origin, origin)
-
-    return False
+def match_origins(expected_origin, origin) -> bool:
+    """Compare two origins for a match (supports wildcards)."""
+    return (
+        is_exact_match(expected_origin, origin) or
+        is_wildcard_match(expected_origin, origin)
+    )
 
 
 def validate_expected_origin(
@@ -123,6 +116,11 @@ def validate_expected_origin(
     ) -> bool:
     """
     Validate that the origin matches the expected origin.
+
+    This is the main entry point for validating the origin - it will
+    validate a client data origin against the expected origin which may
+    be a single string or a list of strings, any of which may include
+    the "*" wildcard to match any subdomain.
 
     See https://www.w3.org/TR/webauthn-3/#sctn-validating-origin
 
@@ -133,8 +131,7 @@ def validate_expected_origin(
         `origin`: The (fully-qualified) origin to validate.
 
     """
-    # convert single string to list so we can treat all the same
     if isinstance(expected_origin, str):
-        return match_origin(expected_origin, origin)
+        return match_origins(expected_origin, origin)
 
-    return any(match_origin(expected, origin) for expected in expected_origin)
+    return any(match_origins(expected, origin) for expected in expected_origin)
