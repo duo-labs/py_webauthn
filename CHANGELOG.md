@@ -1,4 +1,11 @@
 # Changelog
+
+## v1.11.1
+
+**Changes:**
+
+- Deprecation warnings related to `cbor2` in projects using `cbor2>=5.5.0` will no longer appear during registration and authentication response verification ([#181](https://github.com/duo-labs/py_webauthn/pull/181))
+
 ## v1.11.0
 
 **Changes:**
