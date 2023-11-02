@@ -15,20 +15,22 @@ class TestValidateExpectedOrigin(TestCase):
         expected_origin_result = [
             # exact match
             ("https://www.example.org", "https://www.example.org", True),
-            # wildcard match
+            # wildcard subdomain match
             ("https://*.example.org", "https://pass.example.org", True),
-            # global wildcard match
-            ("*", "http://any-old-url", True),
+            # wildcard prefix-only match
+            ("example-os*", "example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7a", True),
+            # wildcard suffix-only match
+            ("*.com", "https://something-random.com", True),
+            # wildcard match anything - this is a bad idea
+            ("*", "totally random origin that isn't even an origin", True),
             # no match
             ("https://foo.example.org", "https://bar.example.org", False),
-            # subdomain passes with a port
-            ("https://*.example.org:8000", "https://pass.example.org:8000", True),
-            # root domain fails on wildcard match
-            ("https://*.example.org", "https://example.org", False),
-            # subdomain fails on scheme mismatch
+            # scheme mismatch
             ("https://example.org", "http://example.org", False),
-            # subdomain fails on port mismatch
+            # port mismatch
             ("https://example.org:8001", "https://example.org:8000", False),
+            # wildcard subdomain fails root domain match
+            ("https://*.example.org", "https://example.org", False),
         ]
         for expected, origin, result in expected_origin_result:
             match = match_origins(expected, origin)
@@ -53,4 +55,9 @@ class TestValidateExpectedOrigin(TestCase):
             self.assertEqual(match, result, "{} != {}".format(origin, expected))
 
     def test_invalid_expected_origin(self) -> None:
-        self.assertRaises(InvalidExpectedOrigin, match_origins, "**", "https://www.example.org")
+        self.assertRaises(
+            InvalidExpectedOrigin,
+            match_origins,
+            "http://*.*.example.org",
+            "https://www.example.org",
+        )
