@@ -41,73 +41,26 @@ exactly equals some element of the list ["https://example.org",
 
 """
 from typing import List, Union
-from urllib.parse import urlparse
+
+from .exceptions import InvalidExpectedOrigin
 
 
-def is_exact_match(expected_origin: str, origin: str) -> bool:
-    """
-    Return True for a case-insensitive match of two origins.
-
-    Args:
-        `expected_origin`: The origin that contains the wildcard ("*").
-        `origin`: The (fully-qualified) origin to match against.
-
-    """
-    return expected_origin.lower() == origin.lower()
-
-
-def is_wildcard_match(expected_origin: str, origin: str) -> bool:
-    """
-    Perform subdomain-agnostic match of two http(s) origins.
-
-    This covers the case where the expected origin has a "*." prefix
-    on the domain, allowing subdomains to match.
-
-    e.g. https://*.example.com will match https://foo.example.com, but
-    not https://example.com.
-
-    If the port number is supplied for either origin then they must
-    match.
-
-    See tests for more examples.
-
-    Args:
-        `expected_origin`: The origin that contains the wildcard ("*").
-        `origin`: The (fully-qualified) origin to match against.
-
-    """
-    # if this isn't a wildcard origin, do an exact match
-    if "*" not in expected_origin:
-        return is_exact_match(expected_origin, origin)
-
-    # wildcards only (currently) supported with http(s) schemes
-    if not expected_origin.startswith("http"):
-        return False
-
-    # split the origins so we can compare scheme and port
-    parts1 = urlparse(expected_origin)
-    parts2 = urlparse(origin)
-
-    # schemes must match
-    if parts1.scheme != parts2.scheme:
-        return False
-
-    # if either origin has a port number, they must match
-    if (parts1.port or parts2.port) and parts1.port != parts2.port:
-        return False
-
-    # split off wildcard part of origin1 and check origin2 ends with it
-    suffix = parts1.netloc.rsplit("*", 1)[1]
-    # NB "*.example.com" should not match "example.com" exactly
-    return parts2.netloc.endswith(suffix) and parts2.netloc != suffix
-
-
-def match_origins(expected_origin, origin) -> bool:
+def match_origins(expected_origin: str, origin: str) -> bool:
     """Compare two origins for a match (supports wildcards)."""
-    return (
-        is_exact_match(expected_origin, origin) or
-        is_wildcard_match(expected_origin, origin)
-    )
+    if expected_origin == origin:
+        return True
+
+    # neither exact match nor wildcard match
+    if "*" not in expected_origin:
+        return False
+
+    try:
+        startswith, endswith = expected_origin.split("*")
+    except ValueError:
+        raise InvalidExpectedOrigin("Wildcard origin must contain exactly one '*'")
+
+    # NB this allows very broad matches, e.g. "http*" will match any web url
+    return origin.startswith(startswith) and origin.endswith(endswith)
 
 
 def validate_expected_origin(
