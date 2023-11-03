@@ -4,45 +4,29 @@ Validation of the origin passed in via ClientDataJSON.
 See https://www.w3.org/TR/webauthn-3/#sctn-validating-origin
 
 ---
-The Relying Party MUST NOT accept unexpected values of origin, as doing
-so could allow a malicious website to obtain valid credentials. Although
-the scope of WebAuthn credentials prevents their use on domains outside
-the RP ID they were registered for, the Relying Party's origin
-validation serves as an additional layer of protection in case a faulty
-authenticator fails to enforce credential scope. See also §13.4.8 Code
-injection attacks for discussion of potentially malicious subdomains.
 
-Validation MAY be performed by exact string matching or any other method
-as needed by the Relying Party. For example:
+From the specification there are two main rules:
 
-- A web application served only at https://example.org SHOULD require
-origin to exactly equal https://example.org.
+    The Relying Party MUST validate the origin member of the client data.
 
-This is the simplest case, where origin is expected to be the string
-https:// followed by the RP ID.
+    The Relying Party MUST NOT accept unexpected values of origin [...]
 
-- A web application served at a small number of domains might require
-origin to exactly equal some element of a list of allowed origins, for
-example the list ["https://example.org", "https://login.example.org"].
+Regarding the validation itself, the spec is more open:
 
-- A web application served at a large set of domains that changes often
-might parse origin structurally and require that the URL scheme is https
-and that the authority equals or is any subdomain of the RP ID - for
-example, example.org or any subdomain of example.org).
+    Validation MAY be performed by exact string matching _or any other
+    method_ as needed by the Relying Party.
 
-NOTE: See §13.4.8 Code injection attacks for a discussion of the risks
-of allowing any subdomain of the RP ID.
+"Any other method" is an open door - this method implements a simple
+wildcard matching scheme. If there is no exact match and the expected
+origin contains a "*" (wildcard char) then it splits the value into a
+prefix / suffix and checks that the origin starts with the prefix and
+ends with the suffix.
 
-A web application with a companion native application might allow origin
-to be an operating system dependent identifier for the native
-application. For example, such a Relying Party might require that origin
-exactly equals some element of the list ["https://example.org",
-"example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7a"].
+This method does allow a very broad match - e.g. "*" on its own splits
+into ('', '') and will match any origin.
 
 """
 from typing import List, Union
-
-from .exceptions import InvalidExpectedOrigin
 
 
 def match_origins(expected_origin: str, origin: str) -> bool:
@@ -57,9 +41,11 @@ def match_origins(expected_origin: str, origin: str) -> bool:
     try:
         startswith, endswith = expected_origin.split("*")
     except ValueError:
-        raise InvalidExpectedOrigin("Wildcard origin must contain exactly one '*'")
+        # this will raise InvalideAuthenticationResponse or
+        # InvalidRegistrationResponse depending on where it is called
+        return False
 
-    # NB this allows very broad matches, e.g. "http*" will match any web url
+    # NB "*" will match anything, effectively disabling origin validation.
     return origin.startswith(startswith) and origin.endswith(endswith)
 
 
@@ -84,7 +70,13 @@ def validate_expected_origin(
         `origin`: The (fully-qualified) origin to validate.
 
     """
+    if not expected_origin:
+        return False
+
     if isinstance(expected_origin, str):
         return match_origins(expected_origin, origin)
 
-    return any(match_origins(expected, origin) for expected in expected_origin)
+    if isinstance(expected_origin, list):
+        return any(match_origins(expected, origin) for expected in expected_origin)
+
+    return False

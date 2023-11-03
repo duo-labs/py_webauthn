@@ -56,7 +56,3 @@ class InvalidBackupFlags(Exception):
 
 class InvalidCBORData(Exception):
     pass
-
-
-class InvalidExpectedOrigin(Exception):
-    pass

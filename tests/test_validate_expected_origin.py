@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from webauthn.helpers.exceptions import InvalidExpectedOrigin
 from webauthn.helpers.validate_expected_origin import (
     match_origins,
     validate_expected_origin,
@@ -31,6 +30,8 @@ class TestValidateExpectedOrigin(TestCase):
             ("https://example.org:8001", "https://example.org:8000", False),
             # wildcard subdomain fails root domain match
             ("https://*.example.org", "https://example.org", False),
+            # invalid expected origin
+            ("https://*.*.example.org", "https://foo.bar.example.org", False),
         ]
         for expected, origin, result in expected_origin_result:
             match = match_origins(expected, origin)
@@ -49,15 +50,12 @@ class TestValidateExpectedOrigin(TestCase):
             ("https://www.example.org", "https://foo.example.org", False),
             # list mismatch
             ("https://www.example.org", ["https://foo.example.org"], False),
+            # empty expected origin
+            ("https://www.example.org", [], False),
+            ("https://www.example.org", "", False),
+            # invalid expected origin
+            ("https://www.example.org", 99, False),
         ]
         for expected, origin, result in expected_origin_result:
             match = validate_expected_origin(expected, origin)
             self.assertEqual(match, result, "{} != {}".format(origin, expected))
-
-    def test_invalid_expected_origin(self) -> None:
-        self.assertRaises(
-            InvalidExpectedOrigin,
-            match_origins,
-            "http://*.*.example.org",
-            "https://www.example.org",
-        )
