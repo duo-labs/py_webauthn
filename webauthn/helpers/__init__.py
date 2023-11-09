@@ -6,7 +6,6 @@ from .decoded_public_key_to_cryptography import decoded_public_key_to_cryptograp
 from .generate_challenge import generate_challenge
 from .generate_user_handle import generate_user_handle
 from .hash_by_alg import hash_by_alg
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .options_to_json import options_to_json
 from .parse_attestation_object import parse_attestation_object
 from .parse_authentication_credential_json import parse_authentication_credential_json
@@ -28,7 +27,6 @@ __all__ = [
     "generate_challenge",
     "generate_user_handle",
     "hash_by_alg",
-    "json_loads_base64url_to_bytes",
     "options_to_json",
     "parse_attestation_object",
     "parse_authenticator_data",

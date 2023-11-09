@@ -3,14 +3,17 @@ from unittest import TestCase
 
 import cbor2
 from pydantic import ValidationError
+
+from webauthn import verify_registration_response
 from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, parse_registration_credential_json
 from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidCBORData
 from webauthn.helpers.known_root_certs import globalsign_r2
 from webauthn.helpers.structs import (
     AttestationFormat,
     PublicKeyCredentialType,
+    RegistrationCredential,
+    PYDANTIC_V2,
 )
-from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponse(TestCase):
@@ -245,6 +248,41 @@ class TestVerifyRegistrationResponse(TestCase):
 
         verification = verify_registration_response(
             credential=credential,
+            expected_challenge=challenge,
+            expected_origin=expected_origin,
+            expected_rp_id=rp_id,
+        )
+
+        assert verification.fmt == AttestationFormat.NONE
+
+    def test_supports_pydantic_validated_credential(self) -> None:
+        credential = {
+            "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+            "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+            "response": {
+                "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAFwAAAAAAAAAAAAAAAAAAAAAAQPctcQPE5oNRRJk_nO_371mf7qE7qIodzr0eOf6ACvnMB1oQG165dqutoi1U44shGezu5_gkTjmOPeJO0N8a7P-lAQIDJiABIVggSFbUJF-42Ug3pdM8rDRFu_N5oiVEysPDB6n66r_7dZAiWCDUVnB39FlGypL-qAoIO9xWHtJygo2jfDmHl-_eKFRLDA",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiVHdON240V1R5R0tMYzRaWS1xR3NGcUtuSE00bmdscXN5VjBJQ0psTjJUTzlYaVJ5RnRya2FEd1V2c3FsLWdrTEpYUDZmbkYxTWxyWjUzTW00UjdDdnciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {},
+            "transports": [
+                "cable"
+            ]
+        }
+
+        if PYDANTIC_V2:
+            parsed_credential = RegistrationCredential.model_validate(credential)
+        else:
+            parsed_credential = RegistrationCredential.validate(credential)
+
+        challenge = base64url_to_bytes(
+            "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
+        )
+        rp_id = "localhost"
+        expected_origin = "http://localhost:5000"
+
+        verification = verify_registration_response(
+            credential=parsed_credential,
             expected_challenge=challenge,
             expected_origin=expected_origin,
             expected_rp_id=rp_id,

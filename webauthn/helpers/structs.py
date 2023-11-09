@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Callable, List, Literal, Optional, Any, Dict
 
-
 try:
     from pydantic import (  # type: ignore[attr-defined]
         BaseModel,
@@ -21,7 +20,6 @@ except ImportError:
 from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .snake_case_to_camel_case import snake_case_to_camel_case
 
 
@@ -85,7 +83,7 @@ class WebAuthnBaseModel(BaseModel):
             """
             field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
-            if field.annotation != bytes:
+            if field.annotation != bytes or info.field_name == 'user_handle':
                 return v
 
             if isinstance(v, str):
@@ -117,7 +115,6 @@ class WebAuthnBaseModel(BaseModel):
 
         class Config:
             json_encoders = {bytes: bytes_to_base64url}
-            json_loads = json_loads_base64url_to_bytes
             alias_generator = snake_case_to_camel_case
             allow_population_by_field_name = True
 
@@ -128,8 +125,11 @@ class WebAuthnBaseModel(BaseModel):
             specify bytes-adjacent values (bytes subclasses, memoryviews, etc...) that otherwise
             function like `bytes`. Keeps the library Pythonic.
             """
-            if field.type_ != bytes:
+            if field.type_ != bytes or field.name == 'user_handle':
                 return v
+
+            if isinstance(v, str):
+                return base64url_to_bytes(v)
 
             return _to_bytes(v)
 
