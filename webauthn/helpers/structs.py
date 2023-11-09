@@ -83,7 +83,7 @@ class WebAuthnBaseModel(BaseModel):
             """
             field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
 
-            if field.annotation != bytes or info.field_name == 'user_handle':
+            if field.annotation != bytes or info.field_name == 'user_handle':   # type: ignore[attr-defined]
                 return v
 
             if isinstance(v, str):
