@@ -28,6 +28,47 @@ into ('', '') and will match any origin.
 """
 from typing import List, Union
 
+from .exceptions import InvalidExpectedOrigin
+
+
+def _validate_wildcard(expected_origin: str) -> None:
+    """
+    Validate the expected origin value.
+
+    Validates according to the following rules:
+
+    - must not be empty
+    - must not contain more than one "*"
+    - must not start or end with "*"
+
+    Raises InvalidExpectedOrigin if the expected origin is invalid.
+
+    """
+    if not expected_origin:
+        raise InvalidExpectedOrigin("Expected origin must not be empty")
+
+    if expected_origin.endswith(("example.com", "example.org", "example.net")):
+        raise InvalidExpectedOrigin("Expected origin must not be a reserved domain")
+
+    wildcards = expected_origin.count("*")
+    if wildcards == 0:
+        return
+
+    if wildcards > 1:
+        raise InvalidExpectedOrigin(
+            "Expected origin must not contain more than one wildcard character ('*')"
+        )
+
+    if expected_origin.startswith("*"):
+        raise InvalidExpectedOrigin(
+            "Expected origin must not start with a wildcard character ('*.')"
+        )
+
+    if expected_origin.endswith("*"):
+        raise InvalidExpectedOrigin(
+            "Expected origin must not end with a wildcard character ('.*')"
+        )
+
 
 def match_origins(expected_origin: str, origin: str) -> bool:
     """Compare two origins for a match (supports wildcards)."""
@@ -38,21 +79,15 @@ def match_origins(expected_origin: str, origin: str) -> bool:
     if "*" not in expected_origin:
         return False
 
-    try:
-        startswith, endswith = expected_origin.split("*")
-    except ValueError:
-        # this will raise InvalideAuthenticationResponse or
-        # InvalidRegistrationResponse depending on where it is called
-        return False
+    _validate_wildcard(expected_origin)
 
-    # NB "*" will match anything, effectively disabling origin validation.
-    return origin.startswith(startswith) and origin.endswith(endswith)
+    prefix, suffix = expected_origin.split("*")
+    return origin.startswith(prefix) and origin.endswith(suffix)
 
 
 def validate_expected_origin(
-        expected_origin: Union[str, List[str]],
-        origin: str
-    ) -> bool:
+    expected_origin: Union[str, List[str]], origin: str
+) -> bool:
     """
     Validate that the origin matches the expected origin.
 

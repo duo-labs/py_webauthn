@@ -1,37 +1,36 @@
 from unittest import TestCase
 
 from webauthn.helpers.validate_expected_origin import (
+    InvalidExpectedOrigin,
     match_origins,
     validate_expected_origin,
 )
 
 
 class TestValidateExpectedOrigin(TestCase):
-
-
     def test_match_origins(self):
         """Test for combined match (exact and wildcard)."""
         expected_origin_result = [
             # exact match
-            ("https://www.example.org", "https://www.example.org", True),
+            ("https://www.acme.com", "https://www.acme.com", True),
             # wildcard subdomain match
-            ("https://*.example.org", "https://pass.example.org", True),
-            # wildcard prefix-only match
-            ("example-os*", "example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7a", True),
-            # wildcard suffix-only match
-            ("*.com", "https://something-random.com", True),
-            # wildcard match anything - this is a bad idea
-            ("*", "totally random origin that isn't even an origin", True),
+            ("https://*.acme.com", "https://pass.acme.com", True),
             # no match
-            ("https://foo.example.org", "https://bar.example.org", False),
+            ("https://foo.acme.com", "https://bar.acme.com", False),
             # scheme mismatch
-            ("https://example.org", "http://example.org", False),
+            ("https://acme.com", "http://acme.com", False),
             # port mismatch
-            ("https://example.org:8001", "https://example.org:8000", False),
+            ("https://acme.com:8001", "https://acme.com:8000", False),
             # wildcard subdomain fails root domain match
-            ("https://*.example.org", "https://example.org", False),
-            # invalid expected origin
-            ("https://*.*.example.org", "https://foo.bar.example.org", False),
+            ("https://*.acme.com", "https://acme.com", False),
+            # localhost match
+            ("http://localhost", "http://localhost", True),
+            # app protocol match (from spec)
+            (
+                "example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7adb0d8d135908bbd964ed05d2653b",
+                "example-os:appid:204ffa1a5af110ac483f131a1bef8a841a7adb0d8d135908bbd964ed05d2653b",
+                True,
+            ),
         ]
         for expected, origin, result in expected_origin_result:
             match = match_origins(expected, origin)
@@ -41,21 +40,43 @@ class TestValidateExpectedOrigin(TestCase):
         # test that validation handles a str or a list
         expected_origin_result = [
             # single str match
-            ("https://www.example.org", "https://www.example.org", True),
+            ("https://www.acme.com", "https://www.acme.com", True),
             # list match
-            ("https://www.example.org", ["https://www.example.org"], True),
+            ("https://www.acme.com", ["https://www.acme.com"], True),
             # list match
-            ("https://www.example.org", ["https://example.org", "https://www.example.org"], True),
+            (
+                "https://www.example.org",
+                ["https://acme.com", "https://www.acme.com"],
+                True,
+            ),
             # single str mismatch
-            ("https://www.example.org", "https://foo.example.org", False),
+            ("https://www.acme.com", "https://foo.acme.com", False),
             # list mismatch
-            ("https://www.example.org", ["https://foo.example.org"], False),
+            ("https://www.acme.com", ["https://foo.acme.com"], False),
             # empty expected origin
-            ("https://www.example.org", [], False),
-            ("https://www.example.org", "", False),
+            ("https://www.acme.com", [], False),
+            ("https://www.acme.com", "", False),
             # invalid expected origin
-            ("https://www.example.org", 99, False),
+            ("https://www.acme.com", 99, False),
         ]
         for expected, origin, result in expected_origin_result:
             match = validate_expected_origin(expected, origin)
             self.assertEqual(match, result, "{} != {}".format(origin, expected))
+
+    def invalidate_expected_origins(self):
+        invalid_expected_origins = [
+            # empty string
+            (""),
+            # starts with wildcard
+            ("*.acme.com"),
+            # ends with wildcard
+            ("https://acme.*"),
+            # multiple wildcards
+            ("https://*.acme.*"),
+            # reserved domains
+            ("https://example.com"),
+            ("https://example.net"),
+            ("https://example.org"),
+        ]
+        for expected in invalid_expected_origins:
+            self.assertRaises(InvalidExpectedOrigin, validate_expected_origin, expected)

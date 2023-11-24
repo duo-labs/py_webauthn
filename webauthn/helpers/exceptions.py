@@ -6,6 +6,10 @@ class InvalidAuthenticationResponse(Exception):
     pass
 
 
+class InvalidExpectedOrigin(Exception):
+    pass
+
+
 class InvalidPublicKeyStructure(Exception):
     pass
 
