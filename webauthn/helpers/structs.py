@@ -1,13 +1,8 @@
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Callable, List, Literal, Optional, Any, Dict
+from typing import List, Literal, Optional, Union
 
-
-from .base64url_to_bytes import base64url_to_bytes
-from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
-from .snake_case_to_camel_case import snake_case_to_camel_case
 
 
 ################
@@ -199,7 +194,7 @@ class PublicKeyCredentialUserEntity:
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: bytes
+    id: Union[bytes, str]
     name: str
     display_name: str
 
@@ -495,7 +490,7 @@ class AuthenticatorAssertionResponse:
     client_data_json: bytes
     authenticator_data: bytes
     signature: bytes
-    user_handle: Optional[bytes] = None
+    user_handle: Optional[Union[bytes, str]] = None
 
 
 @dataclass

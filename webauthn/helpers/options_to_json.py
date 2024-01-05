@@ -22,11 +22,14 @@ def options_to_json(
         if options.rp.id:
             _rp["id"] = options.rp.id
 
-        _user = {
-            "id": bytes_to_base64url(options.user.id),
+        _user: Dict[str, Any] = {
             "name": options.user.name,
             "displayName": options.user.display_name,
         }
+        if isinstance(options.user.id, bytes):
+            _user["id"] = bytes_to_base64url(options.user.id)
+        else:
+            _user["id"] = options.user.id
 
         reg_to_return: Dict[str, Any] = {
             "rp": _rp,

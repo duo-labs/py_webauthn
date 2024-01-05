@@ -99,7 +99,7 @@ class TestWebAuthnBytesSubclassSupport(TestCase):
             authenticator_data=bytes(),
             client_data_json=bytes(),
             signature=bytes(),
-            user_handle="some_user_handle_string",  # type: ignore
+            user_handle="some_user_handle_string",
         )
 
-        self.assertEqual(response.user_handle, b"some_user_handle_string")
+        self.assertEqual(response.user_handle, "some_user_handle_string")
