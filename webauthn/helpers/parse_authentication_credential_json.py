@@ -27,27 +27,27 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
 
     cred_id = json_val.get("id")
     if not isinstance(cred_id, str):
-        raise InvalidJSONStructure("JSON missing required id")
+        raise InvalidJSONStructure("Credential missing required id")
 
     cred_raw_id = json_val.get("rawId")
     if not isinstance(cred_raw_id, str):
-        raise InvalidJSONStructure("JSON missing required rawId")
+        raise InvalidJSONStructure("Credential missing required rawId")
 
     cred_response = json_val.get("response")
     if not isinstance(cred_response, dict):
-        raise InvalidJSONStructure("JSON missing required response")
+        raise InvalidJSONStructure("Credential missing required response")
 
     response_client_data_json = cred_response.get("clientDataJSON")
     if not isinstance(response_client_data_json, str):
-        raise InvalidJSONStructure("JSON response missing required clientDataJSON")
+        raise InvalidJSONStructure("Credential response missing required clientDataJSON")
 
     response_authenticator_data = cred_response.get("authenticatorData")
     if not isinstance(response_authenticator_data, str):
-        raise InvalidJSONStructure("JSON response missing required authenticatorData")
+        raise InvalidJSONStructure("Credential response missing required authenticatorData")
 
     response_signature = cred_response.get("signature")
     if not isinstance(response_signature, str):
-        raise InvalidJSONStructure("JSON response missing required signature")
+        raise InvalidJSONStructure("Credential response missing required signature")
 
     response_user_handle = cred_response.get("userHandle")
     if isinstance(response_user_handle, str):
@@ -61,7 +61,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
             cred_authenticator_attachment = AuthenticatorAttachment(cred_authenticator_attachment)
         except ValueError as cred_attachment_exc:
             raise InvalidJSONStructure(
-                "Unexpected authenticator attachment"
+                "Credential has unexpected authenticator attachment"
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
