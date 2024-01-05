@@ -3,6 +3,7 @@ from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
 from .decode_credential_public_key import decode_credential_public_key
 from .decoded_public_key_to_cryptography import decoded_public_key_to_cryptography
+from .encode_cbor import encode_cbor
 from .generate_challenge import generate_challenge
 from .generate_user_handle import generate_user_handle
 from .hash_by_alg import hash_by_alg
@@ -25,6 +26,7 @@ __all__ = [
     "bytes_to_base64url",
     "decode_credential_public_key",
     "decoded_public_key_to_cryptography",
+    "encode_cbor",
     "generate_challenge",
     "generate_user_handle",
     "hash_by_alg",
