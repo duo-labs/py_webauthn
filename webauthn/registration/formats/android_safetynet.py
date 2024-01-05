@@ -1,6 +1,7 @@
 import base64
 from dataclasses import dataclass
 import hashlib
+import json
 from typing import List
 
 from cryptography import x509
@@ -84,13 +85,22 @@ def verify_android_safetynet(
     if len(jws_parts) != 3:
         raise InvalidRegistrationResponse("Response JWS did not have three parts (SafetyNet)")
 
-    # TODO: Rewrite this
-    # if PYDANTIC_V2:
-    #     header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))  # type: ignore[attr-defined]
-    #     payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))  # type: ignore[attr-defined]
-    # else:
-    #     header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-    #     payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    header_json = json.loads(base64url_to_bytes(jws_parts[0]))
+    payload_json = json.loads(base64url_to_bytes(jws_parts[1]))
+
+    header = SafetyNetJWSHeader(
+        alg=header_json.get("alg", ""),
+        x5c=header_json.get("x5c", []),
+    )
+    payload = SafetyNetJWSPayload(
+        nonce=payload_json.get("nonce", ""),
+        timestamp_ms=payload_json.get("timestampMs", 0),
+        apk_package_name=payload_json.get("apkPackageName", ""),
+        apk_digest_sha256=payload_json.get("apkDigestSha256", ""),
+        cts_profile_match=payload_json.get("ctsProfileMatch", False),
+        apk_certificate_digest_sha256=payload_json.get("apkCertificateDigestSha256", []),
+        basic_integrity=payload_json.get("basicIntegrity", False),
+    )
 
     signature_bytes_str: str = jws_parts[2]
 
