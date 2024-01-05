@@ -14,10 +14,6 @@ class UnsupportedPublicKeyType(Exception):
     pass
 
 
-class InvalidClientDataJSONStructure(Exception):
-    pass
-
-
 class InvalidJSONStructure(Exception):
     pass
 
