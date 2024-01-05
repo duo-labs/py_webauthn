@@ -67,16 +67,14 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         cred_authenticator_attachment = None
 
     cred_type = json_val.get("type")
-    if isinstance(cred_type, str):
-        try:
-            cred_type = PublicKeyCredentialType(cred_type)
-        except ValueError as cred_type_exc:
-            raise InvalidJSONStructure("Unexpected credential type") from cred_type_exc
-    else:
-        cred_type = None
+    try:
+        # Simply try to get the single matching Enum. We'll set the literal value below assuming
+        # the code can get past here (this is basically a mypy optimization)
+        PublicKeyCredentialType(cred_type)
+    except ValueError as cred_type_exc:
+        raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
     try:
-        # TODO: Write this
         authentication_credential = AuthenticationCredential(
             id=cred_id,
             raw_id=base64url_to_bytes(cred_raw_id),
@@ -87,7 +85,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
                 user_handle=response_user_handle,
             ),
             authenticator_attachment=cred_authenticator_attachment,
-            type=cred_type,
+            type=PublicKeyCredentialType.PUBLIC_KEY,
         )
     except Exception as exc:
         raise InvalidAuthenticationResponse(
