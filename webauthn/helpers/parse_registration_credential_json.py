@@ -58,8 +58,6 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
             except ValueError:
                 pass
 
-    print(f"transports: {transports}")
-
     cred_authenticator_attachment = json_val.get("authenticatorAttachment")
     if isinstance(cred_authenticator_attachment, str):
         try:
