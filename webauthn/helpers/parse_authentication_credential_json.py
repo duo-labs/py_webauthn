@@ -30,7 +30,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         raise InvalidJSONStructure("JSON missing required id")
 
     cred_raw_id = json_val.get("rawId")
-    if not isinstance(cred_id, str):
+    if not isinstance(cred_raw_id, str):
         raise InvalidJSONStructure("JSON missing required rawId")
 
     cred_response = json_val.get("response")
