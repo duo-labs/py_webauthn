@@ -473,7 +473,7 @@ class PublicKeyCredentialRequestOptions:
     challenge: bytes
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
-    allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = field(default_factory=[])
+    allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
     user_verification: Optional[
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
