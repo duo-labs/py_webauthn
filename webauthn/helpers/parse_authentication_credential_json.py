@@ -1,6 +1,6 @@
 import json
 from json.decoder import JSONDecodeError
-from typing import Callable, Union
+from typing import Union
 
 from .exceptions import InvalidAuthenticationResponse, InvalidJSONStructure
 from .base64url_to_bytes import base64url_to_bytes
