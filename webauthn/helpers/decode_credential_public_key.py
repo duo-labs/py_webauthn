@@ -5,6 +5,7 @@ import cbor2
 
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
+from .parse_cbor import parse_cbor
 
 
 @dataclass
@@ -56,7 +57,7 @@ def decode_credential_public_key(
             y=key[33:65],
         )
 
-    decoded_key: dict = cbor2.loads(key)
+    decoded_key: dict = parse_cbor(key)
 
     kty = decoded_key[COSEKey.KTY]
     alg = decoded_key[COSEKey.ALG]

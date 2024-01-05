@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 from unittest import TestCase
 import cbor2
 
-from webauthn.helpers import parse_authenticator_data, bytes_to_base64url
+from webauthn.helpers import parse_authenticator_data, bytes_to_base64url, parse_cbor
 from webauthn.helpers.base64url_to_bytes import base64url_to_bytes
 
 
@@ -153,7 +153,7 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         self.assertIsNotNone(extensions)
         assert extensions  # Make mypy happy
 
-        parsed_extensions = cbor2.loads(extensions)
+        parsed_extensions = parse_cbor(extensions)
         self.assertEqual(parsed_extensions, {"credProtect": 1})
 
     def test_parses_only_extension_data(self) -> None:
@@ -167,7 +167,7 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         extensions = output.extensions
         self.assertIsNotNone(extensions)
         assert extensions  # Make mypy happy
-        parsed_extensions = cbor2.loads(extensions)
+        parsed_extensions = parse_cbor(extensions)
         self.assertEqual(
             parsed_extensions,
             {

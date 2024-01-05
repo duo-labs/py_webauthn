@@ -1,12 +1,12 @@
 import json
 from unittest import TestCase
 
-import cbor2
-from pydantic import ValidationError
 from webauthn.helpers import (
     base64url_to_bytes,
     bytes_to_base64url,
+    encode_cbor,
     parse_registration_credential_json,
+    parse_cbor,
 )
 from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidCBORData
 from webauthn.helpers.known_root_certs import globalsign_r2
@@ -78,9 +78,13 @@ class TestVerifyRegistrationResponse(TestCase):
 
         # Take the otherwise legitimate credential and mangle its attestationObject's
         # "fmt" to something it could never actually be
-        parsed_atte_obj = cbor2.loads(base64url_to_bytes(cred_json["response"]["attestationObject"]))  # type: ignore
+        parsed_atte_obj: dict = parse_cbor(
+            base64url_to_bytes(cred_json["response"]["attestationObject"])  # type: ignore
+        )
         parsed_atte_obj["fmt"] = "not_real_fmt"
-        cred_json["response"]["attestationObject"] = bytes_to_base64url(cbor2.dumps(parsed_atte_obj))  # type: ignore
+        cred_json["response"]["attestationObject"] = bytes_to_base64url(  # type: ignore
+            encode_cbor(parsed_atte_obj)
+        )
 
         credential = json.dumps(cred_json)
         challenge = base64url_to_bytes(
