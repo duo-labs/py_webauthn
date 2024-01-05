@@ -52,7 +52,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
 
     response_user_handle = cred_response.get("userHandle")
     if isinstance(response_user_handle, str):
-        response_user_handle = base64url_to_bytes(response_user_handle)
+        response_user_handle = response_user_handle
     else:
         response_user_handle = None
 
