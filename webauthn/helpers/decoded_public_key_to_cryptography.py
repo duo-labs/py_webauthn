@@ -35,9 +35,7 @@ def decoded_public_key_to_cryptography(
         y = int(codecs.encode(public_key.y, "hex"), 16)
         curve = get_ec2_curve(public_key.crv)
 
-        ecc_pub_key = EllipticCurvePublicNumbers(x, y, curve).public_key(
-            default_backend()
-        )
+        ecc_pub_key = EllipticCurvePublicNumbers(x, y, curve).public_key(default_backend())
 
         return ecc_pub_key
     elif isinstance(public_key, DecodedRSAPublicKey):
@@ -56,10 +54,7 @@ def decoded_public_key_to_cryptography(
         -8 (EdDSA), where crv is 6 (Ed25519).
         https://www.w3.org/TR/webauthn-2/#sctn-public-key-easy
         """
-        if (
-            public_key.alg != COSEAlgorithmIdentifier.EDDSA
-            or public_key.crv != COSECRV.ED25519
-        ):
+        if public_key.alg != COSEAlgorithmIdentifier.EDDSA or public_key.crv != COSECRV.ED25519:
             raise UnsupportedPublicKey(
                 f"OKP public key with alg {public_key.alg} and crv {public_key.crv} is not supported"
             )

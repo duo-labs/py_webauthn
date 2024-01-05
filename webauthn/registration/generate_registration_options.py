@@ -20,10 +20,7 @@ def _generate_pub_key_cred_params(
     """
     Take an array of algorithm ID ints and return an array of PublicKeyCredentialParameters
     """
-    return [
-        PublicKeyCredentialParameters(type="public-key", alg=alg)
-        for alg in supported_algs
-    ]
+    return [PublicKeyCredentialParameters(type="public-key", alg=alg) for alg in supported_algs]
 
 
 default_supported_pub_key_algs = [

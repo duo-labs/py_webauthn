@@ -6,7 +6,7 @@ from .exceptions import InvalidBackupFlags
 
 
 @dataclass
-class ParsedBackupFlags():
+class ParsedBackupFlags:
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
 

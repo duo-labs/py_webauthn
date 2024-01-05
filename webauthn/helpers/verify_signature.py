@@ -53,9 +53,7 @@ def verify_signature(
         public_key.verify(signature, data, get_ec2_sig_alg(signature_alg))
     elif isinstance(public_key, RSAPublicKey):
         if is_rsa_pkcs(signature_alg):
-            public_key.verify(
-                signature, data, PKCS1v15(), get_rsa_pkcs1_sig_alg(signature_alg)
-            )
+            public_key.verify(signature, data, PKCS1v15(), get_rsa_pkcs1_sig_alg(signature_alg))
         elif is_rsa_pss(signature_alg):
             rsa_alg = get_rsa_pss_sig_alg(signature_alg)
             public_key.verify(
@@ -65,9 +63,7 @@ def verify_signature(
                 rsa_alg,
             )
         else:
-            raise UnsupportedAlgorithm(
-                f"Unrecognized RSA signature alg {signature_alg}"
-            )
+            raise UnsupportedAlgorithm(f"Unrecognized RSA signature alg {signature_alg}")
     elif isinstance(public_key, Ed25519PublicKey):
         public_key.verify(signature, data)
     else:

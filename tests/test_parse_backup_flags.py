@@ -24,7 +24,7 @@ class TestParseBackupFlags(TestCase):
 
         parsed = parse_backup_flags(self.flags)
 
-        self.assertEqual(parsed.credential_device_type, 'single_device')
+        self.assertEqual(parsed.credential_device_type, "single_device")
         self.assertEqual(parsed.credential_backed_up, False)
 
     def test_returns_multi_device_not_backed_up(self) -> None:
@@ -33,7 +33,7 @@ class TestParseBackupFlags(TestCase):
 
         parsed = parse_backup_flags(self.flags)
 
-        self.assertEqual(parsed.credential_device_type, 'multi_device')
+        self.assertEqual(parsed.credential_device_type, "multi_device")
         self.assertEqual(parsed.credential_backed_up, False)
 
     def test_returns_multi_device_backed_up(self) -> None:
@@ -42,7 +42,7 @@ class TestParseBackupFlags(TestCase):
 
         parsed = parse_backup_flags(self.flags)
 
-        self.assertEqual(parsed.credential_device_type, 'multi_device')
+        self.assertEqual(parsed.credential_device_type, "multi_device")
         self.assertEqual(parsed.credential_backed_up, True)
 
     def test_raises_on_invalid_backup_state_flags(self) -> None:
@@ -53,4 +53,4 @@ class TestParseBackupFlags(TestCase):
             InvalidBackupFlags,
             "impossible",
         ):
-             parse_backup_flags(self.flags)
+            parse_backup_flags(self.flags)

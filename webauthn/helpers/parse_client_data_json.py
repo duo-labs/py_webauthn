@@ -13,23 +13,17 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
     try:
         json_dict = json.loads(val)
     except JSONDecodeError:
-        raise InvalidClientDataJSONStructure(
-            "Unable to decode client_data_json bytes as JSON"
-        )
+        raise InvalidClientDataJSONStructure("Unable to decode client_data_json bytes as JSON")
 
     # Ensure required values are present in client data
     if "type" not in json_dict:
-        raise InvalidClientDataJSONStructure(
-            'client_data_json missing required property "type"'
-        )
+        raise InvalidClientDataJSONStructure('client_data_json missing required property "type"')
     if "challenge" not in json_dict:
         raise InvalidClientDataJSONStructure(
             'client_data_json missing required property "challenge"'
         )
     if "origin" not in json_dict:
-        raise InvalidClientDataJSONStructure(
-            'client_data_json missing required property "origin"'
-        )
+        raise InvalidClientDataJSONStructure('client_data_json missing required property "origin"')
 
     client_data = CollectedClientData(
         type=json_dict["type"],

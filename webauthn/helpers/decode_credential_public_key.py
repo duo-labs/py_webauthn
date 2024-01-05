@@ -8,7 +8,7 @@ from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
 
 
 @dataclass
-class DecodedOKPPublicKey():
+class DecodedOKPPublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
@@ -16,7 +16,7 @@ class DecodedOKPPublicKey():
 
 
 @dataclass
-class DecodedEC2PublicKey():
+class DecodedEC2PublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
@@ -25,7 +25,7 @@ class DecodedEC2PublicKey():
 
 
 @dataclass
-class DecodedRSAPublicKey():
+class DecodedRSAPublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     n: bytes

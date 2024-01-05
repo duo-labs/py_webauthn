@@ -31,7 +31,7 @@ from .generate_registration_options import default_supported_pub_key_algs
 
 
 @dataclass
-class VerifiedRegistration():
+class VerifiedRegistration:
     """Information about a verified attestation of which an RP can make use.
 
     Attributes:
@@ -70,12 +70,8 @@ def verify_registration_response(
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
     require_user_verification: bool = False,
-    supported_pub_key_algs: List[
-        COSEAlgorithmIdentifier
-    ] = default_supported_pub_key_algs,
-    pem_root_certs_bytes_by_fmt: Optional[
-        Mapping[AttestationFormat, List[bytes]]
-    ] = None,
+    supported_pub_key_algs: List[COSEAlgorithmIdentifier] = default_supported_pub_key_algs,
+    pem_root_certs_bytes_by_fmt: Optional[Mapping[AttestationFormat, List[bytes]]] = None,
 ) -> VerifiedRegistration:
     """Verify an authenticator's response to navigator.credentials.create()
 
@@ -126,9 +122,7 @@ def verify_registration_response(
         )
 
     if expected_challenge != client_data.challenge:
-        raise InvalidRegistrationResponse(
-            "Client data challenge was not expected challenge"
-        )
+        raise InvalidRegistrationResponse("Client data challenge was not expected challenge")
 
     if isinstance(expected_origin, str):
         if expected_origin != client_data.origin:
@@ -171,21 +165,15 @@ def verify_registration_response(
         )
 
     if not auth_data.attested_credential_data:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide attested credential data"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide attested credential data")
 
     attested_credential_data = auth_data.attested_credential_data
 
     if not attested_credential_data.credential_id:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide a credential ID"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide a credential ID")
 
     if not attested_credential_data.credential_public_key:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide a credential public key"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide a credential public key")
 
     if not attested_credential_data.aaguid:
         raise InvalidRegistrationResponse("Authenticator did not provide an AAGUID")

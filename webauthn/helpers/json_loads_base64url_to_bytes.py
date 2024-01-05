@@ -16,14 +16,10 @@ def _object_hook_base64url_to_bytes(orig_dict: dict) -> dict:
         orig_dict["clientDataJSON"] = base64url_to_bytes(orig_dict["clientDataJSON"])
     # Registration
     if "attestationObject" in orig_dict:
-        orig_dict["attestationObject"] = base64url_to_bytes(
-            orig_dict["attestationObject"]
-        )
+        orig_dict["attestationObject"] = base64url_to_bytes(orig_dict["attestationObject"])
     # Authentication
     if "authenticatorData" in orig_dict:
-        orig_dict["authenticatorData"] = base64url_to_bytes(
-            orig_dict["authenticatorData"]
-        )
+        orig_dict["authenticatorData"] = base64url_to_bytes(orig_dict["authenticatorData"])
     if "signature" in orig_dict:
         orig_dict["signature"] = base64url_to_bytes(orig_dict["signature"])
     if "userHandle" in orig_dict:

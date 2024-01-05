@@ -27,9 +27,7 @@ class TestValidateCertificateChain(TestCase):
     # TODO: Revisit these tests when we figure out how to generate dynamic certs that
     # won't start failing tests 72 hours after creation...
     @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_validates_certificate_chain(
-        self, mock_verify_certificate: MagicMock
-    ) -> None:
+    def test_validates_certificate_chain(self, mock_verify_certificate: MagicMock) -> None:
         # Mocked because these certs actually expired and started failing this test
         mock_verify_certificate.return_value = True
 

@@ -32,14 +32,10 @@ def verify_packed(
     See https://www.w3.org/TR/webauthn-2/#sctn-packed-attestation
     """
     if not attestation_statement.sig:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing signature (Packed)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing signature (Packed)")
 
     if not attestation_statement.alg:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing algorithm (Packed)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing algorithm (Packed)")
 
     # Extract attStmt bytes from attestation_object
     attestation_dict = parse_cbor(attestation_object)

@@ -16,10 +16,7 @@ class TestWebAuthnTPMParseCertInfo(TestCase):
             output.qualified_signer
             == b'\x00\x0bW"f{J5_9"\x15\tL\x01\xd5e\xbcr\xc6\xc9\x03\xbc#\xb5m\xee\xb5yI+j\xe6\xce'
         )
-        assert (
-            output.extra_data
-            == b"`\x0bD(A\x99\xf3\xd3\x12I[\x04\x1f\xf4\xe7\xfb)\xc8\x02\x8f"
-        )
+        assert output.extra_data == b"`\x0bD(A\x99\xf3\xd3\x12I[\x04\x1f\xf4\xe7\xfb)\xc8\x02\x8f"
         assert output.firmware_version == b"\x97g1K\xfaf`T"
         # Attested
         assert output.attested.name_alg == TPM_ALG.SHA256

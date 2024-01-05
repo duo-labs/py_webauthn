@@ -61,9 +61,7 @@ def verify_android_key(
         )
 
     if not attestation_statement.x5c:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing x5c (Android Key)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing x5c (Android Key)")
 
     # Validate certificate chain
     try:
@@ -98,9 +96,7 @@ def verify_android_key(
     # and clientDataHash using the public key in the first certificate in x5c with the
     # algorithm specified in alg.
     attestation_cert_bytes = attestation_statement.x5c[0]
-    attestation_cert = x509.load_der_x509_certificate(
-        attestation_cert_bytes, default_backend()
-    )
+    attestation_cert = x509.load_der_x509_certificate(attestation_cert_bytes, default_backend())
     attestation_cert_pub_key = attestation_cert.public_key()
 
     try:

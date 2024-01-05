@@ -163,7 +163,7 @@ class TokenBindingStatus(str, Enum):
 
 
 @dataclass
-class TokenBinding():
+class TokenBinding:
     """
     https://www.w3.org/TR/webauthn-2/#dictdef-tokenbinding
     """
@@ -173,7 +173,7 @@ class TokenBinding():
 
 
 @dataclass
-class PublicKeyCredentialRpEntity():
+class PublicKeyCredentialRpEntity:
     """Information about the Relying Party.
 
     Attributes:
@@ -188,7 +188,7 @@ class PublicKeyCredentialRpEntity():
 
 
 @dataclass
-class PublicKeyCredentialUserEntity():
+class PublicKeyCredentialUserEntity:
     """Information about a user of a Relying Party.
 
     Attributes:
@@ -205,7 +205,7 @@ class PublicKeyCredentialUserEntity():
 
 
 @dataclass
-class PublicKeyCredentialParameters():
+class PublicKeyCredentialParameters:
     """Information about a cryptographic algorithm that may be used when creating a credential.
 
     Attributes:
@@ -220,7 +220,7 @@ class PublicKeyCredentialParameters():
 
 
 @dataclass
-class PublicKeyCredentialDescriptor():
+class PublicKeyCredentialDescriptor:
     """Information about a generated credential.
 
     Attributes:
@@ -232,14 +232,12 @@ class PublicKeyCredentialDescriptor():
     """
 
     id: bytes
-    type: Literal[
-        PublicKeyCredentialType.PUBLIC_KEY
-    ] = PublicKeyCredentialType.PUBLIC_KEY
+    type: Literal[PublicKeyCredentialType.PUBLIC_KEY] = PublicKeyCredentialType.PUBLIC_KEY
     transports: Optional[List[AuthenticatorTransport]] = None
 
 
 @dataclass
-class AuthenticatorSelectionCriteria():
+class AuthenticatorSelectionCriteria:
     """A Relying Party's requirements for the types of authenticators that may interact with the client/browser.
 
     Attributes:
@@ -260,7 +258,7 @@ class AuthenticatorSelectionCriteria():
 
 
 @dataclass
-class CollectedClientData():
+class CollectedClientData:
     """Decoded ClientDataJSON
 
     Attributes:
@@ -288,7 +286,7 @@ class CollectedClientData():
 
 
 @dataclass
-class PublicKeyCredentialCreationOptions():
+class PublicKeyCredentialCreationOptions:
     """Registration Options.
 
     Attributes:
@@ -315,7 +313,7 @@ class PublicKeyCredentialCreationOptions():
 
 
 @dataclass
-class AuthenticatorAttestationResponse():
+class AuthenticatorAttestationResponse:
     """The `response` property on a registration credential.
 
     Attributes:
@@ -333,7 +331,7 @@ class AuthenticatorAttestationResponse():
 
 
 @dataclass
-class RegistrationCredential():
+class RegistrationCredential:
     """A registration-specific subclass of PublicKeyCredential returned from `navigator.credentials.create()`
 
     Attributes:
@@ -349,13 +347,11 @@ class RegistrationCredential():
     raw_id: bytes
     response: AuthenticatorAttestationResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
-    type: Literal[
-        PublicKeyCredentialType.PUBLIC_KEY
-    ] = PublicKeyCredentialType.PUBLIC_KEY
+    type: Literal[PublicKeyCredentialType.PUBLIC_KEY] = PublicKeyCredentialType.PUBLIC_KEY
 
 
 @dataclass
-class AttestationStatement():
+class AttestationStatement:
     """A collection of all possible fields that may exist in an attestation statement. Combinations of these fields are specific to a particular attestation format.
 
     https://www.w3.org/TR/webauthn-2/#sctn-defined-attestation-formats
@@ -375,7 +371,7 @@ class AttestationStatement():
 
 
 @dataclass
-class AuthenticatorDataFlags():
+class AuthenticatorDataFlags:
     """Flags the authenticator will set about information contained within the `attestationObject.authData` property.
 
     Attributes:
@@ -398,7 +394,7 @@ class AuthenticatorDataFlags():
 
 
 @dataclass
-class AttestedCredentialData():
+class AttestedCredentialData:
     """Information about a credential.
 
     Attributes:
@@ -415,7 +411,7 @@ class AttestedCredentialData():
 
 
 @dataclass
-class AuthenticatorData():
+class AuthenticatorData:
     """Context the authenticator provides about itself and the environment in which the registration or authentication ceremony took place.
 
     Attributes:
@@ -437,7 +433,7 @@ class AuthenticatorData():
 
 
 @dataclass
-class AttestationObject():
+class AttestationObject:
     """Information about an attestation, including a statement and authenticator data.
 
     Attributes:
@@ -461,7 +457,7 @@ class AttestationObject():
 
 
 @dataclass
-class PublicKeyCredentialRequestOptions():
+class PublicKeyCredentialRequestOptions:
     """Authentication Options.
 
     Attributes:
@@ -484,7 +480,7 @@ class PublicKeyCredentialRequestOptions():
 
 
 @dataclass
-class AuthenticatorAssertionResponse():
+class AuthenticatorAssertionResponse:
     """The `response` property on an authentication credential.
 
     Attributes:
@@ -503,7 +499,7 @@ class AuthenticatorAssertionResponse():
 
 
 @dataclass
-class AuthenticationCredential():
+class AuthenticationCredential:
     """An authentication-specific subclass of PublicKeyCredential. Returned from `navigator.credentials.get()`
 
     Attributes:
@@ -519,9 +515,7 @@ class AuthenticationCredential():
     raw_id: bytes
     response: AuthenticatorAssertionResponse
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
-    type: Literal[
-        PublicKeyCredentialType.PUBLIC_KEY
-    ] = PublicKeyCredentialType.PUBLIC_KEY
+    type: Literal[PublicKeyCredentialType.PUBLIC_KEY] = PublicKeyCredentialType.PUBLIC_KEY
 
 
 ################
