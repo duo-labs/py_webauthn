@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import hashlib
 from typing import List, Union
 
@@ -20,11 +21,11 @@ from webauthn.helpers.structs import (
     CredentialDeviceType,
     PublicKeyCredentialType,
     TokenBindingStatus,
-    WebAuthnBaseModel,
 )
 
 
-class VerifiedAuthentication(WebAuthnBaseModel):
+@dataclass
+class VerifiedAuthentication:
     """
     Information about a verified authentication of which an RP can make use
     """
@@ -98,9 +99,7 @@ def verify_authentication_response(
         )
 
     if expected_challenge != client_data.challenge:
-        raise InvalidAuthenticationResponse(
-            "Client data challenge was not expected challenge"
-        )
+        raise InvalidAuthenticationResponse("Client data challenge was not expected challenge")
 
     if isinstance(expected_origin, str):
         if expected_origin != client_data.origin:
@@ -133,9 +132,7 @@ def verify_authentication_response(
         raise InvalidAuthenticationResponse("Unexpected RP ID hash")
 
     if not auth_data.flags.up:
-        raise InvalidAuthenticationResponse(
-            "User was not present during authentication"
-        )
+        raise InvalidAuthenticationResponse("User was not present during authentication")
 
     if require_user_verification and not auth_data.flags.uv:
         raise InvalidAuthenticationResponse(

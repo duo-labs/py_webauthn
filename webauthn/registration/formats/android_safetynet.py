@@ -1,4 +1,5 @@
 import base64
+from dataclasses import dataclass
 import hashlib
 from typing import List
 
@@ -20,17 +21,19 @@ from webauthn.helpers.exceptions import (
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import PYDANTIC_V2, AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.structs import AttestationStatement
 
 
-class SafetyNetJWSHeader(WebAuthnBaseModel):
+@dataclass
+class SafetyNetJWSHeader():
     """Properties in the Header of a SafetyNet JWS"""
 
     alg: str
     x5c: List[str]
 
 
-class SafetyNetJWSPayload(WebAuthnBaseModel):
+@dataclass
+class SafetyNetJWSPayload():
     """Properties in the Payload of a SafetyNet JWS
 
     Values below correspond to camelCased properties in the JWS itself. This class
@@ -87,12 +90,13 @@ def verify_android_safetynet(
             "Response JWS did not have three parts (SafetyNet)"
         )
 
-    if PYDANTIC_V2:
-        header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))  # type: ignore[attr-defined]
-        payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))  # type: ignore[attr-defined]
-    else:
-        header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-        payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    # TODO: Rewrite this
+    # if PYDANTIC_V2:
+    #     header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))  # type: ignore[attr-defined]
+    #     payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))  # type: ignore[attr-defined]
+    # else:
+    #     header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
+    #     payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
 
     signature_bytes_str: str = jws_parts[2]
 

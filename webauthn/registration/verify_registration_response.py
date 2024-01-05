@@ -1,4 +1,5 @@
 import hashlib
+from dataclasses import dataclass
 from typing import List, Mapping, Optional, Union
 
 from webauthn.helpers import (
@@ -13,14 +14,12 @@ from webauthn.helpers import (
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.structs import (
-    PYDANTIC_V2,
     AttestationFormat,
     ClientDataType,
     CredentialDeviceType,
     PublicKeyCredentialType,
     RegistrationCredential,
     TokenBindingStatus,
-    WebAuthnBaseModel,
 )
 from .formats.android_key import verify_android_key
 from .formats.android_safetynet import verify_android_safetynet
@@ -31,7 +30,8 @@ from .formats.tpm import verify_tpm
 from .generate_registration_options import default_supported_pub_key_algs
 
 
-class VerifiedRegistration(WebAuthnBaseModel):
+@dataclass
+class VerifiedRegistration():
     """Information about a verified attestation of which an RP can make use.
 
     Attributes:
@@ -210,10 +210,12 @@ def verify_registration_response(
     if attestation_object.fmt == AttestationFormat.NONE:
         # A "none" attestation should not contain _anything_ in its attestation
         # statement
-        if PYDANTIC_V2:
-            num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)  # type: ignore[attr-defined]
-        else:
-            num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        # TODO: Rewrite this
+        # if PYDANTIC_V2:
+        #     num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)  # type: ignore[attr-defined]
+        # else:
+        #     num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        num_att_stmt_fields_set = 0
 
         if num_att_stmt_fields_set > 0:
             raise InvalidRegistrationResponse(

@@ -1,8 +1,6 @@
 import json
 from json.decoder import JSONDecodeError
 
-from pydantic import ValidationError
-
 from .base64url_to_bytes import base64url_to_bytes
 from .exceptions import InvalidClientDataJSONStructure
 from .structs import CollectedClientData, TokenBinding
@@ -65,7 +63,7 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
                     token_binding.id = f"{id}"
 
                 client_data.token_binding = token_binding
-            except ValidationError:
+            except Exception:
                 # If we encounter a status we don't expect then ignore token_binding
                 # completely
                 pass
