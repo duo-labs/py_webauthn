@@ -10,12 +10,15 @@ from webauthn.helpers.structs import (
     AuthenticatorTransport,
     PublicKeyCredentialDescriptor,
     ResidentKeyRequirement,
+    UserVerificationRequirement,
 )
-from webauthn import generate_registration_options
+from webauthn import generate_registration_options, generate_authentication_options
 
 
 class TestWebAuthnOptionsToJSON(TestCase):
-    def test_converts_options_to_JSON(self) -> None:
+    maxDiff = None
+
+    def test_converts_registration_options_to_JSON(self) -> None:
         options = generate_registration_options(
             rp_id="example.com",
             rp_name="Example Co",
@@ -37,25 +40,28 @@ class TestWebAuthnOptionsToJSON(TestCase):
 
         output = options_to_json(options)
 
-        assert json.loads(output) == {
-            "rp": {"name": "Example Co", "id": "example.com"},
-            "user": {
-                "id": "QUJBVjZRV1BCRVk5V09UT0ExQTQ",
-                "name": "lee",
-                "displayName": "Lee",
+        self.assertEqual(
+            json.loads(output),
+            {
+                "rp": {"name": "Example Co", "id": "example.com"},
+                "user": {
+                    "id": "QUJBVjZRV1BCRVk5V09UT0ExQTQ",
+                    "name": "lee",
+                    "displayName": "Lee",
+                },
+                "challenge": "MTIzNDU2Nzg5MA",
+                "pubKeyCredParams": [{"type": "public-key", "alg": -36}],
+                "timeout": 120000,
+                "excludeCredentials": [{"type": "public-key", "id": "MTIzNDU2Nzg5MA"}],
+                "authenticatorSelection": {
+                    "authenticatorAttachment": "platform",
+                    "residentKey": "required",
+                    "requireResidentKey": True,
+                    "userVerification": "preferred",
+                },
+                "attestation": "direct",
             },
-            "challenge": "MTIzNDU2Nzg5MA",
-            "pubKeyCredParams": [{"type": "public-key", "alg": -36}],
-            "timeout": 120000,
-            "excludeCredentials": [{"type": "public-key", "id": "MTIzNDU2Nzg5MA"}],
-            "authenticatorSelection": {
-                "authenticatorAttachment": "platform",
-                "residentKey": "required",
-                "requireResidentKey": True,
-                "userVerification": "preferred",
-            },
-            "attestation": "direct",
-        }
+        )
 
     def test_includes_optional_value_when_set(self) -> None:
         options = generate_registration_options(
@@ -73,10 +79,44 @@ class TestWebAuthnOptionsToJSON(TestCase):
 
         output = options_to_json(options)
 
-        assert json.loads(output)["excludeCredentials"] == [
+        self.assertEqual(
+            json.loads(output)["excludeCredentials"],
+            [
+                {
+                    "id": "MTIzNDU2Nzg5MA",
+                    "transports": ["usb"],
+                    "type": "public-key",
+                }
+            ],
+        )
+
+    def test_converts_authentication_options_to_JSON(self) -> None:
+        options = generate_authentication_options(
+            rp_id="example.com",
+            challenge=b"1234567890",
+            allow_credentials=[
+                PublicKeyCredentialDescriptor(id=b"1234567890"),
+            ],
+            timeout=120000,
+            user_verification=UserVerificationRequirement.DISCOURAGED,
+        )
+
+        output = options_to_json(options)
+
+        self.assertEqual(
+            json.loads(output),
             {
-                "id": "MTIzNDU2Nzg5MA",
-                "transports": ["usb"],
-                "type": "public-key",
-            }
-        ]
+                "rpId": "example.com",
+                "challenge": "MTIzNDU2Nzg5MA",
+                "allowCredentials": [{"type": "public-key", "id": "MTIzNDU2Nzg5MA"}],
+                "timeout": 120000,
+                "userVerification": "discouraged",
+            },
+        )
+
+    def test_raises_on_bad_input(self) -> None:
+        class FooClass:
+            pass
+
+        with self.assertRaisesRegex(TypeError, "not instance"):
+            options_to_json(FooClass())  # type: ignore
