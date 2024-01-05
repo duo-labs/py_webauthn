@@ -18,6 +18,10 @@ class InvalidClientDataJSONStructure(Exception):
     pass
 
 
+class InvalidJSONStructure(Exception):
+    pass
+
+
 class InvalidAuthenticatorDataStructure(Exception):
     pass
 
