@@ -1,137 +1,13 @@
 from enum import Enum
+from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Optional, Any, Dict
 
-
-try:
-    from pydantic import (  # type: ignore[attr-defined]
-        BaseModel,
-        field_validator,
-        ConfigDict,
-        FieldValidationInfo,
-        model_serializer,
-    )
-
-    PYDANTIC_V2 = True
-except ImportError:
-    from pydantic import BaseModel, validator
-    from pydantic.fields import ModelField  # type: ignore[attr-defined]
-
-    PYDANTIC_V2 = False
 
 from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
 from .cose import COSEAlgorithmIdentifier
 from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .snake_case_to_camel_case import snake_case_to_camel_case
-
-
-def _to_bytes(v: Any) -> Any:
-    if isinstance(v, bytes):
-        """
-        Return raw bytes from subclasses as well
-
-        `strict_bytes_validator()` performs a similar check to this, but it passes through the
-        subclass as-is and Pydantic then rejects it. Passing the subclass into `bytes()` lets us
-        return `bytes` and make Pydantic happy.
-        """
-        return bytes(v)
-    elif isinstance(v, memoryview):
-        return v.tobytes()
-    else:
-        # Allow Pydantic to validate the field as usual to support the full range of bytes-like
-        # values
-        return v
-
-
-class WebAuthnBaseModel(BaseModel):
-    """
-    A subclass of Pydantic's BaseModel that includes convenient defaults
-    when working with WebAuthn data structures
-
-    `modelInstance.json()` (to JSON):
-    - Encodes bytes to Base64URL
-    - Converts snake_case properties to camelCase
-
-    `Model.parse_raw()` (from JSON):
-    - Decodes Base64URL to bytes
-    - Converts camelCase properties to snake_case
-    """
-
-    if PYDANTIC_V2:
-        model_config = ConfigDict(  # type: ignore[typeddict-unknown-key]
-            alias_generator=snake_case_to_camel_case,
-            populate_by_name=True,
-            ser_json_bytes="base64",
-        )
-
-        @field_validator("*", mode="before")
-        def _pydantic_v2_validate_bytes_fields(
-            cls, v: Any, info: FieldValidationInfo  # type: ignore[valid-type]
-        ) -> Any:
-            """
-            `FieldValidationInfo` above is being deprecated for `ValidationInfo`, see the following:
-
-            - https://github.com/pydantic/pydantic-core/issues/994
-            - https://github.com/pydantic/pydantic/issues/7667
-
-            There are now docs for the new way to access `field_name` that's only available in
-            Pydantic v2.4+...
-
-            https://docs.pydantic.dev/latest/concepts/types/#access-to-field-name
-
-            This use of `FieldValidationInfo` will continue to work for now, but when it gets
-            removed from Pydantic the `info.field_name` below will need to get updated to
-            `info.data.field_name` after changing the type of `info` above to `ValidationInfo`
-            """
-            field = cls.model_fields[info.field_name]  # type: ignore[attr-defined]
-
-            if field.annotation != bytes:
-                return v
-
-            if isinstance(v, str):
-                # NOTE:
-                # Ideally we should only do this when info.mode == "json", but
-                # that does not work when using the deprecated parse_raw method
-                return base64url_to_bytes(v)
-
-            return _to_bytes(v)
-
-        @model_serializer(mode="wrap", when_used="json")
-        def _pydantic_v2_serialize_bytes_fields(
-            self, serializer: Callable[..., Dict[str, Any]]
-        ) -> Dict[str, Any]:
-            """
-            Remove trailing "=" from bytes fields serialized as base64 encoded strings.
-            """
-
-            serialized = serializer(self)
-
-            for name, field_info in self.model_fields.items():  # type: ignore[attr-defined]
-                value = serialized.get(name)
-                if field_info.annotation is bytes and isinstance(value, str):
-                    serialized[name] = value.rstrip("=")
-
-            return serialized
-
-    else:
-
-        class Config:
-            json_encoders = {bytes: bytes_to_base64url}
-            json_loads = json_loads_base64url_to_bytes
-            alias_generator = snake_case_to_camel_case
-            allow_population_by_field_name = True
-
-        @validator("*", pre=True, allow_reuse=True)  # type: ignore[type-var]
-        def _pydantic_v1_validate_bytes_fields(cls, v: Any, field: ModelField) -> Any:
-            """
-            Allow for Pydantic models to define fields as `bytes`, but allow consuming projects to
-            specify bytes-adjacent values (bytes subclasses, memoryviews, etc...) that otherwise
-            function like `bytes`. Keeps the library Pythonic.
-            """
-            if field.type_ != bytes:
-                return v
-
-            return _to_bytes(v)
 
 
 ################
@@ -286,7 +162,8 @@ class TokenBindingStatus(str, Enum):
     SUPPORTED = "supported"
 
 
-class TokenBinding(WebAuthnBaseModel):
+@dataclass
+class TokenBinding():
     """
     https://www.w3.org/TR/webauthn-2/#dictdef-tokenbinding
     """
@@ -295,7 +172,8 @@ class TokenBinding(WebAuthnBaseModel):
     id: Optional[str] = None
 
 
-class PublicKeyCredentialRpEntity(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialRpEntity():
     """Information about the Relying Party.
 
     Attributes:
@@ -309,7 +187,8 @@ class PublicKeyCredentialRpEntity(WebAuthnBaseModel):
     id: Optional[str] = None
 
 
-class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialUserEntity():
     """Information about a user of a Relying Party.
 
     Attributes:
@@ -325,7 +204,8 @@ class PublicKeyCredentialUserEntity(WebAuthnBaseModel):
     display_name: str
 
 
-class PublicKeyCredentialParameters(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialParameters():
     """Information about a cryptographic algorithm that may be used when creating a credential.
 
     Attributes:
@@ -339,7 +219,8 @@ class PublicKeyCredentialParameters(WebAuthnBaseModel):
     alg: COSEAlgorithmIdentifier
 
 
-class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialDescriptor():
     """Information about a generated credential.
 
     Attributes:
@@ -357,7 +238,8 @@ class PublicKeyCredentialDescriptor(WebAuthnBaseModel):
     transports: Optional[List[AuthenticatorTransport]] = None
 
 
-class AuthenticatorSelectionCriteria(WebAuthnBaseModel):
+@dataclass
+class AuthenticatorSelectionCriteria():
     """A Relying Party's requirements for the types of authenticators that may interact with the client/browser.
 
     Attributes:
@@ -377,7 +259,8 @@ class AuthenticatorSelectionCriteria(WebAuthnBaseModel):
     ] = UserVerificationRequirement.PREFERRED
 
 
-class CollectedClientData(WebAuthnBaseModel):
+@dataclass
+class CollectedClientData():
     """Decoded ClientDataJSON
 
     Attributes:
@@ -404,7 +287,8 @@ class CollectedClientData(WebAuthnBaseModel):
 ################
 
 
-class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialCreationOptions():
     """Registration Options.
 
     Attributes:
@@ -430,7 +314,8 @@ class PublicKeyCredentialCreationOptions(WebAuthnBaseModel):
     attestation: AttestationConveyancePreference = AttestationConveyancePreference.NONE
 
 
-class AuthenticatorAttestationResponse(WebAuthnBaseModel):
+@dataclass
+class AuthenticatorAttestationResponse():
     """The `response` property on a registration credential.
 
     Attributes:
@@ -447,7 +332,8 @@ class AuthenticatorAttestationResponse(WebAuthnBaseModel):
     transports: Optional[List[AuthenticatorTransport]] = None
 
 
-class RegistrationCredential(WebAuthnBaseModel):
+@dataclass
+class RegistrationCredential():
     """A registration-specific subclass of PublicKeyCredential returned from `navigator.credentials.create()`
 
     Attributes:
@@ -468,7 +354,8 @@ class RegistrationCredential(WebAuthnBaseModel):
     ] = PublicKeyCredentialType.PUBLIC_KEY
 
 
-class AttestationStatement(WebAuthnBaseModel):
+@dataclass
+class AttestationStatement():
     """A collection of all possible fields that may exist in an attestation statement. Combinations of these fields are specific to a particular attestation format.
 
     https://www.w3.org/TR/webauthn-2/#sctn-defined-attestation-formats
@@ -487,7 +374,8 @@ class AttestationStatement(WebAuthnBaseModel):
     pub_area: Optional[bytes] = None
 
 
-class AuthenticatorDataFlags(WebAuthnBaseModel):
+@dataclass
+class AuthenticatorDataFlags():
     """Flags the authenticator will set about information contained within the `attestationObject.authData` property.
 
     Attributes:
@@ -509,7 +397,8 @@ class AuthenticatorDataFlags(WebAuthnBaseModel):
     ed: bool
 
 
-class AttestedCredentialData(WebAuthnBaseModel):
+@dataclass
+class AttestedCredentialData():
     """Information about a credential.
 
     Attributes:
@@ -525,7 +414,8 @@ class AttestedCredentialData(WebAuthnBaseModel):
     credential_public_key: bytes
 
 
-class AuthenticatorData(WebAuthnBaseModel):
+@dataclass
+class AuthenticatorData():
     """Context the authenticator provides about itself and the environment in which the registration or authentication ceremony took place.
 
     Attributes:
@@ -546,7 +436,8 @@ class AuthenticatorData(WebAuthnBaseModel):
     extensions: Optional[bytes] = None
 
 
-class AttestationObject(WebAuthnBaseModel):
+@dataclass
+class AttestationObject():
     """Information about an attestation, including a statement and authenticator data.
 
     Attributes:
@@ -559,7 +450,7 @@ class AttestationObject(WebAuthnBaseModel):
 
     fmt: AttestationFormat
     auth_data: AuthenticatorData
-    att_stmt: AttestationStatement = AttestationStatement()
+    att_stmt: AttestationStatement = field(default_factory=AttestationStatement)
 
 
 ################
@@ -569,7 +460,8 @@ class AttestationObject(WebAuthnBaseModel):
 ################
 
 
-class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
+@dataclass
+class PublicKeyCredentialRequestOptions():
     """Authentication Options.
 
     Attributes:
@@ -585,13 +477,14 @@ class PublicKeyCredentialRequestOptions(WebAuthnBaseModel):
     challenge: bytes
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
-    allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = []
+    allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = field(default_factory=[])
     user_verification: Optional[
         UserVerificationRequirement
     ] = UserVerificationRequirement.PREFERRED
 
 
-class AuthenticatorAssertionResponse(WebAuthnBaseModel):
+@dataclass
+class AuthenticatorAssertionResponse():
     """The `response` property on an authentication credential.
 
     Attributes:
@@ -609,7 +502,8 @@ class AuthenticatorAssertionResponse(WebAuthnBaseModel):
     user_handle: Optional[bytes] = None
 
 
-class AuthenticationCredential(WebAuthnBaseModel):
+@dataclass
+class AuthenticationCredential():
     """An authentication-specific subclass of PublicKeyCredential. Returned from `navigator.credentials.get()`
 
     Attributes:
