@@ -93,7 +93,7 @@ class TestVerifyRegistrationResponse(TestCase):
         rp_id = "localhost"
         expected_origin = "http://localhost:5000"
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(InvalidRegistrationResponse):
             verify_registration_response(
                 credential=credential,
                 expected_challenge=challenge,
