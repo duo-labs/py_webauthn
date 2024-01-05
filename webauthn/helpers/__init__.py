@@ -1,6 +1,7 @@
 from .aaguid_to_string import aaguid_to_string
 from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
+from .byteslike_to_bytes import byteslike_to_bytes
 from .decode_credential_public_key import decode_credential_public_key
 from .decoded_public_key_to_cryptography import decoded_public_key_to_cryptography
 from .encode_cbor import encode_cbor
@@ -24,6 +25,7 @@ __all__ = [
     "aaguid_to_string",
     "base64url_to_bytes",
     "bytes_to_base64url",
+    "byteslike_to_bytes",
     "decode_credential_public_key",
     "decoded_public_key_to_cryptography",
     "encode_cbor",
