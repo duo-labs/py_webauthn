@@ -1,3 +1,6 @@
+from typing import Union
+
+from .byteslike_to_bytes import byteslike_to_bytes
 from .exceptions import InvalidAuthenticatorDataStructure
 from .structs import AttestedCredentialData, AuthenticatorData, AuthenticatorDataFlags
 from .parse_cbor import parse_cbor
@@ -8,6 +11,8 @@ def parse_authenticator_data(val: bytes) -> AuthenticatorData:
     """
     Turn `response.attestationObject.authData` into structured data
     """
+    val = byteslike_to_bytes(val)
+
     # Don't bother parsing if there aren't enough bytes for at least:
     # - rpIdHash (32 bytes)
     # - flags (1 byte)

@@ -1,7 +1,9 @@
 import json
 from json.decoder import JSONDecodeError
+from typing import Union
 
 from .base64url_to_bytes import base64url_to_bytes
+from .byteslike_to_bytes import byteslike_to_bytes
 from .exceptions import InvalidJSONStructure
 from .structs import CollectedClientData, TokenBinding
 
@@ -10,6 +12,8 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
     """
     Break apart `response.clientDataJSON` buffer into structured data
     """
+    val = byteslike_to_bytes(val)
+
     try:
         json_dict = json.loads(val)
     except JSONDecodeError:
