@@ -1,5 +1,11 @@
 {
+    "black-formatter.args": [
+        "--line-length", "99"
+    ],
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnPaste": false,
+        "editor.formatOnSaveMode": "file",
+        "editor.formatOnSave": true
     }
 }
