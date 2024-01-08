@@ -85,3 +85,39 @@ class TestGenerateRegistrationOptions(TestCase):
             require_resident_key=True,
         )
         assert options.attestation == AttestationConveyancePreference.DIRECT
+
+    def test_raises_on_empty_rp_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rp_id"):
+            generate_registration_options(
+                rp_id="",
+                rp_name="Example Co",
+                user_id="blah",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_rp_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rp_name"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="",
+                user_id="blah",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_user_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, "user_id"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="Example Co",
+                user_id="",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_user_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "user_name"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="Example Co",
+                user_id="blah",
+                user_name="",
+            )

@@ -72,6 +72,18 @@ def generate_registration_options(
         Registration options ready for the browser. Consider using `helpers.options_to_json()` in this library to quickly convert the options to JSON.
     """
 
+    if not rp_id:
+        raise ValueError("rp_id cannot be an empty string")
+
+    if not rp_name:
+        raise ValueError("rp_name cannot be an empty string")
+
+    if not user_id:
+        raise ValueError("user_id cannot be an empty string")
+
+    if not user_name:
+        raise ValueError("user_name cannot be an empty string")
+
     ########
     # Set defaults for required values
     ########
