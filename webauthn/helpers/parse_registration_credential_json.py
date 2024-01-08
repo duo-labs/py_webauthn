@@ -24,8 +24,8 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
         except JSONDecodeError:
             raise InvalidJSONStructure("Unable to decode credential as JSON")
 
-    # Appease mypy
-    assert isinstance(json_val, dict)
+    if not isinstance(json_val, dict):
+        raise InvalidJSONStructure("Credential is not a JSON object")
 
     cred_id = json_val.get("id")
     if not isinstance(cred_id, str):
