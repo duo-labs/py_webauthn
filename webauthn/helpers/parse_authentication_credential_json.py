@@ -90,7 +90,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         )
     except Exception as exc:
         raise InvalidAuthenticationResponse(
-            "Unable to parse an authentication credential from JSON data"
+            "Unable to parse authentication credential from JSON data"
         ) from exc
 
     return authentication_credential

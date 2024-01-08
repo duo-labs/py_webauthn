@@ -72,7 +72,7 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
             cred_authenticator_attachment = AuthenticatorAttachment(cred_authenticator_attachment)
         except ValueError as cred_attachment_exc:
             raise InvalidJSONStructure(
-                "Credential has unexpected authenticator attachment"
+                "Credential has unexpected authenticatorAttachment"
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
@@ -91,7 +91,7 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
         )
     except Exception as exc:
         raise InvalidRegistrationResponse(
-            "Unable to parse a registration credential from JSON data"
+            "Unable to parse registration credential from JSON data"
         ) from exc
 
     return registration_credential
