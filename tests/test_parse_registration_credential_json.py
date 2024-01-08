@@ -1,7 +1,6 @@
-import json
 from unittest import TestCase
 
-from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
+from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.exceptions import InvalidJSONStructure, InvalidRegistrationResponse
 from webauthn.helpers.structs import AuthenticatorTransport, AuthenticatorAttachment
 from webauthn.helpers.parse_registration_credential_json import parse_registration_credential_json
