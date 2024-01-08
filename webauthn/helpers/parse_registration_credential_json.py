@@ -47,6 +47,14 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
     if not isinstance(response_attestation_object, str):
         raise InvalidJSONStructure("Credential response missing required attestationObject")
 
+    cred_type = json_val.get("type")
+    try:
+        # Simply try to get the single matching Enum. We'll set the literal value below assuming
+        # the code can get past here (this is basically a mypy optimization)
+        PublicKeyCredentialType(cred_type)
+    except ValueError as cred_type_exc:
+        raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
+
     transports: Optional[List[AuthenticatorTransport]] = None
     response_transports = cred_response.get("transports")
     if isinstance(response_transports, list):
@@ -68,14 +76,6 @@ def parse_registration_credential_json(json_val: Union[str, dict]) -> Registrati
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
-
-    cred_type = json_val.get("type")
-    try:
-        # Simply try to get the single matching Enum. We'll set the literal value below assuming
-        # the code can get past here (this is basically a mypy optimization)
-        PublicKeyCredentialType(cred_type)
-    except ValueError as cred_type_exc:
-        raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
     try:
         registration_credential = RegistrationCredential(

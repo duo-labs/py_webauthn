@@ -50,6 +50,14 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
     if not isinstance(response_signature, str):
         raise InvalidJSONStructure("Credential response missing required signature")
 
+    cred_type = json_val.get("type")
+    try:
+        # Simply try to get the single matching Enum. We'll set the literal value below assuming
+        # the code can get past here (this is basically a mypy optimization)
+        PublicKeyCredentialType(cred_type)
+    except ValueError as cred_type_exc:
+        raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
+
     response_user_handle = cred_response.get("userHandle")
     if isinstance(response_user_handle, str):
         response_user_handle = response_user_handle
@@ -66,14 +74,6 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
-
-    cred_type = json_val.get("type")
-    try:
-        # Simply try to get the single matching Enum. We'll set the literal value below assuming
-        # the code can get past here (this is basically a mypy optimization)
-        PublicKeyCredentialType(cred_type)
-    except ValueError as cred_type_exc:
-        raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
     try:
         authentication_credential = AuthenticationCredential(
