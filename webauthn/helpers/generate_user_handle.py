@@ -12,6 +12,6 @@ def generate_user_handle() -> bytes:
     See https://www.w3.org/TR/webauthn-2/#sctn-user-handle-privacy:
 
     "It is RECOMMENDED to let the user handle be 64 random bytes, and store this value
-    in the user’s account."
+    in the user's account."
     """
     return secrets.token_bytes(64)
