@@ -490,7 +490,7 @@ class AuthenticatorAssertionResponse:
     client_data_json: bytes
     authenticator_data: bytes
     signature: bytes
-    user_handle: Optional[Union[bytes, str]] = None
+    user_handle: Optional[bytes] = None
 
 
 @dataclass
