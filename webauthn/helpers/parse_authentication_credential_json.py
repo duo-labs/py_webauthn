@@ -59,10 +59,6 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
     response_user_handle = cred_response.get("userHandle")
-    if isinstance(response_user_handle, str):
-        response_user_handle = response_user_handle
-    else:
-        response_user_handle = None
 
     cred_authenticator_attachment = json_val.get("authenticatorAttachment")
     if isinstance(cred_authenticator_attachment, str):
@@ -70,7 +66,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
             cred_authenticator_attachment = AuthenticatorAttachment(cred_authenticator_attachment)
         except ValueError as cred_attachment_exc:
             raise InvalidJSONStructure(
-                "Credential has unexpected authenticator attachment"
+                "Credential has unexpected authenticatorAttachment"
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
