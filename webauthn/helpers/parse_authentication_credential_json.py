@@ -58,6 +58,10 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
     except ValueError as cred_type_exc:
         raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
+    # Pass on whatever we might have received back for `userHandle`, it's more important for the RP
+    # than response verification. This SHOULD be the same UTF-8 string specified as
+    # `user_id` when calling `generate_registration_options()`, unless something on the front end
+    # is acting up.
     response_user_handle = cred_response.get("userHandle")
 
     cred_authenticator_attachment = json_val.get("authenticatorAttachment")
