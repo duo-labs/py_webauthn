@@ -194,7 +194,7 @@ class PublicKeyCredentialUserEntity:
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
     """
 
-    id: Union[bytes, str]
+    id: bytes
     name: str
     display_name: str
 
