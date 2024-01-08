@@ -9,5 +9,9 @@
         "editor.formatOnSaveMode": "file",
         "editor.formatOnSave": true,
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "gitlens.advanced.blame.customArguments": [
+        "--ignore-revs-file",
+        ".git-blame-ignore-revs"
+      ]
 }
