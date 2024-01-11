@@ -146,7 +146,7 @@ class TestParseClientDataJSON(TestCase):
             }
         )
 
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
 
     def test_handles_missing_user_handle(self) -> None:
         parsed = parse_authentication_credential_json(
@@ -265,7 +265,7 @@ class TestParseClientDataJSON(TestCase):
                 "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSjlyUFpWWnFWODlUSW53bzV3cU11R3dlZjdET0pZRi1OVHlMQnhHV2pjZi16amFzOFRTUTlMbXI3em4wSmpkMTQyMU1sV0ItS2JYdEs5RW5sN19JM3ciLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ"
             ),
         )
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
         self.assertEqual(parsed.type, "public-key")
         self.assertEqual(parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM)
 
@@ -302,6 +302,6 @@ class TestParseClientDataJSON(TestCase):
                 "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSjlyUFpWWnFWODlUSW53bzV3cU11R3dlZjdET0pZRi1OVHlMQnhHV2pjZi16amFzOFRTUTlMbXI3em4wSmpkMTQyMU1sV0ItS2JYdEs5RW5sN19JM3ciLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ"
             ),
         )
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
         self.assertEqual(parsed.type, "public-key")
         self.assertEqual(parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM)

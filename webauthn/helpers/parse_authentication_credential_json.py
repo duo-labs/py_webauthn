@@ -58,11 +58,15 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
     except ValueError as cred_type_exc:
         raise InvalidJSONStructure("Credential had unexpected type") from cred_type_exc
 
-    # Pass on whatever we might have received back for `userHandle`, it's more important for the RP
-    # than response verification. This SHOULD be the same UTF-8 string specified as
-    # `user_id` when calling `generate_registration_options()`, unless something on the front end
-    # is acting up.
     response_user_handle = cred_response.get("userHandle")
+    if isinstance(response_user_handle, str):
+        # The `userHandle` string will most likely be base64url-encoded for ease of JSON
+        # transmission as per the L3 Draft spec:
+        # https://w3c.github.io/webauthn/#dictdef-authenticatorassertionresponsejson
+        response_user_handle = base64url_to_bytes(response_user_handle)
+    elif response_user_handle is not None:
+        # If it's not a string, and it's not None, then it's definitely not valid
+        raise InvalidJSONStructure("Credential response ha unexpected userHandle")
 
     cred_authenticator_attachment = json_val.get("authenticatorAttachment")
     if isinstance(cred_authenticator_attachment, str):
