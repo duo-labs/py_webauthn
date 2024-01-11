@@ -187,7 +187,7 @@ class PublicKeyCredentialUserEntity:
     """Information about a user of a Relying Party.
 
     Attributes:
-        `id`: An "opaque byte sequence" that uniquely identifies a user. Typically something like a UUID, but never user-identifying like an email address. Cannot exceed 64 bytes.
+        `id`: An "opaque byte sequence" that uniquely identifies a user. Typically something like a UUID, but never user-identifying like an email address. Cannot exceed 64 bytes. These bytes should be stored internally alongside your normal user identifier and only used for WebAuthn.
         `name`: A value which a user can see to determine which account this credential is associated with. A username or email address is fine here.
         `display_name`: A user-friendly representation of a user, like a full name.
 
