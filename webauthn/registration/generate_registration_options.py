@@ -61,7 +61,7 @@ def generate_registration_options(
         `user_name`: A value that will help the user identify which account this credential is associated with. Can be an email address, etc...
         (optional) `user_id`: A collection of random bytes that identify a user account. For privacy reasons it should NOT be something like an email address. Defaults to 64 random bytes.
         (optional) `user_display_name`: A user-friendly representation of their account. Can be a full name ,etc... Defaults to the value of `user_name`.
-        (optional) `challenge`: A byte sequence for the authenticator to return back in its response. If no value is specified then a sequence of random bytes will be generated.
+        (optional) `challenge`: A byte sequence for the authenticator to return back in its response. Defaults to 64 random bytes.
         (optional) `timeout`: How long in milliseconds the browser should give the user to choose an authenticator. This value is a *hint* and may be ignored by the browser.
         (optional) `attestation`: The level of attestation to be provided by the authenticator.
         (optional) `authenticator_selection`: Require certain characteristics about an authenticator, like attachment, support for resident keys, user verification, etc...
