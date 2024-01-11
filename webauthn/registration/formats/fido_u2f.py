@@ -41,9 +41,7 @@ def verify_fido_u2f(
     See https://www.w3.org/TR/webauthn-2/#sctn-fido-u2f-attestation
     """
     if not attestation_statement.sig:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing signature (FIDO-U2F)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing signature (FIDO-U2F)")
 
     if not attestation_statement.x5c:
         raise InvalidRegistrationResponse(
@@ -80,20 +78,14 @@ def verify_fido_u2f(
 
     # We need the cert's x and y points so make sure they exist
     if not isinstance(leaf_cert_pub_key, EllipticCurvePublicKey):
-        raise InvalidRegistrationResponse(
-            "Leaf cert was not an EC2 certificate (FIDO-U2F)"
-        )
+        raise InvalidRegistrationResponse("Leaf cert was not an EC2 certificate (FIDO-U2F)")
 
     if not isinstance(leaf_cert_pub_key.curve, SECP256R1):
-        raise InvalidRegistrationResponse(
-            "Leaf cert did not use P-256 curve (FIDO-U2F)"
-        )
+        raise InvalidRegistrationResponse("Leaf cert did not use P-256 curve (FIDO-U2F)")
 
     decoded_public_key = decode_credential_public_key(credential_public_key)
     if not isinstance(decoded_public_key, DecodedEC2PublicKey):
-        raise InvalidRegistrationResponse(
-            "Credential public key was not EC2 (FIDO-U2F)"
-        )
+        raise InvalidRegistrationResponse("Credential public key was not EC2 (FIDO-U2F)")
 
     # Convert the public key to "Raw ANSI X9.62 public key format"
     public_key_u2f = b"".join(

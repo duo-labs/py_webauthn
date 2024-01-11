@@ -44,12 +44,9 @@ def validate_certificate_chain(
         # May be an empty array, that's fine
         intermediate_certs_bytes = x5c[1:]
         intermediate_certs_crypto = [
-            load_der_x509_certificate(cert, default_backend())
-            for cert in intermediate_certs_bytes
+            load_der_x509_certificate(cert, default_backend()) for cert in intermediate_certs_bytes
         ]
-        intermediate_certs = [
-            X509().from_cryptography(cert) for cert in intermediate_certs_crypto
-        ]
+        intermediate_certs = [X509().from_cryptography(cert) for cert in intermediate_certs_crypto]
     except Exception as err:
         raise InvalidCertificateChain(f"Could not prepare intermediate certs: {err}")
 

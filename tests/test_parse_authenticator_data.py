@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 from unittest import TestCase
 import cbor2
 
-from webauthn.helpers import parse_authenticator_data, bytes_to_base64url
+from webauthn.helpers import parse_authenticator_data, bytes_to_base64url, parse_cbor
 from webauthn.helpers.base64url_to_bytes import base64url_to_bytes
 
 
@@ -89,9 +89,7 @@ def _generate_auth_data(
 
 class TestWebAuthnParseAuthenticatorData(TestCase):
     def test_correctly_parses_simple(self) -> None:
-        (auth_data, rp_id_hash, sign_count, _, _, _) = _generate_auth_data(
-            10, up=True, uv=True
-        )
+        (auth_data, rp_id_hash, sign_count, _, _, _) = _generate_auth_data(10, up=True, uv=True)
 
         output = parse_authenticator_data(auth_data)
 
@@ -138,7 +136,9 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         self.assertFalse(output.flags.uv)
 
     def test_parses_attested_credential_data_and_extension_data(self) -> None:
-        auth_data = bytes.fromhex("50569158be61d7a1ba084f80e45e938fd326e0a8dff07b37036e6c82303ae26bc1000004377b3024675546afcb92e4495c8a1e193f00dca30058b8d74f6bd74de90baeb34afb51e3578e1ac4ca9f79a7f88473d8254d5762ca82d68f3bf63f49e9b284caab4d45d6f9bb468d0c1b7f0f727378c1db8adb4802cb7c5ad9c5eb905bf0ba03f79bd1f04d63765452d49c4087acfad340516dc892eafd87d498ae9e6fd6f06a3f423108ebdc032d93e82fdd6deacc1b638fd56838a482f01232ad01e266e016a50b8121816997a167f41139900fe46094b8ef30aad14ee08cc457366a033bb4a0554dcf9c9589f9622d4f84481541014c870291c87d7a3bbe3d8b07eb02509de5721e3f728aa5eac41e9c5af02869a4010103272006215820e613b86a8d4ebae24e84a0270b6773f7bb30d1d59f5ec379910ebe7c87714274a16b6372656450726f7465637401")
+        auth_data = bytes.fromhex(
+            "50569158be61d7a1ba084f80e45e938fd326e0a8dff07b37036e6c82303ae26bc1000004377b3024675546afcb92e4495c8a1e193f00dca30058b8d74f6bd74de90baeb34afb51e3578e1ac4ca9f79a7f88473d8254d5762ca82d68f3bf63f49e9b284caab4d45d6f9bb468d0c1b7f0f727378c1db8adb4802cb7c5ad9c5eb905bf0ba03f79bd1f04d63765452d49c4087acfad340516dc892eafd87d498ae9e6fd6f06a3f423108ebdc032d93e82fdd6deacc1b638fd56838a482f01232ad01e266e016a50b8121816997a167f41139900fe46094b8ef30aad14ee08cc457366a033bb4a0554dcf9c9589f9622d4f84481541014c870291c87d7a3bbe3d8b07eb02509de5721e3f728aa5eac41e9c5af02869a4010103272006215820e613b86a8d4ebae24e84a0270b6773f7bb30d1d59f5ec379910ebe7c87714274a16b6372656450726f7465637401"
+        )
         output = parse_authenticator_data(auth_data)
 
         cred_data = output.attested_credential_data
@@ -146,15 +146,15 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         assert cred_data  # Make mypy happy
         self.assertEqual(
             bytes_to_base64url(cred_data.credential_public_key),
-            "pAEBAycgBiFYIOYTuGqNTrriToSgJwtnc_e7MNHVn17DeZEOvnyHcUJ0"
+            "pAEBAycgBiFYIOYTuGqNTrriToSgJwtnc_e7MNHVn17DeZEOvnyHcUJ0",
         )
 
         extensions = output.extensions
         self.assertIsNotNone(extensions)
         assert extensions  # Make mypy happy
 
-        parsed_extensions = cbor2.loads(extensions)
-        self.assertEqual(parsed_extensions, {'credProtect': 1})
+        parsed_extensions = parse_cbor(extensions)
+        self.assertEqual(parsed_extensions, {"credProtect": 1})
 
     def test_parses_only_extension_data(self) -> None:
         # Pulled from Conformance Testing suite
@@ -167,12 +167,12 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
         extensions = output.extensions
         self.assertIsNotNone(extensions)
         assert extensions  # Make mypy happy
-        parsed_extensions = cbor2.loads(extensions)
+        parsed_extensions = parse_cbor(extensions)
         self.assertEqual(
             parsed_extensions,
             {
-                'example.extension': 'This is an example extension! If you read this message, you probably successfully passing conformance tests. Good job!',
-            }
+                "example.extension": "This is an example extension! If you read this message, you probably successfully passing conformance tests. Good job!",
+            },
         )
 
     def test_parses_backup_state_flags(self) -> None:
@@ -202,7 +202,7 @@ class TestWebAuthnParseAuthenticatorData(TestCase):
 
         self.assertEqual(
             cred_data.credential_id.hex(),
-            "e82fe6bde300e4ecc93e0016448ad00fa6f28a011a6f87ff7b0cfca499beaf83344c3660b5ecabf72a3b2838a0cc7d87d3fa58292b53449cff13ad69732d7521649d365ccbc5d0a0fa4b4e09eae99537261f2f44093f8f4fd4cf5796e0fe58ff0615ffc5882836bbe7b99b08be2986721c1c5a6ac7f32d3220d9b34d8dee2fc9"
+            "e82fe6bde300e4ecc93e0016448ad00fa6f28a011a6f87ff7b0cfca499beaf83344c3660b5ecabf72a3b2838a0cc7d87d3fa58292b53449cff13ad69732d7521649d365ccbc5d0a0fa4b4e09eae99537261f2f44093f8f4fd4cf5796e0fe58ff0615ffc5882836bbe7b99b08be2986721c1c5a6ac7f32d3220d9b34d8dee2fc9",
         )
         self.assertEqual(
             cred_data.credential_public_key.hex(),

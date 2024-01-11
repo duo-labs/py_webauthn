@@ -54,14 +54,10 @@ def verify_tpm(
     See https://www.w3.org/TR/webauthn-2/#sctn-tpm-attestation
     """
     if not attestation_statement.cert_info:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing certInfo (TPM)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing certInfo (TPM)")
 
     if not attestation_statement.pub_area:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing pubArea (TPM)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing pubArea (TPM)")
 
     if not attestation_statement.alg:
         raise InvalidRegistrationResponse("Attestation statement was missing alg (TPM)")
@@ -195,9 +191,7 @@ def verify_tpm(
     # Verify the sig is a valid signature over certInfo using the attestation
     # public key in aikCert with the algorithm specified in alg.
     attestation_cert_bytes = attestation_statement.x5c[0]
-    attestation_cert = x509.load_der_x509_certificate(
-        attestation_cert_bytes, default_backend()
-    )
+    attestation_cert = x509.load_der_x509_certificate(attestation_cert_bytes, default_backend())
     attestation_cert_pub_key = attestation_cert.public_key()
 
     try:
@@ -208,9 +202,7 @@ def verify_tpm(
             data=attestation_statement.cert_info,
         )
     except InvalidSignature:
-        raise InvalidRegistrationResponse(
-            "Could not verify attestation statement signature (TPM)"
-        )
+        raise InvalidRegistrationResponse("Could not verify attestation statement signature (TPM)")
 
     # Verify that aikCert meets the requirements in § 8.3.1 TPM Attestation Statement
     # Certificate Requirements.
@@ -301,9 +293,7 @@ def verify_tpm(
 
     # The Basic Constraints extension MUST have the CA component set to false.
     if ext_basic_constraints.ca is not False:
-        raise InvalidRegistrationResponse(
-            "Certificate Basic Constraints CA was not False (TPM)"
-        )
+        raise InvalidRegistrationResponse("Certificate Basic Constraints CA was not False (TPM)")
 
     # If aikCert contains an extension with OID 1.3.6.1.4.1.45724.1.1.4
     # (id-fido-gen-ce-aaguid) verify that the value of this extension matches the

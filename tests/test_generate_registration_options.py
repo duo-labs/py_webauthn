@@ -66,9 +66,7 @@ class TestGenerateRegistrationOptions(TestCase):
             timeout=120000,
         )
 
-        assert options.rp == PublicKeyCredentialRpEntity(
-            id="example.com", name="Example Co"
-        )
+        assert options.rp == PublicKeyCredentialRpEntity(id="example.com", name="Example Co")
         assert options.challenge == b"1234567890"
         assert options.user == PublicKeyCredentialUserEntity(
             id=b"ABAV6QWPBEY9WOTOA1A4",
@@ -80,12 +78,46 @@ class TestGenerateRegistrationOptions(TestCase):
             alg=COSEAlgorithmIdentifier.ECDSA_SHA_512,
         )
         assert options.timeout == 120000
-        assert options.exclude_credentials == [
-            PublicKeyCredentialDescriptor(id=b"1234567890")
-        ]
+        assert options.exclude_credentials == [PublicKeyCredentialDescriptor(id=b"1234567890")]
         assert options.authenticator_selection == AuthenticatorSelectionCriteria(
             authenticator_attachment=AuthenticatorAttachment.PLATFORM,
             resident_key=ResidentKeyRequirement.REQUIRED,
             require_resident_key=True,
         )
         assert options.attestation == AttestationConveyancePreference.DIRECT
+
+    def test_raises_on_empty_rp_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rp_id"):
+            generate_registration_options(
+                rp_id="",
+                rp_name="Example Co",
+                user_id="blah",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_rp_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rp_name"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="",
+                user_id="blah",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_user_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, "user_id"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="Example Co",
+                user_id="",
+                user_name="blah",
+            )
+
+    def test_raises_on_empty_user_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "user_name"):
+            generate_registration_options(
+                rp_id="example.com",
+                rp_name="Example Co",
+                user_id="blah",
+                user_name="",
+            )

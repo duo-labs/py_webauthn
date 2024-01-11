@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import hashlib
 from typing import List, Union
 
@@ -5,6 +6,7 @@ from cryptography.exceptions import InvalidSignature
 
 from webauthn.helpers import (
     bytes_to_base64url,
+    byteslike_to_bytes,
     decode_credential_public_key,
     decoded_public_key_to_cryptography,
     parse_authenticator_data,
@@ -20,11 +22,11 @@ from webauthn.helpers.structs import (
     CredentialDeviceType,
     PublicKeyCredentialType,
     TokenBindingStatus,
-    WebAuthnBaseModel,
 )
 
 
-class VerifiedAuthentication(WebAuthnBaseModel):
+@dataclass
+class VerifiedAuthentication:
     """
     Information about a verified authentication of which an RP can make use
     """
@@ -90,7 +92,11 @@ def verify_authentication_response(
 
     response = credential.response
 
-    client_data = parse_client_data_json(response.client_data_json)
+    client_data_bytes = byteslike_to_bytes(response.client_data_json)
+    authenticator_data_bytes = byteslike_to_bytes(response.authenticator_data)
+    signature_bytes = byteslike_to_bytes(response.signature)
+
+    client_data = parse_client_data_json(client_data_bytes)
 
     if client_data.type != ClientDataType.WEBAUTHN_GET:
         raise InvalidAuthenticationResponse(
@@ -98,9 +104,7 @@ def verify_authentication_response(
         )
 
     if expected_challenge != client_data.challenge:
-        raise InvalidAuthenticationResponse(
-            "Client data challenge was not expected challenge"
-        )
+        raise InvalidAuthenticationResponse("Client data challenge was not expected challenge")
 
     if isinstance(expected_origin, str):
         if expected_origin != client_data.origin:
@@ -122,7 +126,7 @@ def verify_authentication_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    auth_data = parse_authenticator_data(response.authenticator_data)  # TODO: Issue #173
+    auth_data = parse_authenticator_data(authenticator_data_bytes)
 
     # Generate a hash of the expected RP ID for comparison
     expected_rp_id_hash = hashlib.sha256()
@@ -133,9 +137,7 @@ def verify_authentication_response(
         raise InvalidAuthenticationResponse("Unexpected RP ID hash")
 
     if not auth_data.flags.up:
-        raise InvalidAuthenticationResponse(
-            "User was not present during authentication"
-        )
+        raise InvalidAuthenticationResponse("User was not present during authentication")
 
     if require_user_verification and not auth_data.flags.uv:
         raise InvalidAuthenticationResponse(
@@ -153,10 +155,10 @@ def verify_authentication_response(
         )
 
     client_data_hash = hashlib.sha256()
-    client_data_hash.update(response.client_data_json)
+    client_data_hash.update(client_data_bytes)
     client_data_hash_bytes = client_data_hash.digest()
 
-    signature_base = response.authenticator_data + client_data_hash_bytes
+    signature_base = authenticator_data_bytes + client_data_hash_bytes
 
     try:
         decoded_public_key = decode_credential_public_key(credential_public_key)
@@ -165,7 +167,7 @@ def verify_authentication_response(
         verify_signature(
             public_key=crypto_public_key,
             signature_alg=decoded_public_key.alg,
-            signature=response.signature,
+            signature=signature_bytes,
             data=signature_base,
         )
     except InvalidSignature:

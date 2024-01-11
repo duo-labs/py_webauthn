@@ -23,13 +23,11 @@ class TestDecodeCredentialPublicKey(TestCase):
         assert decoded.crv == 1
         assert (
             decoded.x
-            and bytes_to_base64url(decoded.x)
-            == "MMcEPFOpY_jJlmcBrnbgvq4-7CGKt5TBEPmxdjpTaDE"
+            and bytes_to_base64url(decoded.x) == "MMcEPFOpY_jJlmcBrnbgvq4-7CGKt5TBEPmxdjpTaDE"
         )
         assert (
             decoded.y
-            and bytes_to_base64url(decoded.y)
-            == "xuwbECbDdNfTTegnc174oYdusZiMmJgct0yI_ulrJGI"
+            and bytes_to_base64url(decoded.y) == "xuwbECbDdNfTTegnc174oYdusZiMmJgct0yI_ulrJGI"
         )
 
     def test_decode_rsa_public_key(self) -> None:
@@ -62,11 +60,9 @@ class TestDecodeCredentialPublicKey(TestCase):
         assert decoded.crv == 1
         assert (
             decoded.x
-            and bytes_to_base64url(decoded.x)
-            == "FrEpm55XKvkgIN-izKDHBF-VJ09Rw2F5mFOFcJ5MVM0"
+            and bytes_to_base64url(decoded.x) == "FrEpm55XKvkgIN-izKDHBF-VJ09Rw2F5mFOFcJ5MVM0"
         )
         assert (
             decoded.y
-            and bytes_to_base64url(decoded.y)
-            == "o0EM9dj0V-xJ1JwpE2XZ_8NRIt5KVvr71Zl0rB8BWOs"
+            and bytes_to_base64url(decoded.y) == "o0EM9dj0V-xJ1JwpE2XZ_8NRIt5KVvr71Zl0rB8BWOs"
         )

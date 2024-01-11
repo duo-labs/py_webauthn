@@ -29,6 +29,9 @@ def generate_authentication_options(
         Authentication options ready for the browser. Consider using `helpers.options_to_json()` in this library to quickly convert the options to JSON.
     """
 
+    if not rp_id:
+        raise ValueError("rp_id cannot be an empty string")
+
     ########
     # Set defaults for required values
     ########

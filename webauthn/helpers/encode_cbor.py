@@ -5,16 +5,16 @@ import cbor2
 from .exceptions import InvalidCBORData
 
 
-def parse_cbor(data: bytes) -> Any:
+def encode_cbor(val: Any) -> bytes:
     """
-    Attempt to decode CBOR-encoded data.
+    Attempt to encode data into CBOR.
 
     Raises:
         `helpers.exceptions.InvalidCBORData` if data cannot be decoded
     """
     try:
-        to_return = cbor2.loads(data)
+        to_return = cbor2.dumps(val)
     except Exception as exc:
-        raise InvalidCBORData("Could not decode CBOR data") from exc
+        raise InvalidCBORData("Data could not be encoded to CBOR") from exc
 
     return to_return

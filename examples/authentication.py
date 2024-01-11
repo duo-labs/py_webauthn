@@ -5,7 +5,6 @@ from webauthn import (
     base64url_to_bytes,
 )
 from webauthn.helpers.structs import (
-    PYDANTIC_V2,
     PublicKeyCredentialDescriptor,
     UserVerificationRequirement,
 )
@@ -66,8 +65,5 @@ authentication_verification = verify_authentication_response(
     require_user_verification=True,
 )
 print("\n[Authentication Verification]")
-if PYDANTIC_V2:
-    print(authentication_verification.model_dump_json(indent=2))
-else:
-    print(authentication_verification.json(indent=2))
+print(authentication_verification)
 assert authentication_verification.new_sign_count == 1

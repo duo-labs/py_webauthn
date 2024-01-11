@@ -1,5 +1,17 @@
 {
+    "black-formatter.args": [
+        "--line-length", "99"
+    ],
+    "mypy-type-checker.path": ["venv/bin/mypy"],
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    }
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnPaste": false,
+        "editor.formatOnSaveMode": "file",
+        "editor.formatOnSave": true,
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "gitlens.advanced.blame.customArguments": [
+        "--ignore-revs-file",
+        ".git-blame-ignore-revs"
+      ]
 }

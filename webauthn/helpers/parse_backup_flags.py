@@ -1,11 +1,12 @@
 from enum import Enum
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 from .structs import AuthenticatorDataFlags, CredentialDeviceType
 from .exceptions import InvalidBackupFlags
 
 
-class ParsedBackupFlags(BaseModel):
+@dataclass
+class ParsedBackupFlags:
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
 

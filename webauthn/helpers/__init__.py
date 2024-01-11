@@ -1,12 +1,13 @@
 from .aaguid_to_string import aaguid_to_string
 from .base64url_to_bytes import base64url_to_bytes
 from .bytes_to_base64url import bytes_to_base64url
+from .byteslike_to_bytes import byteslike_to_bytes
 from .decode_credential_public_key import decode_credential_public_key
 from .decoded_public_key_to_cryptography import decoded_public_key_to_cryptography
+from .encode_cbor import encode_cbor
 from .generate_challenge import generate_challenge
 from .generate_user_handle import generate_user_handle
 from .hash_by_alg import hash_by_alg
-from .json_loads_base64url_to_bytes import json_loads_base64url_to_bytes
 from .options_to_json import options_to_json
 from .parse_attestation_object import parse_attestation_object
 from .parse_authentication_credential_json import parse_authentication_credential_json
@@ -23,12 +24,13 @@ __all__ = [
     "aaguid_to_string",
     "base64url_to_bytes",
     "bytes_to_base64url",
+    "byteslike_to_bytes",
     "decode_credential_public_key",
     "decoded_public_key_to_cryptography",
+    "encode_cbor",
     "generate_challenge",
     "generate_user_handle",
     "hash_by_alg",
-    "json_loads_base64url_to_bytes",
     "options_to_json",
     "parse_attestation_object",
     "parse_authenticator_data",

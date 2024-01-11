@@ -1,20 +1,23 @@
 from typing import Union
+from dataclasses import dataclass
 
 import cbor2
-from pydantic import BaseModel
 
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
+from .parse_cbor import parse_cbor
 
 
-class DecodedOKPPublicKey(BaseModel):
+@dataclass
+class DecodedOKPPublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
     x: bytes
 
 
-class DecodedEC2PublicKey(BaseModel):
+@dataclass
+class DecodedEC2PublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     crv: COSECRV
@@ -22,7 +25,8 @@ class DecodedEC2PublicKey(BaseModel):
     y: bytes
 
 
-class DecodedRSAPublicKey(BaseModel):
+@dataclass
+class DecodedRSAPublicKey:
     kty: COSEKTY
     alg: COSEAlgorithmIdentifier
     n: bytes
@@ -53,7 +57,7 @@ def decode_credential_public_key(
             y=key[33:65],
         )
 
-    decoded_key: dict = cbor2.loads(key)
+    decoded_key: dict = parse_cbor(key)
 
     kty = decoded_key[COSEKey.KTY]
     alg = decoded_key[COSEKey.ALG]

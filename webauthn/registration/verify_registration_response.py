@@ -1,9 +1,11 @@
 import hashlib
+from dataclasses import dataclass, asdict
 from typing import List, Mapping, Optional, Union
 
 from webauthn.helpers import (
     aaguid_to_string,
     bytes_to_base64url,
+    byteslike_to_bytes,
     decode_credential_public_key,
     parse_attestation_object,
     parse_client_data_json,
@@ -13,14 +15,12 @@ from webauthn.helpers import (
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.exceptions import InvalidRegistrationResponse
 from webauthn.helpers.structs import (
-    PYDANTIC_V2,
     AttestationFormat,
     ClientDataType,
     CredentialDeviceType,
     PublicKeyCredentialType,
     RegistrationCredential,
     TokenBindingStatus,
-    WebAuthnBaseModel,
 )
 from .formats.android_key import verify_android_key
 from .formats.android_safetynet import verify_android_safetynet
@@ -31,7 +31,8 @@ from .formats.tpm import verify_tpm
 from .generate_registration_options import default_supported_pub_key_algs
 
 
-class VerifiedRegistration(WebAuthnBaseModel):
+@dataclass
+class VerifiedRegistration:
     """Information about a verified attestation of which an RP can make use.
 
     Attributes:
@@ -70,12 +71,8 @@ def verify_registration_response(
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
     require_user_verification: bool = False,
-    supported_pub_key_algs: List[
-        COSEAlgorithmIdentifier
-    ] = default_supported_pub_key_algs,
-    pem_root_certs_bytes_by_fmt: Optional[
-        Mapping[AttestationFormat, List[bytes]]
-    ] = None,
+    supported_pub_key_algs: List[COSEAlgorithmIdentifier] = default_supported_pub_key_algs,
+    pem_root_certs_bytes_by_fmt: Optional[Mapping[AttestationFormat, List[bytes]]] = None,
 ) -> VerifiedRegistration:
     """Verify an authenticator's response to navigator.credentials.create()
 
@@ -118,7 +115,10 @@ def verify_registration_response(
 
     response = credential.response
 
-    client_data = parse_client_data_json(response.client_data_json)
+    client_data_bytes = byteslike_to_bytes(response.client_data_json)
+    attestation_object_bytes = byteslike_to_bytes(response.attestation_object)
+
+    client_data = parse_client_data_json(client_data_bytes)
 
     if client_data.type != ClientDataType.WEBAUTHN_CREATE:
         raise InvalidRegistrationResponse(
@@ -126,9 +126,7 @@ def verify_registration_response(
         )
 
     if expected_challenge != client_data.challenge:
-        raise InvalidRegistrationResponse(
-            "Client data challenge was not expected challenge"
-        )
+        raise InvalidRegistrationResponse("Client data challenge was not expected challenge")
 
     if isinstance(expected_origin, str):
         if expected_origin != client_data.origin:
@@ -150,7 +148,7 @@ def verify_registration_response(
                 f'Unexpected token_binding status of "{status}", expected one of "{",".join(expected_token_binding_statuses)}"'
             )
 
-    attestation_object = parse_attestation_object(response.attestation_object)  # TODO: Issue #173
+    attestation_object = parse_attestation_object(attestation_object_bytes)
 
     auth_data = attestation_object.auth_data
 
@@ -171,21 +169,15 @@ def verify_registration_response(
         )
 
     if not auth_data.attested_credential_data:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide attested credential data"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide attested credential data")
 
     attested_credential_data = auth_data.attested_credential_data
 
     if not attested_credential_data.credential_id:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide a credential ID"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide a credential ID")
 
     if not attested_credential_data.credential_public_key:
-        raise InvalidRegistrationResponse(
-            "Authenticator did not provide a credential public key"
-        )
+        raise InvalidRegistrationResponse("Authenticator did not provide a credential public key")
 
     if not attested_credential_data.aaguid:
         raise InvalidRegistrationResponse("Authenticator did not provide an AAGUID")
@@ -208,14 +200,12 @@ def verify_registration_response(
             pem_root_certs_bytes.extend(custom_certs)
 
     if attestation_object.fmt == AttestationFormat.NONE:
-        # A "none" attestation should not contain _anything_ in its attestation
-        # statement
-        if PYDANTIC_V2:
-            num_att_stmt_fields_set = len(attestation_object.att_stmt.model_fields_set)  # type: ignore[attr-defined]
-        else:
-            num_att_stmt_fields_set = len(attestation_object.att_stmt.__fields_set__)
+        # A "none" attestation should not contain _anything_ in its attestation statement
+        any_att_stmt_fields_set = any(
+            [field is not None for field in asdict(attestation_object.att_stmt).values()]
+        )
 
-        if num_att_stmt_fields_set > 0:
+        if any_att_stmt_fields_set:
             raise InvalidRegistrationResponse(
                 "None attestation had unexpected attestation statement"
             )
@@ -225,7 +215,7 @@ def verify_registration_response(
     elif attestation_object.fmt == AttestationFormat.FIDO_U2F:
         verified = verify_fido_u2f(
             attestation_statement=attestation_object.att_stmt,
-            client_data_json=response.client_data_json,
+            client_data_json=client_data_bytes,
             rp_id_hash=auth_data.rp_id_hash,
             credential_id=attested_credential_data.credential_id,
             credential_public_key=attested_credential_data.credential_public_key,
@@ -235,39 +225,39 @@ def verify_registration_response(
     elif attestation_object.fmt == AttestationFormat.PACKED:
         verified = verify_packed(
             attestation_statement=attestation_object.att_stmt,
-            attestation_object=response.attestation_object,
-            client_data_json=response.client_data_json,
+            attestation_object=attestation_object_bytes,
+            client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
         )
     elif attestation_object.fmt == AttestationFormat.TPM:
         verified = verify_tpm(
             attestation_statement=attestation_object.att_stmt,
-            attestation_object=response.attestation_object,
-            client_data_json=response.client_data_json,
+            attestation_object=attestation_object_bytes,
+            client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
         )
     elif attestation_object.fmt == AttestationFormat.APPLE:
         verified = verify_apple(
             attestation_statement=attestation_object.att_stmt,
-            attestation_object=response.attestation_object,
-            client_data_json=response.client_data_json,
+            attestation_object=attestation_object_bytes,
+            client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
         )
     elif attestation_object.fmt == AttestationFormat.ANDROID_SAFETYNET:
         verified = verify_android_safetynet(
             attestation_statement=attestation_object.att_stmt,
-            attestation_object=response.attestation_object,
-            client_data_json=response.client_data_json,
+            attestation_object=attestation_object_bytes,
+            client_data_json=client_data_bytes,
             pem_root_certs_bytes=pem_root_certs_bytes,
         )
     elif attestation_object.fmt == AttestationFormat.ANDROID_KEY:
         verified = verify_android_key(
             attestation_statement=attestation_object.att_stmt,
-            attestation_object=response.attestation_object,
-            client_data_json=response.client_data_json,
+            attestation_object=attestation_object_bytes,
+            client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
         )
@@ -292,7 +282,7 @@ def verify_registration_response(
         fmt=attestation_object.fmt,
         credential_type=credential.type,
         user_verified=auth_data.flags.uv,
-        attestation_object=response.attestation_object,
+        attestation_object=attestation_object_bytes,
         credential_device_type=parsed_backup_flags.credential_device_type,
         credential_backed_up=parsed_backup_flags.credential_backed_up,
     )

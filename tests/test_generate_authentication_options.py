@@ -39,3 +39,9 @@ class TestWebAuthnGenerateAttestationOptions(TestCase):
             PublicKeyCredentialDescriptor(id=b"12345"),
         ]
         assert options.user_verification == UserVerificationRequirement.REQUIRED
+
+    def test_raises_on_empty_rp_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rp_id"):
+            generate_authentication_options(
+                rp_id="",
+            )

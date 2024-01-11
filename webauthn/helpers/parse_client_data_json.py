@@ -1,10 +1,10 @@
 import json
 from json.decoder import JSONDecodeError
-
-from pydantic import ValidationError
+from typing import Union
 
 from .base64url_to_bytes import base64url_to_bytes
-from .exceptions import InvalidClientDataJSONStructure
+from .byteslike_to_bytes import byteslike_to_bytes
+from .exceptions import InvalidJSONStructure
 from .structs import CollectedClientData, TokenBinding
 
 
@@ -12,26 +12,20 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
     """
     Break apart `response.clientDataJSON` buffer into structured data
     """
+    val = byteslike_to_bytes(val)
+
     try:
         json_dict = json.loads(val)
     except JSONDecodeError:
-        raise InvalidClientDataJSONStructure(
-            "Unable to decode client_data_json bytes as JSON"
-        )
+        raise InvalidJSONStructure("Unable to decode client_data_json bytes as JSON")
 
     # Ensure required values are present in client data
     if "type" not in json_dict:
-        raise InvalidClientDataJSONStructure(
-            'client_data_json missing required property "type"'
-        )
+        raise InvalidJSONStructure('client_data_json missing required property "type"')
     if "challenge" not in json_dict:
-        raise InvalidClientDataJSONStructure(
-            'client_data_json missing required property "challenge"'
-        )
+        raise InvalidJSONStructure('client_data_json missing required property "challenge"')
     if "origin" not in json_dict:
-        raise InvalidClientDataJSONStructure(
-            'client_data_json missing required property "origin"'
-        )
+        raise InvalidJSONStructure('client_data_json missing required property "origin"')
 
     client_data = CollectedClientData(
         type=json_dict["type"],
@@ -50,9 +44,7 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
         # Some U2F devices set a string to `token_binding`, in which case ignore it
         if type(token_binding_dict) is dict:
             if "status" not in token_binding_dict:
-                raise InvalidClientDataJSONStructure(
-                    'token_binding missing required property "status"'
-                )
+                raise InvalidJSONStructure('token_binding missing required property "status"')
 
             status = token_binding_dict["status"]
             try:
@@ -65,7 +57,7 @@ def parse_client_data_json(val: bytes) -> CollectedClientData:
                     token_binding.id = f"{id}"
 
                 client_data.token_binding = token_binding
-            except ValidationError:
+            except Exception:
                 # If we encounter a status we don't expect then ignore token_binding
                 # completely
                 pass

@@ -2,7 +2,7 @@ import json
 from unittest import TestCase
 
 from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
-from webauthn.helpers.exceptions import InvalidClientDataJSONStructure
+from webauthn.helpers.exceptions import InvalidJSONStructure
 from webauthn.helpers.parse_client_data_json import parse_client_data_json
 from webauthn.helpers.structs import TokenBindingStatus
 
@@ -28,7 +28,7 @@ class TestParseClientDataJSON(TestCase):
         client_data_bytes = b"not_real-JS0N"
 
         with self.assertRaisesRegex(
-            InvalidClientDataJSONStructure,
+            InvalidJSONStructure,
             "Unable to decode",
         ):
             parse_client_data_json(client_data_bytes)
@@ -43,7 +43,7 @@ class TestParseClientDataJSON(TestCase):
         client_data_bytes = client_data_str.encode("utf-8")
 
         with self.assertRaisesRegex(
-            InvalidClientDataJSONStructure,
+            InvalidJSONStructure,
             'missing required property "type"',
         ):
             parse_client_data_json(client_data_bytes)
@@ -55,7 +55,7 @@ class TestParseClientDataJSON(TestCase):
         client_data_bytes = client_data_str.encode("utf-8")
 
         with self.assertRaisesRegex(
-            InvalidClientDataJSONStructure,
+            InvalidJSONStructure,
             'missing required property "challenge"',
         ):
             parse_client_data_json(client_data_bytes)
@@ -70,7 +70,7 @@ class TestParseClientDataJSON(TestCase):
         client_data_bytes = client_data_str.encode("utf-8")
 
         with self.assertRaisesRegex(
-            InvalidClientDataJSONStructure,
+            InvalidJSONStructure,
             'missing required property "origin"',
         ):
             parse_client_data_json(client_data_bytes)
@@ -131,7 +131,7 @@ class TestParseClientDataJSON(TestCase):
         )
         client_data_bytes = client_data_str.encode("utf-8")
 
-        with self.assertRaises(InvalidClientDataJSONStructure) as context:
+        with self.assertRaises(InvalidJSONStructure) as context:
             parse_client_data_json(client_data_bytes)
 
         assert 'missing required property "status"' in str(context.exception)

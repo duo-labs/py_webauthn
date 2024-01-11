@@ -1,5 +1,7 @@
 import base64
+from dataclasses import dataclass
 import hashlib
+import json
 from typing import List
 
 from cryptography import x509
@@ -20,17 +22,19 @@ from webauthn.helpers.exceptions import (
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.known_root_certs import globalsign_r2, globalsign_root_ca
-from webauthn.helpers.structs import PYDANTIC_V2, AttestationStatement, WebAuthnBaseModel
+from webauthn.helpers.structs import AttestationStatement
 
 
-class SafetyNetJWSHeader(WebAuthnBaseModel):
+@dataclass
+class SafetyNetJWSHeader:
     """Properties in the Header of a SafetyNet JWS"""
 
     alg: str
     x5c: List[str]
 
 
-class SafetyNetJWSPayload(WebAuthnBaseModel):
+@dataclass
+class SafetyNetJWSPayload:
     """Properties in the Payload of a SafetyNet JWS
 
     Values below correspond to camelCased properties in the JWS itself. This class
@@ -69,30 +73,34 @@ def verify_android_safetynet(
     if not attestation_statement.ver:
         # As of this writing, there is only one format of the SafetyNet response and
         # ver is reserved for future use (so for now just make sure it's present)
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing version (SafetyNet)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing version (SafetyNet)")
 
     if not attestation_statement.response:
-        raise InvalidRegistrationResponse(
-            "Attestation statement was missing response (SafetyNet)"
-        )
+        raise InvalidRegistrationResponse("Attestation statement was missing response (SafetyNet)")
 
     # Begin peeling apart the JWS in the attestation statement response
     jws = attestation_statement.response.decode("ascii")
     jws_parts = jws.split(".")
 
     if len(jws_parts) != 3:
-        raise InvalidRegistrationResponse(
-            "Response JWS did not have three parts (SafetyNet)"
-        )
+        raise InvalidRegistrationResponse("Response JWS did not have three parts (SafetyNet)")
 
-    if PYDANTIC_V2:
-        header = SafetyNetJWSHeader.model_validate_json(base64url_to_bytes(jws_parts[0]))  # type: ignore[attr-defined]
-        payload = SafetyNetJWSPayload.model_validate_json(base64url_to_bytes(jws_parts[1]))  # type: ignore[attr-defined]
-    else:
-        header = SafetyNetJWSHeader.parse_raw(base64url_to_bytes(jws_parts[0]))
-        payload = SafetyNetJWSPayload.parse_raw(base64url_to_bytes(jws_parts[1]))
+    header_json = json.loads(base64url_to_bytes(jws_parts[0]))
+    payload_json = json.loads(base64url_to_bytes(jws_parts[1]))
+
+    header = SafetyNetJWSHeader(
+        alg=header_json.get("alg", ""),
+        x5c=header_json.get("x5c", []),
+    )
+    payload = SafetyNetJWSPayload(
+        nonce=payload_json.get("nonce", ""),
+        timestamp_ms=payload_json.get("timestampMs", 0),
+        apk_package_name=payload_json.get("apkPackageName", ""),
+        apk_digest_sha256=payload_json.get("apkDigestSha256", ""),
+        cts_profile_match=payload_json.get("ctsProfileMatch", False),
+        apk_certificate_digest_sha256=payload_json.get("apkCertificateDigestSha256", []),
+        basic_integrity=payload_json.get("basicIntegrity", False),
+    )
 
     signature_bytes_str: str = jws_parts[2]
 
@@ -125,18 +133,14 @@ def verify_android_safetynet(
     nonce_data_str = nonce_data_hash_bytes.decode("utf-8")
 
     if payload.nonce != nonce_data_str:
-        raise InvalidRegistrationResponse(
-            "Payload nonce was not expected value (SafetyNet)"
-        )
+        raise InvalidRegistrationResponse("Payload nonce was not expected value (SafetyNet)")
 
     # Verify that the SafetyNet response actually came from the SafetyNet service
     # by following the steps in the SafetyNet online documentation.
     x5c = [base64url_to_bytes(cert) for cert in header.x5c]
 
     if not payload.cts_profile_match:
-        raise InvalidRegistrationResponse(
-            "Could not verify device integrity (SafetyNet)"
-        )
+        raise InvalidRegistrationResponse("Could not verify device integrity (SafetyNet)")
 
     if verify_timestamp_ms:
         try:
@@ -174,9 +178,7 @@ def verify_android_safetynet(
     signature_bytes = base64url_to_bytes(signature_bytes_str)
 
     if header.alg != "RS256":
-        raise InvalidRegistrationResponse(
-            f"JWS header alg was not RS256: {header.alg} (SafetyNet"
-        )
+        raise InvalidRegistrationResponse(f"JWS header alg was not RS256: {header.alg} (SafetyNet")
 
     # Get cert public key bytes
     attestation_cert_pub_key = attestation_cert.public_key()

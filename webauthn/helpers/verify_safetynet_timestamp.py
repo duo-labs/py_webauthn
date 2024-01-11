@@ -12,9 +12,7 @@ def verify_safetynet_timestamp(timestamp_ms: int) -> None:
 
     # Make sure the response was generated in the past
     if timestamp_ms > (now + grace_ms):
-        raise ValueError(
-            f"Payload timestamp {timestamp_ms} was later than {now} + {grace_ms}"
-        )
+        raise ValueError(f"Payload timestamp {timestamp_ms} was later than {now} + {grace_ms}")
 
     # Make sure the response arrived within the grace period
     if timestamp_ms < (now - grace_ms):
