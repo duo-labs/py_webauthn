@@ -7,11 +7,11 @@ class TestWebAuthnGenerateChallenge(TestCase):
     def test_generates_byte_sequence(self) -> None:
         output = generate_challenge()
 
-        assert type(output) == bytes
-        assert len(output) == 64
+        self.assertEqual(type(output), bytes)
+        self.assertEqual(len(output), 64)
 
     def test_generates_unique_value_each_time(self) -> None:
         output1 = generate_challenge()
         output2 = generate_challenge()
 
-        assert output1 != output2
+        self.assertNotEqual(output1, output2)
