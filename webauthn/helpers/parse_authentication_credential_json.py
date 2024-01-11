@@ -24,7 +24,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
             raise InvalidJSONStructure("Unable to decode credential as JSON")
 
     if not isinstance(json_val, dict):
-        raise InvalidJSONStructure("Credential is not a JSON object")
+        raise InvalidJSONStructure("Credential was not a JSON object")
 
     cred_id = json_val.get("id")
     if not isinstance(cred_id, str):
@@ -66,7 +66,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         response_user_handle = base64url_to_bytes(response_user_handle)
     elif response_user_handle is not None:
         # If it's not a string, and it's not None, then it's definitely not valid
-        raise InvalidJSONStructure("Credential response ha unexpected userHandle")
+        raise InvalidJSONStructure("Credential response had unexpected userHandle")
 
     cred_authenticator_attachment = json_val.get("authenticatorAttachment")
     if isinstance(cred_authenticator_attachment, str):
@@ -74,7 +74,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
             cred_authenticator_attachment = AuthenticatorAttachment(cred_authenticator_attachment)
         except ValueError as cred_attachment_exc:
             raise InvalidJSONStructure(
-                "Credential has unexpected authenticatorAttachment"
+                "Credential had unexpected authenticatorAttachment"
             ) from cred_attachment_exc
     else:
         cred_authenticator_attachment = None
@@ -94,7 +94,7 @@ def parse_authentication_credential_json(json_val: Union[str, dict]) -> Authenti
         )
     except Exception as exc:
         raise InvalidAuthenticationResponse(
-            "Unable to parse authentication credential from JSON data"
+            "Could not parse authentication credential from JSON data"
         ) from exc
 
     return authentication_credential
