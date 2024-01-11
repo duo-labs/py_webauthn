@@ -1,5 +1,144 @@
 # Changelog
 
+## v2.0.0
+
+**Changes:**
+
+- See **Breaking Changes** below
+
+**Breaking Changes:**
+
+- [Pydantic](https://docs.pydantic.dev/latest/) is no longer used by py_webauthn. If your project
+  calls any Pydantic-specific methods on classes provided by py_webauthn then you will need to
+  refactor those calls accordingly. Typical use of py_webauthn should not need any major refactor
+  related to this change, but please see **Breaking Changes** below ([#195](https://github.com/duo-labs/py_webauthn/pull/195))
+- `webauthn.helpers.generate_challenge()` now always generates 64 random bytes and no longer accepts any arguments. Refactor your existing calls to remove any arguments ([#198](https://github.com/duo-labs/py_webauthn/pull/198))
+- `webauthn.helpers.exceptions.InvalidClientDataJSONStructure` has been replaced by `webauthn.helpers.exceptions.InvalidJSONStructure` ([#195](https://github.com/duo-labs/py_webauthn/pull/195))
+- `webauthn.helpers.json_loads_base64url_to_bytes()` has been removed ([#195](https://github.com/duo-labs/py_webauthn/pull/195))
+- The `user_id` argument passed into `generate_registration_options()` is now `Optional[bytes]`
+  instead of a required `str` value. A random sequence of 64 bytes will be generated for `user_id`
+  if it is `None` ([#197](https://github.com/duo-labs/py_webauthn/pull/197))
+  - There are a few options available to refactor existing calls:
+
+### Option 1: Use the `base64url_to_bytes()` helper
+
+If you already store your WebAuthn user ID bytes as base64url-encoded strings then you can simply decode these strings to bytes using an included helper:
+
+**Before:**
+```py
+options = generate_registration_options(
+    # ...
+    user_id: "3ZPk1HGhX_cul7z5UydfZE_vgnUYkOVshDNcvI1ILyQ",
+)
+```
+
+**After:**
+
+```py
+from webauthn.helpers import bytes_to_base64url
+
+options = generate_registration_options(
+    # ...
+    user_id: bytes_to_base64url("3ZPk1HGhX_cul7z5UydfZE_vgnUYkOVshDNcvI1ILyQ"),
+)
+```
+
+### Option 2: Generate unique WebAuthn-specific identifiers for existing and new users
+
+WebAuthn **strongly** encourages Relying Parties to use 64 randomized bytes for **every** user ID you pass into `navigator.credentials.create()`. This would be a second identifier used exclusively for WebAuthn that you associate along with your typical internal user ID.
+
+py_webauthn includes a `generate_user_handle()` helper that can simplify the task of creating this special user identifier for your existing users in one go:
+
+```py
+from webauthn.helpers import generate_user_handle
+
+# Pseudocode (imagine this is in some kind of migration script)
+for user in get_all_users_in_db():
+    add_webauthn_user_id_to_db_for_user(
+        current_user=user.id,
+        webauthn_user_id=generate_user_handle(),  # Generates 64 random bytes
+    )
+```
+
+You can also use this method when creating new users to ensure that all subsequent users have a WebAuthn-specific identifier as well:
+
+```py
+from webauthn.helpers import generate_user_handle
+
+# ...existing user onboarding logic...
+
+# Pseudocode
+create_new_user_in_db(
+    # ...
+    webauthn_user_id=generate_user_handle(),
+)
+```
+
+Once your users are assigned their second WebAuthn-specific ID you can then pass those bytes into `generate_registration_options()` on subsequent calls:
+
+```py
+# Pseudocode
+webauthn_user_id: bytes = get_webauthn_user_id_bytes_from_db(current_user.id)
+
+options = generate_registration_options(
+    # ...
+    user_id=webauthn_user_id,
+)
+```
+
+### Option 3: Let `generate_registration_options()` generate a user ID for you
+
+When the `user_id` argument is omitted then a random 64-byte identifier will be generated for you:
+
+**Before:**
+```py
+options = generate_registration_options(
+    # ...
+    user_id: "USERIDGOESHERE",
+)
+```
+
+**After:**
+```py
+# Pseudocode
+webauthn_user_id: bytes | None = get_webauthn_user_id_bytes_from_db(
+    current_user=current_user.id,
+)
+
+options = generate_registration_options(
+    # ...
+    user_id=webauthn_user_id,
+)
+
+if webauthn_user_id is None:
+    # Pseudocode
+    store_webauthn_user_id_bytes_in_your_db(
+        current_user=current_user.id,
+        webauthn_user_id=options.user.id,  # Randomly generated 64-bytes
+    )
+```
+
+### Option 4: Encode existing `str` argument to UTF-8 bytes
+
+This technique is a quick win, but can be prone to base64url-related encoding and decoding quirks between browsers. **It is recommended you quickly follow this up with Option 2 or Option 3 above:**
+
+**Before:**
+```py
+options = generate_registration_options(
+    # ...
+    user_id: "USERIDGOESHERE",
+)
+```
+
+**After:**
+
+```py
+options = generate_registration_options(
+    # ...
+    user_id: "USERIDGOESHERE".encode('utf-8'),
+)
+```
+
 ## v1.11.1
 
 **Changes:**
