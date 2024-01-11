@@ -22,7 +22,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
         options = generate_registration_options(
             rp_id="example.com",
             rp_name="Example Co",
-            user_id="ABAV6QWPBEY9WOTOA1A4",
+            user_id=bytes([1, 2, 3, 4]),
             user_name="lee",
             user_display_name="Lee",
             attestation=AttestationConveyancePreference.DIRECT,
@@ -45,7 +45,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
             {
                 "rp": {"name": "Example Co", "id": "example.com"},
                 "user": {
-                    "id": "QUJBVjZRV1BCRVk5V09UT0ExQTQ",
+                    "id": "AQIDBA",
                     "name": "lee",
                     "displayName": "Lee",
                 },
@@ -67,7 +67,6 @@ class TestWebAuthnOptionsToJSON(TestCase):
         options = generate_registration_options(
             rp_id="example.com",
             rp_name="Example Co",
-            user_id="ABAV6QWPBEY9WOTOA1A4",
             user_name="lee",
             exclude_credentials=[
                 PublicKeyCredentialDescriptor(

@@ -165,7 +165,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_raw_id(self) -> None:
         with self.assertRaisesRegex(
-            InvalidRegistrationResponse, "Unable to parse registration credential"
+            InvalidRegistrationResponse, "Could not parse registration credential"
         ):
             parse_registration_credential_json(
                 {
@@ -181,7 +181,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_attestation_object(self) -> None:
         with self.assertRaisesRegex(
-            InvalidRegistrationResponse, "Unable to parse registration credential"
+            InvalidRegistrationResponse, "Could not parse registration credential"
         ):
             parse_registration_credential_json(
                 {
@@ -197,7 +197,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_client_data_json(self) -> None:
         with self.assertRaisesRegex(
-            InvalidRegistrationResponse, "Unable to parse registration credential"
+            InvalidRegistrationResponse, "Could not parse registration credential"
         ):
             parse_registration_credential_json(
                 {

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from webauthn.helpers import generate_challenge
+from webauthn.helpers import generate_challenge, generate_user_handle, byteslike_to_bytes
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.structs import (
     AttestationConveyancePreference,
@@ -43,8 +43,8 @@ def generate_registration_options(
     *,
     rp_id: str,
     rp_name: str,
-    user_id: str,
     user_name: str,
+    user_id: Optional[bytes] = None,
     user_display_name: Optional[str] = None,
     challenge: Optional[bytes] = None,
     timeout: int = 60000,
@@ -58,8 +58,8 @@ def generate_registration_options(
     Args:
         `rp_id`: A unique, constant identifier for this Relying Party.
         `rp_name`: A user-friendly, readable name for the Relying Party.
-        `user_id`: A unique identifier for the user. For privacy reasons it should NOT be something like an email address.
         `user_name`: A value that will help the user identify which account this credential is associated with. Can be an email address, etc...
+        (optional) `user_id`: A collection of random bytes that identify a user account. For privacy reasons it should NOT be something like an email address. Defaults to 64 random bytes.
         (optional) `user_display_name`: A user-friendly representation of their account. Can be a full name ,etc... Defaults to the value of `user_name`.
         (optional) `challenge`: A byte sequence for the authenticator to return back in its response. If no value is specified then a sequence of random bytes will be generated.
         (optional) `timeout`: How long in milliseconds the browser should give the user to choose an authenticator. This value is a *hint* and may be ignored by the browser.
@@ -78,11 +78,14 @@ def generate_registration_options(
     if not rp_name:
         raise ValueError("rp_name cannot be an empty string")
 
-    if not user_id:
-        raise ValueError("user_id cannot be an empty string")
-
     if not user_name:
         raise ValueError("user_name cannot be an empty string")
+
+    if user_id:
+        if not isinstance(user_id, bytes):
+            raise ValueError("user_id must be bytes")
+    else:
+        user_id = generate_user_handle()
 
     ########
     # Set defaults for required values
@@ -111,7 +114,7 @@ def generate_registration_options(
             id=rp_id,
         ),
         user=PublicKeyCredentialUserEntity(
-            id=user_id.encode("utf-8"),
+            id=user_id,
             name=user_name,
             display_name=user_display_name,
         ),

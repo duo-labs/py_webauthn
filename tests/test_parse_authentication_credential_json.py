@@ -146,7 +146,7 @@ class TestParseClientDataJSON(TestCase):
             }
         )
 
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
 
     def test_handles_missing_user_handle(self) -> None:
         parsed = parse_authentication_credential_json(
@@ -166,7 +166,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_raw_id(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -183,7 +183,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_authenticator_data(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -200,7 +200,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_client_data_json(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -217,7 +217,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_signature(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -265,7 +265,7 @@ class TestParseClientDataJSON(TestCase):
                 "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSjlyUFpWWnFWODlUSW53bzV3cU11R3dlZjdET0pZRi1OVHlMQnhHV2pjZi16amFzOFRTUTlMbXI3em4wSmpkMTQyMU1sV0ItS2JYdEs5RW5sN19JM3ciLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ"
             ),
         )
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
         self.assertEqual(parsed.type, "public-key")
         self.assertEqual(parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM)
 
@@ -302,6 +302,6 @@ class TestParseClientDataJSON(TestCase):
                 "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSjlyUFpWWnFWODlUSW53bzV3cU11R3dlZjdET0pZRi1OVHlMQnhHV2pjZi16amFzOFRTUTlMbXI3em4wSmpkMTQyMU1sV0ItS2JYdEs5RW5sN19JM3ciLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ"
             ),
         )
-        self.assertEqual(parsed.response.user_handle, "bW1pbGxlcg")
+        self.assertEqual(parsed.response.user_handle, base64url_to_bytes("bW1pbGxlcg"))
         self.assertEqual(parsed.type, "public-key")
         self.assertEqual(parsed.authenticator_attachment, AuthenticatorAttachment.PLATFORM)

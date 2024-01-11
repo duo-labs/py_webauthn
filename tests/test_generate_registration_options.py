@@ -19,11 +19,12 @@ class TestGenerateRegistrationOptions(TestCase):
     @patch("secrets.token_bytes")
     def test_generates_options_with_defaults(self, token_bytes_mock: MagicMock) -> None:
         token_bytes_mock.return_value = b"12345"
+        user_id = "ABAV6QWPBEY9WOTOA1A4".encode("utf-8")
 
         options = generate_registration_options(
             rp_id="example.com",
             rp_name="Example Co",
-            user_id="ABAV6QWPBEY9WOTOA1A4",
+            user_id=user_id,
             user_name="lee",
         )
 
@@ -33,7 +34,7 @@ class TestGenerateRegistrationOptions(TestCase):
         )
         assert options.challenge == b"12345"
         assert options.user == PublicKeyCredentialUserEntity(
-            id=b"ABAV6QWPBEY9WOTOA1A4",
+            id=user_id,
             name="lee",
             display_name="lee",
         )
@@ -47,10 +48,12 @@ class TestGenerateRegistrationOptions(TestCase):
         assert options.attestation == AttestationConveyancePreference.NONE
 
     def test_generates_options_with_custom_values(self) -> None:
+        user_id = "ABAV6QWPBEY9WOTOA1A4".encode("utf-8")
+
         options = generate_registration_options(
             rp_id="example.com",
             rp_name="Example Co",
-            user_id="ABAV6QWPBEY9WOTOA1A4",
+            user_id=user_id,
             user_name="lee",
             user_display_name="Lee",
             attestation=AttestationConveyancePreference.DIRECT,
@@ -69,7 +72,7 @@ class TestGenerateRegistrationOptions(TestCase):
         assert options.rp == PublicKeyCredentialRpEntity(id="example.com", name="Example Co")
         assert options.challenge == b"1234567890"
         assert options.user == PublicKeyCredentialUserEntity(
-            id=b"ABAV6QWPBEY9WOTOA1A4",
+            id=user_id,
             name="lee",
             display_name="Lee",
         )
@@ -91,7 +94,6 @@ class TestGenerateRegistrationOptions(TestCase):
             generate_registration_options(
                 rp_id="",
                 rp_name="Example Co",
-                user_id="blah",
                 user_name="blah",
             )
 
@@ -100,17 +102,29 @@ class TestGenerateRegistrationOptions(TestCase):
             generate_registration_options(
                 rp_id="example.com",
                 rp_name="",
-                user_id="blah",
                 user_name="blah",
             )
 
-    def test_raises_on_empty_user_id(self) -> None:
+    @patch("secrets.token_bytes")
+    def test_generated_random_id_on_empty_user_id(self, token_bytes_mock: MagicMock) -> None:
+        token_bytes_mock.return_value = bytes([1, 2, 3, 4])
+
+        options = generate_registration_options(
+            rp_id="example.com",
+            rp_name="Example Co",
+            user_name="blah",
+            user_id=None,
+        )
+
+        self.assertEqual(options.user.id, bytes([1, 2, 3, 4]))
+
+    def test_raises_on_non_bytes_user_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "user_id"):
             generate_registration_options(
                 rp_id="example.com",
                 rp_name="Example Co",
-                user_id="",
-                user_name="blah",
+                user_name="hello",
+                user_id="hello",  # type: ignore
             )
 
     def test_raises_on_empty_user_name(self) -> None:
@@ -118,6 +132,5 @@ class TestGenerateRegistrationOptions(TestCase):
             generate_registration_options(
                 rp_id="example.com",
                 rp_name="Example Co",
-                user_id="blah",
                 user_name="",
             )
