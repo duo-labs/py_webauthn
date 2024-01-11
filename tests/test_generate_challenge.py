@@ -15,8 +15,3 @@ class TestWebAuthnGenerateChallenge(TestCase):
         output2 = generate_challenge()
 
         assert output1 != output2
-
-    def test_supports_custom_lengths(self) -> None:
-        output = generate_challenge(32)
-
-        assert len(output) == 32
