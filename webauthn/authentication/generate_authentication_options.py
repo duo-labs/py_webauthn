@@ -20,7 +20,7 @@ def generate_authentication_options(
 
     Args:
         `rp_id`: The Relying Party's unique identifier as specified in attestations.
-        (optional) `challenge`: A byte sequence for the authenticator to return back in its response. If no value is specified then a sequence of random bytes will be generated.
+        (optional) `challenge`: A byte sequence for the authenticator to return back in its response. Defaults to 64 random bytes.
         (optional) `timeout`: How long in milliseconds the browser should give the user to choose an authenticator. This value is a *hint* and may be ignored by the browser.
         (optional) `allow_credentials`: A list of credentials registered to the user.
         (optional) `user_verification`: The RP's preference for the authenticator's enforcement of the "user verified" flag.
