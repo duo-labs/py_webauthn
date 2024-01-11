@@ -166,7 +166,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_raw_id(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -183,7 +183,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_authenticator_data(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -200,7 +200,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_client_data_json(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
@@ -217,7 +217,7 @@ class TestParseClientDataJSON(TestCase):
 
     def test_raises_on_non_base64url_signature(self) -> None:
         with self.assertRaisesRegex(
-            InvalidAuthenticationResponse, "Unable to parse authentication credential"
+            InvalidAuthenticationResponse, "Could not parse authentication credential"
         ):
             parse_authentication_credential_json(
                 {
