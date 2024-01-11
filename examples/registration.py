@@ -23,7 +23,6 @@ from webauthn.helpers.structs import (
 simple_registration_options = generate_registration_options(
     rp_id="example.com",
     rp_name="Example Co",
-    user_id="12345",
     user_name="bob",
 )
 
@@ -34,7 +33,7 @@ print(options_to_json(simple_registration_options))
 complex_registration_options = generate_registration_options(
     rp_id="example.com",
     rp_name="Example Co",
-    user_id="ABAV6QWPBEY9WOTOA1A4",
+    user_id=bytes([1, 2, 3, 4]),
     user_name="lee",
     user_display_name="Lee",
     attestation=AttestationConveyancePreference.DIRECT,
@@ -42,7 +41,7 @@ complex_registration_options = generate_registration_options(
         authenticator_attachment=AuthenticatorAttachment.PLATFORM,
         resident_key=ResidentKeyRequirement.REQUIRED,
     ),
-    challenge=b"1234567890",
+    challenge=bytes([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]),
     exclude_credentials=[
         PublicKeyCredentialDescriptor(id=b"1234567890"),
     ],
