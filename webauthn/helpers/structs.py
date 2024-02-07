@@ -260,7 +260,7 @@ class CollectedClientData:
         `type`: Either `"webauthn.create"` or `"webauthn.get"`, for registration and authentication ceremonies respectively
         `challenge`: The challenge passed to the authenticator within the options
         `origin`: The base domain with protocol on which the registration or authentication ceremony took place (e.g. "https://foo.bar")
-        (optional) `cross_origin`: Whether or not the the registration or authentication ceremony took place on a different origin (think within an <iframe>)
+        (optional) `cross_origin`: Whether or not the registration or authentication ceremony took place on a different origin (think within an <iframe>)
         (optional) `token_binding`: Information on the state of the Token Binding protocol
 
     https://www.w3.org/TR/webauthn-2/#dictdef-collectedclientdata
@@ -332,7 +332,7 @@ class RegistrationCredential:
     Attributes:
         `id`: The Base64URL-encoded representation of raw_id
         `raw_id`: A byte sequence representing the credential's unique identifier
-        `response`: The authenticator's attesation data
+        `response`: The authenticator's attestation data
         `type`: The literal string `"public-key"`
 
     https://www.w3.org/TR/webauthn-2/#publickeycredential
