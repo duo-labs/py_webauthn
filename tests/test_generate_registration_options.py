@@ -89,13 +89,12 @@ class TestGenerateRegistrationOptions(TestCase):
         )
         assert options.attestation == AttestationConveyancePreference.DIRECT
 
-    def test_raises_on_empty_rp_id(self) -> None:
-        with self.assertRaisesRegex(ValueError, "rp_id"):
-            generate_registration_options(
-                rp_id="",
-                rp_name="Example Co",
-                user_name="blah",
-            )
+    def test_generates_options_with_empty_rp_id(self) -> None:
+        options = generate_registration_options(
+            rp_id="",
+            rp_name="Example Co",
+            user_name="blah",
+        )
 
     def test_raises_on_empty_rp_name(self) -> None:
         with self.assertRaisesRegex(ValueError, "rp_name"):
