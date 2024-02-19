@@ -81,7 +81,7 @@ def verify_registration_response(
           stringified JSON object, a plain dict, or an instance of RegistrationCredential
         - `expected_challenge`: The challenge passed to the authenticator within the preceding
           registration options.
-        - `expected_rp_id`: The Relying Party's unique identifier as specified in the precending
+        - `expected_rp_id`: The Relying Party's unique identifier as specified in the preceding
           registration options.
         - `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which
           the registration should have occurred. Can also be a list of expected origins.

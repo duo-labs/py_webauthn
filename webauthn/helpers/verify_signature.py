@@ -45,8 +45,8 @@ def verify_signature(
         `data`: Data signed by private key
 
     Raises:
-        `webauth.helpers.exceptions.UnsupportedAlgorithm` when the algorithm is not a recognized COSE algorithm ID
-        `webauth.helpers.exceptions.UnsupportedPublicKey` when the public key is not a valid EC2, RSA, or OKP certificate
+        `webauthn.helpers.exceptions.UnsupportedAlgorithm` when the algorithm is not a recognized COSE algorithm ID
+        `webauthn.helpers.exceptions.UnsupportedPublicKey` when the public key is not a valid EC2, RSA, or OKP certificate
         `cryptography.exceptions.InvalidSignature` when the signature cannot be verified
     """
     if isinstance(public_key, EllipticCurvePublicKey):
