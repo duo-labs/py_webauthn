@@ -1,5 +1,38 @@
 # Changelog
 
+## v2.1.0
+
+**Changes:**
+
+- New `webauthn.helpers.parse_registration_options_json()` and `webauthn.helpers.parse_authentication_options_json()` methods have been added to help replace use of Pydantic's `.parse_obj()` on this library's `PublicKeyCredentialCreationOptions` and `PublicKeyCredentialRequestOptions` classes in projects upgrading to `webauthn>=2.0.0`. See **Refactor Guidance** below for more info ([#210](https://github.com/duo-labs/py_webauthn/issues/210))
+- Updated dependencies to `cryptography==42.0.5` ([#212](https://github.com/duo-labs/py_webauthn/pull/212))
+
+### Refactor Guidance
+
+Taking an example from registration: imagine **a py_webauthn v1.11.1 scenario** in which a project using this library wanted to retrieve output from `generate_registration_options()`, serialized to JSON using `webauthn.helpers.options_to_json()` and then stored in a cache or DB, and turn it back into an instance of `PublicKeyCredentialCreationOptions`:
+
+```py
+# webauthn==1.11.1
+json_reg_options: dict = get_stored_registration_options(session_id)
+parsed_reg_options = PublicKeyCredentialCreationOptions.parse_obj(
+    json_reg_options,
+)
+```
+
+**py_webauthn v2.0.0+** removed use of Pydantic so `.parse_obj()` is no longer available on `PublicKeyCredentialCreationOptions`. It will become possible to refactor away this use of `.parse_obj()` with the new `webauthn.helpers.parse_registration_options_json()` in this release:
+
+```py
+# webauthn==2.1.0
+from webauthn.helpers import parse_registration_options_json
+
+json_reg_options: dict = get_stored_registration_options(session_id)
+parsed_reg_options: PublicKeyCredentialCreationOptions = parse_registration_options_json(
+    json_reg_options,
+)
+```
+
+This same logic applies to calls to `PublicKeyCredentialRequestOptions.parse_obj()` - these calls can be replaced with the new `webauthn.helpers.parse_authentication_options_json()` in this release as well.
+
 ## v2.0.0
 
 **Changes:**
