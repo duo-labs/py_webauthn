@@ -31,17 +31,7 @@ class TestParseRegistrationOptionsJSON(TestCase):
                     "displayName": "bob",
                 },
                 "challenge": "scb_z5GweYijAT2ppsB0HAklsw96fPs_tOWh-myqkOeb9rcvhWBwUZ56J3t3eocgjHkS4Mf3XeXTOQc1ySvk5w",
-                "pubKeyCredParams": [
-                    {"type": "public-key", "alg": -7},
-                    {"type": "public-key", "alg": -8},
-                    {"type": "public-key", "alg": -36},
-                    {"type": "public-key", "alg": -37},
-                    {"type": "public-key", "alg": -38},
-                    {"type": "public-key", "alg": -39},
-                    {"type": "public-key", "alg": -257},
-                    {"type": "public-key", "alg": -258},
-                    {"type": "public-key", "alg": -259},
-                ],
+                "pubKeyCredParams": [{"type": "public-key", "alg": -36}],
                 "timeout": 60000,
                 "excludeCredentials": [],
                 "attestation": "none",
@@ -74,41 +64,9 @@ class TestParseRegistrationOptionsJSON(TestCase):
             parsed.pub_key_cred_params,
             [
                 PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.ECDSA_SHA_256,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.EDDSA,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
                     alg=COSEAlgorithmIdentifier.ECDSA_SHA_512,
                     type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_256,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_384,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_512,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_256,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_384,
-                    type="public-key",
-                ),
-                PublicKeyCredentialParameters(
-                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_512,
-                    type="public-key",
-                ),
+                )
             ],
         )
         self.assertEqual(parsed.timeout, 60000)
@@ -119,7 +77,17 @@ class TestParseRegistrationOptionsJSON(TestCase):
                 "rp": {"name": "Example Co", "id": "example.com"},
                 "user": {"id": "AQIDBA", "name": "lee", "displayName": "Lee"},
                 "challenge": "AQIDBAUGBwgJAA",
-                "pubKeyCredParams": [{"type": "public-key", "alg": -36}],
+                "pubKeyCredParams": [
+                    {"type": "public-key", "alg": -7},
+                    {"type": "public-key", "alg": -8},
+                    {"type": "public-key", "alg": -36},
+                    {"type": "public-key", "alg": -37},
+                    {"type": "public-key", "alg": -38},
+                    {"type": "public-key", "alg": -39},
+                    {"type": "public-key", "alg": -257},
+                    {"type": "public-key", "alg": -258},
+                    {"type": "public-key", "alg": -259},
+                ],
                 "timeout": 12000,
                 "excludeCredentials": [
                     {
@@ -173,12 +141,47 @@ class TestParseRegistrationOptionsJSON(TestCase):
             parsed.pub_key_cred_params,
             [
                 PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.ECDSA_SHA_256,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.EDDSA,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
                     alg=COSEAlgorithmIdentifier.ECDSA_SHA_512,
                     type="public-key",
-                )
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_256,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_384,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PSS_SHA_512,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_256,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_384,
+                    type="public-key",
+                ),
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_512,
+                    type="public-key",
+                ),
             ],
         )
         self.assertEqual(parsed.timeout, 12000)
+
+    def test_supports_json_string(self) -> None:
+        pass
 
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
