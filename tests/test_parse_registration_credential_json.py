@@ -6,7 +6,7 @@ from webauthn.helpers.structs import AuthenticatorTransport, AuthenticatorAttach
 from webauthn.helpers.parse_registration_credential_json import parse_registration_credential_json
 
 
-class TestParseClientDataJSON(TestCase):
+class TestParseRegistrationCredentialJSON(TestCase):
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
             parse_registration_credential_json("[0]")
