@@ -6,6 +6,10 @@ class InvalidRegistrationResponse(Exception):
     pass
 
 
+class InvalidAuthenticationOptions(Exception):
+    pass
+
+
 class InvalidAuthenticationResponse(Exception):
     pass
 
