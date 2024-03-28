@@ -25,10 +25,10 @@ def parse_registration_options_json(
     json_val: Union[str, dict]
 ) -> PublicKeyCredentialCreationOptions:
     """
-    Parse a JSON form of registration options, as either a stringified JSON object or a
-    plain dict, into an instance of PublicKeyCredentialCreationOptions. Typically useful in
-    mapping output from `generate_registration_options()`, that's been persisted as JSON via
-    Redis/etc... back into structured data.
+    Parse a JSON form of registration options, as either stringified JSON or a plain dict, into an
+    instance of `PublicKeyCredentialCreationOptions`. Typically useful in mapping output from
+    `generate_registration_options()`, that's been persisted as JSON via Redis/etc... back into
+    structured data.
     """
     if isinstance(json_val, str):
         try:
