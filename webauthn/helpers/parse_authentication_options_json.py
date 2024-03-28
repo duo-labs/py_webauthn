@@ -2,8 +2,7 @@ import json
 from json import JSONDecodeError
 from typing import List, Optional, Union
 
-from webauthn.helpers import base64url_to_bytes
-
+from .base64url_to_bytes import base64url_to_bytes
 from .exceptions import InvalidJSONStructure, InvalidAuthenticationOptions
 from .structs import (
     AuthenticatorTransport,
