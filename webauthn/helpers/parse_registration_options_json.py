@@ -26,16 +26,18 @@ def parse_registration_options_json(
 ) -> PublicKeyCredentialCreationOptions:
     """
     Parse a JSON form of registration options, as either a stringified JSON object or a
-    plain dict, into an instance of PublicKeyCredentialCreationOptions
+    plain dict, into an instance of PublicKeyCredentialCreationOptions. Typically useful in
+    mapping output from `generate_registration_options()`, that's been persisted as JSON via
+    Redis/etc... back into structured data.
     """
     if isinstance(json_val, str):
         try:
             json_val = json.loads(json_val)
         except JSONDecodeError:
-            raise InvalidJSONStructure("Unable to decode credential as JSON")
+            raise InvalidJSONStructure("Unable to decode options as JSON")
 
     if not isinstance(json_val, dict):
-        raise InvalidJSONStructure("Credential was not a JSON object")
+        raise InvalidJSONStructure("Options were not a JSON object")
 
     """
     Check rp
@@ -150,10 +152,15 @@ def parse_registration_options_json(
     if not isinstance(options_pub_key_cred_params, list):
         raise InvalidJSONStructure("Options pubKeyCredParams was invalid value")
 
-    mapped_pub_key_cred_params = [
-        PublicKeyCredentialParameters(alg=COSEAlgorithmIdentifier(param["alg"]), type="public-key")
-        for param in options_pub_key_cred_params
-    ]
+    try:
+        mapped_pub_key_cred_params = [
+            PublicKeyCredentialParameters(
+                alg=COSEAlgorithmIdentifier(param["alg"]), type="public-key"
+            )
+            for param in options_pub_key_cred_params
+        ]
+    except ValueError as exc:
+        raise InvalidJSONStructure("Options pubKeyCredParams entry had invalid alg") from exc
 
     """
     Check excludeCredentials
@@ -163,19 +170,26 @@ def parse_registration_options_json(
     if isinstance(options_exclude_credentials, list):
         mapped_exclude_credentials = []
         for cred in options_exclude_credentials:
-            _mapped = PublicKeyCredentialDescriptor(
-                id=base64url_to_bytes(cred["id"]),
-            )
+            _cred_id = cred.get("id")
+            if not isinstance(_cred_id, str):
+                raise InvalidJSONStructure("Options excludeCredentials entry missing required id")
+
+            _mapped = PublicKeyCredentialDescriptor(id=base64url_to_bytes(_cred_id))
 
             _transports = cred.get("transports")
             if _transports is not None:
                 if not isinstance(_transports, list):
                     raise InvalidJSONStructure(
-                        "Options excludeCredentials entry transports were invalid"
+                        "Options excludeCredentials entry transports was not list"
                     )
-                _mapped.transports = [
-                    AuthenticatorTransport(_transport) for _transport in _transports
-                ]
+                try:
+                    _mapped.transports = [
+                        AuthenticatorTransport(_transport) for _transport in _transports
+                    ]
+                except ValueError as exc:
+                    raise InvalidJSONStructure(
+                        "Options excludeCredentials entry transports had invalid value"
+                    ) from exc
 
             mapped_exclude_credentials.append(_mapped)
 

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from webauthn.helpers import base64url_to_bytes, options_to_json
-from webauthn.helpers.exceptions import InvalidJSONStructure, InvalidRegistrationResponse
+from webauthn.helpers import base64url_to_bytes
+from webauthn.helpers.exceptions import InvalidJSONStructure
 from webauthn.helpers.structs import (
     AuthenticatorTransport,
     AuthenticatorAttachment,
@@ -9,8 +9,6 @@ from webauthn.helpers.structs import (
     AuthenticatorSelectionCriteria,
     PublicKeyCredentialDescriptor,
     ResidentKeyRequirement,
-    PublicKeyCredentialCreationOptions,
-    PublicKeyCredentialCreationOptions,
     PublicKeyCredentialRpEntity,
     PublicKeyCredentialUserEntity,
     UserVerificationRequirement,
@@ -18,15 +16,10 @@ from webauthn.helpers.structs import (
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.parse_registration_options_json import parse_registration_options_json
-from webauthn.registration.generate_registration_options import generate_registration_options
 
 
 class TestParseRegistrationOptionsJSON(TestCase):
     maxDiff = None
-
-    def test_raises_on_non_dict_json(self) -> None:
-        with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
-            parse_registration_options_json("[0]")
 
     def test_returns_parsed_options_simple(self) -> None:
         parsed = parse_registration_options_json(
@@ -186,3 +179,238 @@ class TestParseRegistrationOptionsJSON(TestCase):
             ],
         )
         self.assertEqual(parsed.timeout, 12000)
+
+    def test_raises_on_non_dict_json(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
+            parse_registration_options_json("[0]")
+
+    def test_raises_on_missing_rp(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required rp"):
+            parse_registration_options_json({})
+
+    def test_raises_on_malformed_rp_id(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "id present but not string"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": 0},
+                }
+            )
+
+    def test_raises_on_missing_missing_rp_name(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required name"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com"},
+                }
+            )
+
+    def test_raises_on_missing_user(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required user"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                }
+            )
+
+    def test_raises_on_missing_user_id(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required id"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {},
+                }
+            )
+
+    def test_raises_on_missing_user_name(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required name"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa"},
+                }
+            )
+
+    def test_raises_on_missing_user_display_name(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required displayName"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "Lee"},
+                }
+            )
+
+    def test_raises_on_missing_attestation(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required attestation"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                }
+            )
+
+    def test_raises_on_unrecognized_attestation(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "attestation was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "if_you_feel_like_it",
+                }
+            )
+
+    def test_supports_optional_authenticator_selection(self) -> None:
+        opts = parse_registration_options_json(
+            {
+                "rp": {"id": "example.com", "name": "Example Co"},
+                "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                "attestation": "none",
+                "challenge": "AAAA",
+                "pubKeyCredParams": [{"type": "public-key", "alg": -7}],
+            }
+        )
+
+        self.assertIsNone(opts.authenticator_selection)
+
+    def test_raises_on_invalid_authenticator_selection_authenticator_attachment(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "attachment was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "authenticatorSelection": {"authenticatorAttachment": "pcie"},
+                }
+            )
+
+    def test_raises_on_invalid_authenticator_selection_resident_key(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "residentKey was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "authenticatorSelection": {"residentKey": "yes_please"},
+                }
+            )
+
+    def test_raises_on_invalid_authenticator_selection_require_resident_key(self) -> None:
+        with self.assertRaisesRegex(
+            InvalidJSONStructure, "requireResidentKey was invalid boolean"
+        ):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "authenticatorSelection": {"requireResidentKey": "always"},
+                }
+            )
+
+    def test_raises_on_invalid_authenticator_selection_user_verification(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "userVerification was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "authenticatorSelection": {"userVerification": "when_inconvenient"},
+                }
+            )
+
+    def test_raises_on_missing_challenge(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required challenge"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                }
+            )
+
+    def test_raises_on_missing_pub_key_cred_params(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "pubKeyCredParams was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                }
+            )
+
+    def test_raises_on_pub_key_cred_params_entry_with_invalid_alg(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "entry had invalid alg"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": 0}],
+                }
+            )
+
+    def test_supports_optional_exclude_credentials(self) -> None:
+        opts = parse_registration_options_json(
+            {
+                "rp": {"id": "example.com", "name": "Example Co"},
+                "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                "attestation": "none",
+                "challenge": "aaaa",
+                "pubKeyCredParams": [{"alg": -7}],
+            }
+        )
+
+        self.assertIsNone(opts.exclude_credentials)
+
+    def test_raises_on_exclude_credentials_entry_missing_id(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "missing required id"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": -7}],
+                    "excludeCredentials": [{}],
+                }
+            )
+
+    def test_raises_on_exclude_credentials_entry_invalid_transports(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "transports was not list"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": -7}],
+                    "excludeCredentials": [{"id": "aaaa", "transports": ""}],
+                }
+            )
+
+    def test_raises_on_exclude_credentials_entry_invalid_transports_entry(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "entry transports had invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": -7}],
+                    "excludeCredentials": [{"id": "aaaa", "transports": ["pcie"]}],
+                }
+            )
+
+    def test_supports_missing_timeout(self) -> None:
+        opts = parse_registration_options_json(
+            {
+                "rp": {"id": "example.com", "name": "Example Co"},
+                "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                "attestation": "none",
+                "challenge": "aaaa",
+                "pubKeyCredParams": [{"alg": -7}],
+            }
+        )
+
+        self.assertIsNone(opts.timeout)
