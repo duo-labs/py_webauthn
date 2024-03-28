@@ -181,7 +181,45 @@ class TestParseRegistrationOptionsJSON(TestCase):
         self.assertEqual(parsed.timeout, 12000)
 
     def test_supports_json_string(self) -> None:
-        pass
+        parsed = parse_registration_options_json(
+            '{"rp": {"name": "Example Co", "id": "example.com"}, "user": {"id": "vEC5nFXSxpc_W68bX59JeD3c_-1XDJ5RblcWjY3Tx7RvfC0rkB19UWadf6wDEWG8T1ztksOYMim0sJIn6z_5tw", "name": "bob", "displayName": "bob"}, "challenge": "scb_z5GweYijAT2ppsB0HAklsw96fPs_tOWh-myqkOeb9rcvhWBwUZ56J3t3eocgjHkS4Mf3XeXTOQc1ySvk5w", "authenticatorSelection": {"userVerification": "required"}, "pubKeyCredParams": [{"type": "public-key", "alg": -36}], "timeout": 60000, "excludeCredentials": [], "attestation": "none"}'
+        )
+
+        self.assertEqual(
+            parsed.rp, PublicKeyCredentialRpEntity(id="example.com", name="Example Co")
+        )
+        self.assertEqual(
+            parsed.user,
+            PublicKeyCredentialUserEntity(
+                id=base64url_to_bytes(
+                    "vEC5nFXSxpc_W68bX59JeD3c_-1XDJ5RblcWjY3Tx7RvfC0rkB19UWadf6wDEWG8T1ztksOYMim0sJIn6z_5tw"
+                ),
+                name="bob",
+                display_name="bob",
+            ),
+        )
+        self.assertEqual(parsed.attestation, AttestationConveyancePreference.NONE)
+        self.assertEqual(
+            parsed.authenticator_selection,
+            AuthenticatorSelectionCriteria(user_verification=UserVerificationRequirement.REQUIRED),
+        )
+        self.assertEqual(
+            parsed.challenge,
+            base64url_to_bytes(
+                "scb_z5GweYijAT2ppsB0HAklsw96fPs_tOWh-myqkOeb9rcvhWBwUZ56J3t3eocgjHkS4Mf3XeXTOQc1ySvk5w"
+            ),
+        )
+        self.assertEqual(parsed.exclude_credentials, [])
+        self.assertEqual(
+            parsed.pub_key_cred_params,
+            [
+                PublicKeyCredentialParameters(
+                    alg=COSEAlgorithmIdentifier.ECDSA_SHA_512,
+                    type="public-key",
+                )
+            ],
+        )
+        self.assertEqual(parsed.timeout, 60000)
 
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
