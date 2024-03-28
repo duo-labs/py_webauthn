@@ -85,3 +85,32 @@ Python's unittest module can be used to execute everything in the **tests/** dir
 ```sh
 venv $> python -m unittest
 ```
+
+Auto-watching unittests can be achieved with a tool like nodemon.
+
+**All tests:**
+```sh
+venv $> nodemon --exec "python -m unittest" --ext py
+```
+
+**An individual test file:**
+```sh
+venv $> nodemon --exec "python -m unittest tests/test_aaguid_to_string.py" --ext py
+```
+
+### Linting and Formatting
+
+Linting is handled via `mypy`:
+
+```sh
+venv $> python -m mypy webauthn
+Success: no issues found in 52 source files
+```
+
+The entire library is formatted using `black`:
+
+```sh
+venv $> python -m black webauthn --line-length=99
+All done! ✨ 🍰 ✨
+52 files left unchanged.
+```
