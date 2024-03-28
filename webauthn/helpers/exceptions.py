@@ -1,3 +1,7 @@
+class InvalidRegistrationOptions(Exception):
+    pass
+
+
 class InvalidRegistrationResponse(Exception):
     pass
 
