@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from webauthn.helpers import base64url_to_bytes
+from webauthn.helpers import base64url_to_bytes, options_to_json
 from webauthn.helpers.exceptions import InvalidJSONStructure
 from webauthn.helpers.structs import (
     AuthenticatorTransport,
@@ -16,6 +16,7 @@ from webauthn.helpers.structs import (
 )
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.parse_registration_options_json import parse_registration_options_json
+from webauthn.registration.generate_registration_options import generate_registration_options
 
 
 class TestParseRegistrationOptionsJSON(TestCase):
@@ -220,6 +221,49 @@ class TestParseRegistrationOptionsJSON(TestCase):
             ],
         )
         self.assertEqual(parsed.timeout, 60000)
+
+    def test_supports_options_to_json_output(self) -> None:
+        """
+        Test that output from `generate_registration_options()` that's fed directly into
+        `options_to_json()` gets parsed back into the original options without any changes along
+        the way.
+        """
+        opts = generate_registration_options(
+            rp_id="example.com",
+            rp_name="Example Co",
+            user_id=bytes([1, 2, 3, 4]),
+            user_name="lee",
+            user_display_name="Lee",
+            attestation=AttestationConveyancePreference.DIRECT,
+            authenticator_selection=AuthenticatorSelectionCriteria(
+                authenticator_attachment=AuthenticatorAttachment.PLATFORM,
+                resident_key=ResidentKeyRequirement.REQUIRED,
+                require_resident_key=True,
+                user_verification=UserVerificationRequirement.DISCOURAGED,
+            ),
+            challenge=bytes([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]),
+            exclude_credentials=[
+                PublicKeyCredentialDescriptor(
+                    id=b"1234567890",
+                    transports=[AuthenticatorTransport.INTERNAL, AuthenticatorTransport.HYBRID],
+                ),
+            ],
+            supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
+            timeout=12000,
+        )
+
+        opts_json = options_to_json(opts)
+
+        parsed_opts_json = parse_registration_options_json(opts_json)
+
+        self.assertEqual(parsed_opts_json.rp, opts.rp)
+        self.assertEqual(parsed_opts_json.user, opts.user)
+        self.assertEqual(parsed_opts_json.attestation, opts.attestation)
+        self.assertEqual(parsed_opts_json.authenticator_selection, opts.authenticator_selection)
+        self.assertEqual(parsed_opts_json.challenge, opts.challenge)
+        self.assertEqual(parsed_opts_json.exclude_credentials, opts.exclude_credentials)
+        self.assertEqual(parsed_opts_json.pub_key_cred_params, opts.pub_key_cred_params)
+        self.assertEqual(parsed_opts_json.timeout, opts.timeout)
 
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):

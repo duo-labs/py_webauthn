@@ -1,7 +1,7 @@
 from email.mime import base
 from unittest import TestCase
 
-from webauthn.helpers import base64url_to_bytes
+from webauthn.helpers import base64url_to_bytes, options_to_json
 from webauthn.helpers.exceptions import InvalidJSONStructure
 from webauthn.helpers.structs import (
     AuthenticatorTransport,
@@ -9,6 +9,7 @@ from webauthn.helpers.structs import (
     UserVerificationRequirement,
 )
 from webauthn.helpers.parse_authentication_options_json import parse_authentication_options_json
+from webauthn.authentication.generate_authentication_options import generate_authentication_options
 
 
 class TestParseAuthenticationOptionsJSON(TestCase):
@@ -82,6 +83,35 @@ class TestParseAuthenticationOptionsJSON(TestCase):
         self.assertEqual(opts.rp_id, "example.com")
         self.assertEqual(opts.allow_credentials, [])
         self.assertEqual(opts.user_verification, UserVerificationRequirement.PREFERRED)
+
+    def test_supports_options_to_json_output(self) -> None:
+        """
+        Test that output from `generate_authentication_options()` that's fed directly into
+        `options_to_json()` gets parsed back into the original options without any changes along
+        the way.
+        """
+        opts = generate_authentication_options(
+            rp_id="example.com",
+            challenge=b"1234567890",
+            timeout=12000,
+            allow_credentials=[
+                PublicKeyCredentialDescriptor(
+                    id=b"1234567890",
+                    transports=[AuthenticatorTransport.INTERNAL, AuthenticatorTransport.HYBRID],
+                )
+            ],
+            user_verification=UserVerificationRequirement.REQUIRED,
+        )
+
+        opts_json = options_to_json(opts)
+
+        parsed_opts_json = parse_authentication_options_json(opts_json)
+
+        self.assertEqual(parsed_opts_json.rp_id, opts.rp_id)
+        self.assertEqual(parsed_opts_json.challenge, opts.challenge)
+        self.assertEqual(parsed_opts_json.allow_credentials, opts.allow_credentials)
+        self.assertEqual(parsed_opts_json.timeout, opts.timeout)
+        self.assertEqual(parsed_opts_json.user_verification, opts.user_verification)
 
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
