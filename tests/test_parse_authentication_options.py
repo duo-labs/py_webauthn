@@ -11,7 +11,7 @@ from webauthn.helpers.structs import (
 from webauthn.helpers.parse_authentication_options_json import parse_authentication_options_json
 
 
-class TestParseRegistrationOptionsJSON(TestCase):
+class TestParseAuthenticationOptionsJSON(TestCase):
     maxDiff = None
 
     def test_returns_parsed_options_simple(self) -> None:
