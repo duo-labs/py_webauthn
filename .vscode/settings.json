@@ -13,5 +13,6 @@
     "gitlens.advanced.blame.customArguments": [
         "--ignore-revs-file",
         ".git-blame-ignore-revs"
-      ]
+    ],
+    "python.analysis.autoImportCompletions": true
 }

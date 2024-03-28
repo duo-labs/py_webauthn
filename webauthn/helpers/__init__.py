@@ -11,11 +11,13 @@ from .hash_by_alg import hash_by_alg
 from .options_to_json import options_to_json
 from .parse_attestation_object import parse_attestation_object
 from .parse_authentication_credential_json import parse_authentication_credential_json
+from .parse_authentication_options_json import parse_authentication_options_json
 from .parse_authenticator_data import parse_authenticator_data
 from .parse_backup_flags import parse_backup_flags
 from .parse_cbor import parse_cbor
 from .parse_client_data_json import parse_client_data_json
 from .parse_registration_credential_json import parse_registration_credential_json
+from .parse_registration_options_json import parse_registration_options_json
 from .validate_certificate_chain import validate_certificate_chain
 from .verify_safetynet_timestamp import verify_safetynet_timestamp
 from .verify_signature import verify_signature
@@ -35,10 +37,12 @@ __all__ = [
     "parse_attestation_object",
     "parse_authenticator_data",
     "parse_authentication_credential_json",
+    "parse_authentication_options_json",
     "parse_backup_flags",
     "parse_cbor",
     "parse_client_data_json",
     "parse_registration_credential_json",
+    "parse_registration_options_json",
     "validate_certificate_chain",
     "verify_safetynet_timestamp",
     "verify_signature",

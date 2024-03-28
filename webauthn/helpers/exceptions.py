@@ -1,4 +1,12 @@
+class InvalidRegistrationOptions(Exception):
+    pass
+
+
 class InvalidRegistrationResponse(Exception):
+    pass
+
+
+class InvalidAuthenticationOptions(Exception):
     pass
 
 
