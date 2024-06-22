@@ -1,66 +1,70 @@
-class InvalidRegistrationOptions(Exception):
+class WebAuthnException(Exception):
     pass
 
 
-class InvalidRegistrationResponse(Exception):
+class InvalidRegistrationOptions(WebAuthnException):
     pass
 
 
-class InvalidAuthenticationOptions(Exception):
+class InvalidRegistrationResponse(WebAuthnException):
     pass
 
 
-class InvalidAuthenticationResponse(Exception):
+class InvalidAuthenticationOptions(WebAuthnException):
     pass
 
 
-class InvalidPublicKeyStructure(Exception):
+class InvalidAuthenticationResponse(WebAuthnException):
     pass
 
 
-class UnsupportedPublicKeyType(Exception):
+class InvalidPublicKeyStructure(WebAuthnException):
     pass
 
 
-class InvalidJSONStructure(Exception):
+class UnsupportedPublicKeyType(WebAuthnException):
     pass
 
 
-class InvalidAuthenticatorDataStructure(Exception):
+class InvalidJSONStructure(WebAuthnException):
     pass
 
 
-class SignatureVerificationException(Exception):
+class InvalidAuthenticatorDataStructure(WebAuthnException):
     pass
 
 
-class UnsupportedAlgorithm(Exception):
+class SignatureVerificationException(WebAuthnException):
     pass
 
 
-class UnsupportedPublicKey(Exception):
+class UnsupportedAlgorithm(WebAuthnException):
     pass
 
 
-class UnsupportedEC2Curve(Exception):
+class UnsupportedPublicKey(WebAuthnException):
     pass
 
 
-class InvalidTPMPubAreaStructure(Exception):
+class UnsupportedEC2Curve(WebAuthnException):
     pass
 
 
-class InvalidTPMCertInfoStructure(Exception):
+class InvalidTPMPubAreaStructure(WebAuthnException):
     pass
 
 
-class InvalidCertificateChain(Exception):
+class InvalidTPMCertInfoStructure(WebAuthnException):
     pass
 
 
-class InvalidBackupFlags(Exception):
+class InvalidCertificateChain(WebAuthnException):
     pass
 
 
-class InvalidCBORData(Exception):
+class InvalidBackupFlags(WebAuthnException):
+    pass
+
+
+class InvalidCBORData(WebAuthnException):
     pass
