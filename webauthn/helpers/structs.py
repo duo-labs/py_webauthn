@@ -248,9 +248,9 @@ class AuthenticatorSelectionCriteria:
     authenticator_attachment: Optional[AuthenticatorAttachment] = None
     resident_key: Optional[ResidentKeyRequirement] = None
     require_resident_key: Optional[bool] = False
-    user_verification: Optional[
-        UserVerificationRequirement
-    ] = UserVerificationRequirement.PREFERRED
+    user_verification: Optional[UserVerificationRequirement] = (
+        UserVerificationRequirement.PREFERRED
+    )
 
 
 @dataclass
@@ -470,9 +470,9 @@ class PublicKeyCredentialRequestOptions:
     timeout: Optional[int] = None
     rp_id: Optional[str] = None
     allow_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
-    user_verification: Optional[
-        UserVerificationRequirement
-    ] = UserVerificationRequirement.PREFERRED
+    user_verification: Optional[UserVerificationRequirement] = (
+        UserVerificationRequirement.PREFERRED
+    )
 
 
 @dataclass
