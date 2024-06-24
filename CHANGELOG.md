@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.0
+
+**Changes:**
+
+- All exceptions in `webauthn.helpers.exceptions` now subclass the new `webauthn.helpers.exceptions.WebAuthnException` base exception ([#219](https://github.com/duo-labs/py_webauthn/issues/219), h/t @bschoenmaeckers)
+- Support has been added for the new `"smart-card"` transport ([#221](https://github.com/duo-labs/py_webauthn/pull/221))
+
 ## v2.1.0
 
 **Changes:**
