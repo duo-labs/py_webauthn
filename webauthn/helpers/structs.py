@@ -29,6 +29,7 @@ class AuthenticatorTransport(str, Enum):
     USB = "usb"
     NFC = "nfc"
     BLE = "ble"
+    SMART_CARD = "smart-card"
     INTERNAL = "internal"
     CABLE = "cable"
     HYBRID = "hybrid"
