@@ -24,10 +24,11 @@ The library exposes just a few core methods on the root `webauthn` module:
 - `generate_authentication_options()`
 - `verify_authentication_response()`
 
-Two additional helper methods are also exposed:
+Three additional helper methods are also exposed:
 
 - `options_to_json()`
 - `base64url_to_bytes()`
+- `bytes_to_base64url()`
 
 Additional data structures are available on `webauthn.helpers.structs`. These dataclasses are useful for constructing inputs to the methods above, and for providing type hinting to help ensure consistency in the shape of data being passed around.
 

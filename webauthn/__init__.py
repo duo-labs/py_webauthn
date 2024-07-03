@@ -6,9 +6,9 @@ from .authentication.generate_authentication_options import (
 from .authentication.verify_authentication_response import (
     verify_authentication_response,
 )
-from .helpers import base64url_to_bytes, options_to_json
+from .helpers import base64url_to_bytes, options_to_json, bytes_to_base64url
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 __all__ = [
     "generate_registration_options",
@@ -17,4 +17,5 @@ __all__ = [
     "verify_authentication_response",
     "base64url_to_bytes",
     "options_to_json",
+    "bytes_to_base64url",
 ]
