@@ -14,7 +14,7 @@ release = '2020'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['myst_parser']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -26,3 +26,11 @@ exclude_patterns = []
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+# -- Extension Configuration - MyST Parser
+
+myst_enable_extensions = [
+    "colon_fence",
+    "strikethrough",
+]
+myst_heading_anchors = 3
