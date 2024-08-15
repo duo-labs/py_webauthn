@@ -20,6 +20,8 @@ This module is available on **PyPI**:
 :hidden:
 :maxdepth: 2
 
-hello
-foobar
+intro
+registration
+authentication
+passkeys
 ```
