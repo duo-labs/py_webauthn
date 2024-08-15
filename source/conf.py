@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "py_webauthn"
-copyright = "2020, Duo Labs"
+copyright = "2020 - 2024, Duo Labs"
 author = "Duo Labs"
 release = "v2.2.0"
 
