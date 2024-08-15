@@ -1,6 +1,7 @@
 alabaster==1.0.0
 anyio==4.4.0
 babel==2.16.0
+black==24.8.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
@@ -14,8 +15,11 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdit-py-plugins==0.4.1
 mdurl==0.1.2
+mypy-extensions==1.0.0
 myst-parser==4.0.0
 packaging==24.1
+pathspec==0.12.1
+platformdirs==4.2.2
 Pygments==2.18.0
 PyYAML==6.0.2
 requests==2.32.3
