@@ -26,6 +26,21 @@ html_copy_source = False
 
 html_theme = "alabaster"
 html_static_path = ["_static"]
+html_sidebars = {
+    "**": [
+        "about.html",
+        "searchfield.html",
+        "navigation.html",
+        "relations.html",
+    ]
+}
+html_theme_options = {
+    "github_user": "duo-labs",
+    "github_repo": "py_webauthn",
+    "description": "Pythonic WebAuthn 🐍",
+    "github_button": True,
+    "show_powered_by": False,
+}
 
 # -- Extension Configuration - MyST Parser
 
