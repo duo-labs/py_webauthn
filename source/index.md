@@ -17,6 +17,9 @@ This module is available on **PyPI**:
 - Python 3.8 and up
 
 ```{toctree}
+:hidden:
 :maxdepth: 2
+
 hello
+foobar
 ```
