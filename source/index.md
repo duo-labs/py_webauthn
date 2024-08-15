@@ -10,7 +10,9 @@ This library supports all FIDO2-compliant authenticators, including security key
 
 This module is available on **PyPI**:
 
-`pip install webauthn`
+```sh
+pip install webauthn
+```
 
 ## Requirements
 
