@@ -25,6 +25,7 @@ html_copy_source = False
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
+html_css_files = ["styles.css"]
 
 # -- Theme configuration -----------------------------------------------------
 # https://alabaster.readthedocs.io/en/latest/customization.html
