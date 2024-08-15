@@ -26,7 +26,7 @@ The library makes the following assumptions about how a Relying Party that is in
 
 py_webauthn is concerned exclusively with the **server** side of supporting WebAuthn. This means that Relying Parties will need to orchestrate calls to WebAuthn in the **browser** in some other way.
 
-Typically this means **manually writing front end JavaScript** to coordinate encoding and decoding certain `bytes` values to and from **base64url** before calling WebAuthn's `navigator.credentials.create()` and `navigator.credentials.get()`.
+Typically this means **manually writing front end JavaScript** to coordinate encoding and decoding certain **bytes** values to and from **base64url** before calling WebAuthn's `navigator.credentials.create()` and `navigator.credentials.get()`.
 
 Relying Parties may also consider **using an existing third-party library** that takes care of all this.
 

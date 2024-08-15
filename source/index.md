@@ -20,7 +20,7 @@ This module is available on **PyPI**:
 :hidden:
 :maxdepth: 2
 
-intro
+overview
 registration
 authentication
 passkeys
