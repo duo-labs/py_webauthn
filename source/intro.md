@@ -1,4 +1,4 @@
-# Intro
+# Overview
 
 The **py_webauthn** library exposes a small number of core methods from the `webauthn` module:
 
@@ -16,15 +16,24 @@ Additional data structures are available on `webauthn.helpers.structs`. These da
 
 ## Assumptions
 
-Generally, the library makes the following assumptions about how a Relying Party implementing this library will interface with a webpage that will handle calling the WebAuthn API:
+The library makes the following assumptions about how a Relying Party that is incorporating this library into their project will interface with the WebAuthn API:
 
-- JSON is the preferred data type for transmitting registration and authentication options from the server to the webpage to feed to `navigator.credentials.create()` and `navigator.credentials.get()` respectively.
-- JSON is the preferred data type for transmitting WebAuthn responses from the browser to the server.
-- Bytes are not directly transmittable in either direction as JSON, and so should be encoded to and decoded from [base64url to avoid introducing any more dependencies than those that are specified in the WebAuthn spec](https://www.w3.org/TR/webauthn-2/#sctn-dependencies).
-  - See the [`WebAuthnBaseModel` struct](https://github.com/duo-labs/py_webauthn/blob/master/webauthn/helpers/structs.py#L13) for more information on how this is achieved
+- **JSON** is the preferred data type for transmitting WebAuthn API options from the **server** to the **browser**.
+- **JSON** is the preferred data type for transmitting WebAuthn responses from the **browser** to the **server**.
+- Bytes are not directly transmittable in either direction as JSON, and so should be encoded to and decoded from **base64url** to avoid introducing any more dependencies than those that [are specified in the WebAuthn spec](https://www.w3.org/TR/webauthn-2/#sctn-dependencies).
 
-The examples mentioned below include uses of the `options_to_json()` helper (see above) to show how easily `bytes` values in registration and authentication options can be encoded to base64url for transmission to the front end.
+## Front End Libraries
 
-The examples also include demonstrations of how to pass JSON-ified responses, using base64url encoding for `ArrayBuffer` values, into `parse_registration_credential_json` and `parse_authentication_credential_json` to be automatically parsed by the methods in this library. An RP can pair this with corresponding custom front end logic, or one of several frontend-specific libraries (like [@simplewebauthn/browser](https://www.npmjs.com/package/@simplewebauthn/browser), for example) to handle encoding and decoding such values to and from JSON.
+py_webauthn is concerned exclusively with the **server** side of supporting WebAuthn. This means that Relying Parties will need to orchestrate calls to WebAuthn in the **browser** in some other way.
 
-Other arguments into this library's methods that are defined as `bytes` are intended to be values stored entirely on the server. Such values can more easily exist as `bytes` without needing potentially extraneous encoding and decoding into other formats. Any encoding or decoding of such values in the name of storing them between steps in a WebAuthn ceremony is left up to the RP to achieve in an implementation-specific manner.
+Typically this means **manually writing front end JavaScript** to coordinate encoding and decoding certain `bytes` values to and from **base64url** before calling WebAuthn's `navigator.credentials.create()` and `navigator.credentials.get()`.
+
+Relying Parties may also consider **using an existing third-party library** that takes care of all this.
+
+### @simplewebauthn/browser
+
+A great third-party library option is the **@simplewebauthn/browser** library out of the SimpleWebAuthn project:
+
+<https://simplewebauthn.dev/docs/packages/browser>
+
+The methods available in **@simplewebauthn/browser** can accept JSON output from this project without modification, and their return values can be passed as-is into the `credential` argument of this library's response verification methods. See the SimpleWebAuthn docs for more information.
