@@ -2,7 +2,6 @@
     "black-formatter.args": [
         "--line-length", "99"
     ],
-    "mypy-type-checker.path": ["venv/bin/mypy"],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnPaste": false,
@@ -14,5 +13,8 @@
         "--ignore-revs-file",
         ".git-blame-ignore-revs"
     ],
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": "file:///Users/mattmil3/Developer/py_webauthn/.github/workflows/deploy.yaml"
+    }
 }
