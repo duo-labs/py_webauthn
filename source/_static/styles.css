@@ -7,3 +7,11 @@ div.body p, div.body dd, div.body li, div.body blockquote {
   -webkit-hyphens: none;
   hyphens: none;
 }
+
+pre {
+  padding: 11px 14px;
+}
+
+.highlight {
+  background: #EEE;
+}
