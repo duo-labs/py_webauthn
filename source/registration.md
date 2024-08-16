@@ -65,6 +65,16 @@ complex_registration_options = generate_registration_options(
 
 The output from `generate_registration_options()` can be passed into `webauthn.helpers.options_to_json()` to quickly convert them to a `str` value that can be sent to the browser as JSON.
 
+:::{tip}
+If you are using [@simplewebauthn/browser](overview.md#simplewebauthn-browser) in your front end code then you can pass...
+```py
+opts = options_to_json(
+    generate_registration_options(**kwargs)
+)
+```
+...directly into its `startRegistration(opts)` method.
+:::
+
 ## Verify Response
 
 Registration responses can be verified using the following method:
@@ -91,21 +101,23 @@ verification = verify_registration_response(
     },
     # The value of `options.challenge` from above
     expected_challenge=base64url_to_bytes("..."),
-    expected_origin="https://example.com",
     expected_rp_id="example.com",
+    expected_origin="https://example.com",
     require_user_verification=True,
 )
 ```
 
 [See the docstrings](https://github.com/duo-labs/py_webauthn/blob/2219507f483e5592ec980ec95d97a5d3563fa45b/webauthn/registration/verify_registration_response.py#L67-L100) for details about the various required and optional **kwargs**.
 
-:::{note}
-After verifying a response, store the following values from `verification` above for the logged-in user so that the user can use this passkey later to sign in:
+:::{tip}
+If you are using [@simplewebauthn/browser](overview.md#simplewebauthn-browser) in your front end code then you can pass the output from `startRegistration(opts)` directly into `verify_registration_response(**kwargs)` as the `credential` kwarg.
+:::
+
+After verifying a response, **store the following values** from `verification` above for the logged-in user in the database so that they can use this passkey later to sign in:
 
 - `verification.credential_id`
 - `verification.credential_public_key`
 - `verification.sign_count`
 - `verification.credential_device_type`
 - `verification.credential_backed_up`
-- The value of `response.transports` from the JSON passed in as the `credential` kwarg
-:::
+- `credential["response"]["transports"]`
