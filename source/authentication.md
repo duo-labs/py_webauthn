@@ -20,7 +20,7 @@ from webauthn.helpers.structs import (
 
 # Simple Options
 simple_authentication_options = generate_authentication_options(
-  rp_id="example.com",
+    rp_id="example.com",
 )
 
 # Complex Options
@@ -29,7 +29,7 @@ complex_authentication_options = generate_authentication_options(
     challenge=b"1234567890",
     timeout=12000,
     allow_credentials=[PublicKeyCredentialDescriptor(
-      id=b"1234567890",
+        id=b"1234567890",
     )],
     user_verification=UserVerificationRequirement.REQUIRED,
 )
