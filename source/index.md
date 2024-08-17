@@ -25,5 +25,6 @@ pip install webauthn
 overview
 registration
 authentication
-passkeys
+advanced_use_cases
+api_reference
 ```

@@ -7,3 +7,36 @@ div.body p, div.body dd, div.body li, div.body blockquote {
   -webkit-hyphens: none;
   hyphens: none;
 }
+
+pre {
+  padding: 11px 14px;
+}
+
+.highlight {
+  background: #EEE;
+}
+
+/* Admonitions */
+
+div.warning, div.caution, div.attention, div.important {
+  background: #fff3cd;
+  border: 1px solid #CCC;
+}
+
+div.danger, div.error {
+  background: #f9e1e4;
+  border: 1px solid #CCC;
+  box-shadow: initial;
+  -webkit-box-shadow: initial;
+  -moz-box-shadow: initial;
+}
+
+div.hint, div.tip, div.seealso {
+  background: #d6ece1;
+  border: 1px solid #CCC;
+}
+
+div.note {
+  background: #dce7fc;
+  border: 1px solid #CCC;
+}
