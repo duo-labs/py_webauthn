@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.0
+
+**Changes:**
+
+- The minimum supported version of Python has been bumped up to Python 3.9, with ongoing testing from Python 3.9 through Python 3.13. Dependencies have been updated as well, including upgrading to `cryptography==43.0.3` ([#233](https://github.com/duo-labs/py_webauthn/pull/233), with thanks to @ds-cbo)
+
 ## v2.2.0
 
 **Changes:**
