@@ -11,6 +11,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialRpEntity,
     PublicKeyCredentialUserEntity,
     ResidentKeyRequirement,
+    PublicKeyCredentialHint,
 )
 
 
@@ -52,6 +53,7 @@ def generate_registration_options(
     authenticator_selection: Optional[AuthenticatorSelectionCriteria] = None,
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None,
     supported_pub_key_algs: Optional[List[COSEAlgorithmIdentifier]] = None,
+    hints: Optional[List[PublicKeyCredentialHint]] = None,
 ) -> PublicKeyCredentialCreationOptions:
     """Generate options for registering a credential via navigator.credentials.create()
 
@@ -123,6 +125,7 @@ def generate_registration_options(
         timeout=timeout,
         exclude_credentials=exclude_credentials,
         attestation=attestation,
+        hints=hints,
     )
 
     ########
