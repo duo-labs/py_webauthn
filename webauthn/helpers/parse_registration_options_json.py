@@ -5,6 +5,7 @@ from typing import Union, Optional, List
 
 from .structs import (
     PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialHint,
     PublicKeyCredentialRpEntity,
     PublicKeyCredentialUserEntity,
     AttestationConveyancePreference,
@@ -201,6 +202,20 @@ def parse_registration_options_json(
     if isinstance(options_timeout, int):
         mapped_timeout = options_timeout
 
+    """
+    Check hints
+    """
+    options_hints = json_val.get("hints")
+    mapped_hints = None
+    if options_hints is not None:
+        if not isinstance(options_hints, list):
+            raise InvalidJSONStructure("Options hints was invalid value")
+
+        try:
+            mapped_hints = [PublicKeyCredentialHint(hint) for hint in options_hints]
+        except ValueError as exc:
+            raise InvalidJSONStructure("Options hints had invalid value") from exc
+
     try:
         registration_options = PublicKeyCredentialCreationOptions(
             rp=PublicKeyCredentialRpEntity(
@@ -218,6 +233,7 @@ def parse_registration_options_json(
             pub_key_cred_params=mapped_pub_key_cred_params,
             exclude_credentials=mapped_exclude_credentials,
             timeout=mapped_timeout,
+            hints=mapped_hints,
         )
     except Exception as exc:
         raise InvalidRegistrationOptions(

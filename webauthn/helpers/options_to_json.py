@@ -66,9 +66,9 @@ def options_to_json(
             json_selection: Dict[str, Any] = {}
 
             if _selection.authenticator_attachment is not None:
-                json_selection[
-                    "authenticatorAttachment"
-                ] = _selection.authenticator_attachment.value
+                json_selection["authenticatorAttachment"] = (
+                    _selection.authenticator_attachment.value
+                )
 
             if _selection.resident_key is not None:
                 json_selection["residentKey"] = _selection.resident_key.value
@@ -83,6 +83,9 @@ def options_to_json(
 
         if options.attestation is not None:
             reg_to_return["attestation"] = options.attestation.value
+
+        if options.hints is not None:
+            reg_to_return["hints"] = [hint.value for hint in options.hints]
 
         return json.dumps(reg_to_return)
 
