@@ -9,6 +9,7 @@ from webauthn.helpers.structs import (
     AuthenticatorSelectionCriteria,
     AuthenticatorTransport,
     PublicKeyCredentialDescriptor,
+    PublicKeyCredentialHint,
     ResidentKeyRequirement,
     UserVerificationRequirement,
 )
@@ -36,6 +37,11 @@ class TestWebAuthnOptionsToJSON(TestCase):
             ],
             supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
             timeout=120000,
+            hints=[
+                PublicKeyCredentialHint.SECURITY_KEY,
+                PublicKeyCredentialHint.CLIENT_DEVICE,
+                PublicKeyCredentialHint.HYBRID,
+            ],
         )
 
         output = options_to_json(options)
@@ -60,6 +66,7 @@ class TestWebAuthnOptionsToJSON(TestCase):
                     "userVerification": "preferred",
                 },
                 "attestation": "direct",
+                "hints": ["security-key", "client-device", "hybrid"],
             },
         )
 

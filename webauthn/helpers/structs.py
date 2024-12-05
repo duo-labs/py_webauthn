@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
 from .cose import COSEAlgorithmIdentifier
 
@@ -158,6 +158,25 @@ class TokenBindingStatus(str, Enum):
     SUPPORTED = "supported"
 
 
+class PublicKeyCredentialHint(str, Enum):
+    """Categories of authenticators that Relying Parties can pass along to browsers during
+    registration. Browsers that understand these values can optimize their modal experience to
+    start the user off in a particular registration flow. These values are less strict than
+    `authenticatorAttachment` (see `webauthn.helpers.strucAuthenticatorAttachment`)
+
+    Members:
+        `SECURITY_KEY`: A portable FIDO2 authenticator capable of being used on multiple devices via a USB or NFC connection
+        `CLIENT_DEVICE`: The device that WebAuthn is being called on. Typically synonymous with platform authenticators
+        `HYBRID`: A platform authenticator on a mobile device
+
+    https://w3c.github.io/webauthn/#enumdef-publickeycredentialhint
+    """
+
+    SECURITY_KEY = "security-key"
+    CLIENT_DEVICE = "client-device"
+    HYBRID = "hybrid"
+
+
 @dataclass
 class TokenBinding:
     """
@@ -293,6 +312,7 @@ class PublicKeyCredentialCreationOptions:
         (optional) `timeout`: How long the client/browser should give the user to interact with an authenticator
         (optional) `exclude_credentials`: A list of credentials associated with the user to prevent them from re-enrolling one of them
         (optional) `authenticator_selection`: Additional qualities about the authenticators the user can use to complete registration
+        (optional) `hints`: Suggestions to the browser about the type of authenticator the user should try and register. Multiple values should be ordered by decreasing preference
         (optional) `attestation`: The Relying Party's desire for a declaration of an authenticator's provenance via attestation statement
 
     https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialcreationoptions
@@ -305,6 +325,7 @@ class PublicKeyCredentialCreationOptions:
     timeout: Optional[int] = None
     exclude_credentials: Optional[List[PublicKeyCredentialDescriptor]] = None
     authenticator_selection: Optional[AuthenticatorSelectionCriteria] = None
+    hints: Optional[List[PublicKeyCredentialHint]] = None
     attestation: AttestationConveyancePreference = AttestationConveyancePreference.NONE
 
 
