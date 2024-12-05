@@ -9,6 +9,7 @@ from webauthn.helpers.structs import (
     AuthenticatorSelectionCriteria,
     PublicKeyCredentialDescriptor,
     ResidentKeyRequirement,
+    PublicKeyCredentialHint,
     PublicKeyCredentialRpEntity,
     PublicKeyCredentialUserEntity,
     UserVerificationRequirement,
@@ -104,6 +105,7 @@ class TestParseRegistrationOptionsJSON(TestCase):
                     "userVerification": "discouraged",
                 },
                 "attestation": "direct",
+                "hints": ["security-key", "client-device", "hybrid"],
             }
         )
 
@@ -180,6 +182,14 @@ class TestParseRegistrationOptionsJSON(TestCase):
             ],
         )
         self.assertEqual(parsed.timeout, 12000)
+        self.assertEqual(
+            parsed.hints,
+            [
+                PublicKeyCredentialHint.SECURITY_KEY,
+                PublicKeyCredentialHint.CLIENT_DEVICE,
+                PublicKeyCredentialHint.HYBRID,
+            ],
+        )
 
     def test_supports_json_string(self) -> None:
         parsed = parse_registration_options_json(
@@ -250,6 +260,11 @@ class TestParseRegistrationOptionsJSON(TestCase):
             ],
             supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
             timeout=12000,
+            hints=[
+                PublicKeyCredentialHint.CLIENT_DEVICE,
+                PublicKeyCredentialHint.SECURITY_KEY,
+                PublicKeyCredentialHint.HYBRID,
+            ],
         )
 
         opts_json = options_to_json(opts)
@@ -264,6 +279,7 @@ class TestParseRegistrationOptionsJSON(TestCase):
         self.assertEqual(parsed_opts_json.exclude_credentials, opts.exclude_credentials)
         self.assertEqual(parsed_opts_json.pub_key_cred_params, opts.pub_key_cred_params)
         self.assertEqual(parsed_opts_json.timeout, opts.timeout)
+        self.assertEqual(parsed_opts_json.hints, opts.hints)
 
     def test_raises_on_non_dict_json(self) -> None:
         with self.assertRaisesRegex(InvalidJSONStructure, "not a JSON object"):
@@ -499,3 +515,56 @@ class TestParseRegistrationOptionsJSON(TestCase):
         )
 
         self.assertIsNone(opts.timeout)
+
+    def test_supports_empty_hints(self) -> None:
+        opts = parse_registration_options_json(
+            {
+                "rp": {"id": "example.com", "name": "Example Co"},
+                "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                "attestation": "none",
+                "challenge": "aaaa",
+                "pubKeyCredParams": [{"alg": -7}],
+                "hints": [],
+            }
+        )
+
+        self.assertEqual(opts.hints, [])
+
+    def test_raises_on_invalid_hints_assignment(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "hints was invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": -7}],
+                    "hints": "security-key",
+                }
+            )
+
+    def test_raises_on_invalid_hints_entry(self) -> None:
+        with self.assertRaisesRegex(InvalidJSONStructure, "hints had invalid value"):
+            parse_registration_options_json(
+                {
+                    "rp": {"id": "example.com", "name": "Example Co"},
+                    "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                    "attestation": "none",
+                    "challenge": "aaaa",
+                    "pubKeyCredParams": [{"alg": -7}],
+                    "hints": ["platform"],
+                }
+            )
+
+    def test_supports_optional_hints(self) -> None:
+        opts = parse_registration_options_json(
+            {
+                "rp": {"id": "example.com", "name": "Example Co"},
+                "user": {"id": "aaaa", "name": "lee", "displayName": "Lee"},
+                "attestation": "none",
+                "challenge": "aaaa",
+                "pubKeyCredParams": [{"alg": -7}],
+            }
+        )
+
+        self.assertIsNone(opts.hints)
