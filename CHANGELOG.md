@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.0
+
+**Changes:**
+
+- An optional `hints` argument has been added to `generate_registration_options()` to specify one or more categories of authenticators for the browser to prioritize registration of. See `webauthn.helpers.structs.PublicKeyCredentialHint` for more information ([#234](https://github.com/duo-labs/py_webauthn/pull/234))
+
 ## v2.3.0
 
 **Changes:**
