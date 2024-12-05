@@ -10,6 +10,7 @@ from webauthn.helpers.structs import (
     AuthenticatorAttachment,
     AuthenticatorSelectionCriteria,
     PublicKeyCredentialDescriptor,
+    PublicKeyCredentialHint,
     ResidentKeyRequirement,
 )
 
@@ -47,6 +48,7 @@ complex_registration_options = generate_registration_options(
     ],
     supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512],
     timeout=12000,
+    hints=[PublicKeyCredentialHint.CLIENT_DEVICE],
 )
 
 print("\n[Registration Options - Complex]")
