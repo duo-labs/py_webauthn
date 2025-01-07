@@ -43,6 +43,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         assert verification.new_sign_count == 78
         assert verification.credential_backed_up == False
         assert verification.credential_device_type == "single_device"
+        assert not verification.user_verified
 
     def test_verify_authentication_response_with_RSA_public_key(self):
         credential = """{
@@ -78,6 +79,7 @@ class TestVerifyAuthenticationResponse(TestCase):
         )
 
         assert verification.new_sign_count == 1
+        assert verification.user_verified
 
     def test_raises_exception_on_incorrect_public_key(self):
         credential = """{
