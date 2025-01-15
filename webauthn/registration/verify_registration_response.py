@@ -70,6 +70,7 @@ def verify_registration_response(
     expected_challenge: bytes,
     expected_rp_id: str,
     expected_origin: Union[str, List[str]],
+    require_user_presence: bool = True,
     require_user_verification: bool = False,
     supported_pub_key_algs: List[COSEAlgorithmIdentifier] = default_supported_pub_key_algs,
     pem_root_certs_bytes_by_fmt: Optional[Mapping[AttestationFormat, List[bytes]]] = None,
@@ -85,6 +86,8 @@ def verify_registration_response(
           registration options.
         - `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which
           the registration should have occurred. Can also be a list of expected origins.
+        - (optional) `require_user_presence`: Whether or not to require that the user was present
+            during the registration. Should be False during auto registration.
         - (optional) `require_user_verification`: Whether or not to require that the authenticator
           verified the user.
         - (optional) `supported_pub_key_algs`: A list of public key algorithm IDs the RP chooses to
@@ -160,8 +163,8 @@ def verify_registration_response(
     if auth_data.rp_id_hash != expected_rp_id_hash_bytes:
         raise InvalidRegistrationResponse("Unexpected RP ID hash")
 
-    if not auth_data.flags.up:
-        raise InvalidRegistrationResponse("User was not present during attestation")
+    if require_user_presence and not auth_data.flags.up:
+        raise InvalidRegistrationResponse("User presence was required, but was not present during attestation")
 
     if require_user_verification and not auth_data.flags.uv:
         raise InvalidRegistrationResponse(
