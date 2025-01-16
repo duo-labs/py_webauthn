@@ -1,6 +1,7 @@
 import hashlib
 from typing import List
 
+from asn1crypto.core import OctetString
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -32,6 +33,8 @@ from webauthn.helpers.exceptions import (
 from webauthn.helpers.known_root_certs import (
     google_hardware_attestation_root_1,
     google_hardware_attestation_root_2,
+    google_hardware_attestation_root_3,
+    google_hardware_attestation_root_4,
 )
 from webauthn.helpers.structs import AttestationStatement
 
@@ -48,7 +51,7 @@ def verify_android_key(
 
     See https://www.w3.org/TR/webauthn-2/#sctn-android-key-attestation
 
-    Also referenced: https://source.android.com/security/keystore/attestation
+    Also referenced: https://source.android.com/docs/security/features/keystore/attestation
     """
     if not attestation_statement.sig:
         raise InvalidRegistrationResponse(
@@ -63,18 +66,32 @@ def verify_android_key(
     if not attestation_statement.x5c:
         raise InvalidRegistrationResponse("Attestation statement was missing x5c (Android Key)")
 
-    # Validate certificate chain
-    try:
-        # Include known root certificates for this attestation format
-        pem_root_certs_bytes.append(google_hardware_attestation_root_1)
-        pem_root_certs_bytes.append(google_hardware_attestation_root_2)
+    # x5c includes a root certificate, so break it up accordingly
+    x5c_no_root = attestation_statement.x5c[:-1]
+    x5c_root_cert = attestation_statement.x5c[-1]
 
+    x5c_root_cert_x509 = x509.load_der_x509_certificate(x5c_root_cert, default_backend())
+    x5c_root_cert_pem = x5c_root_cert_x509.public_bytes(Encoding.PEM)
+
+    # Make sure x509 forms a complete, valid cert chain
+    try:
         validate_certificate_chain(
-            x5c=attestation_statement.x5c,
-            pem_root_certs_bytes=pem_root_certs_bytes,
+            x5c=x5c_no_root,
+            pem_root_certs_bytes=[x5c_root_cert_pem],
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (Android Key)")
+
+    # Make sure the root cert is one of these
+    pem_root_certs_bytes.append(google_hardware_attestation_root_1)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_2)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_3)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_4)
+
+    if x5c_root_cert_pem not in pem_root_certs_bytes:
+        raise InvalidRegistrationResponse(
+            "x5c root certificate was not a known root certificate (Android Key)"
+        )
 
     # Extract attStmt bytes from attestation_object
     attestation_dict = parse_cbor(attestation_object)
@@ -149,6 +166,14 @@ def verify_android_key(
     ext_value_wrapper: UnrecognizedExtension = ext_key_description.value
     ext_value: bytes = ext_value_wrapper.value
     parsed_ext = KeyDescription.load(ext_value)
+
+    # Verify that the attestationChallenge field in the attestation certificate extension data
+    # is identical to clientDataHash.
+    attestation_challenge: OctetString = parsed_ext["attestationChallenge"]
+    if bytes(attestation_challenge) != client_data_hash_bytes:
+        raise InvalidRegistrationResponse(
+            "attestationChallenge field was not the same as the hash of clientDataJSON (Android Key)"
+        )
 
     # Verify the following using the appropriate authorization list from the attestation
     # certificate extension data:
