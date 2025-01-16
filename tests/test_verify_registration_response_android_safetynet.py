@@ -59,7 +59,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
     ):
         """
         We're not working with a full WebAuthn response here so we have to mock out some values
-        because all we really want to test is that a response
+        because all we really want to test is that such a response is allowed through
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "3N7YJmISsFM0cdvMAYcHcw==".encode("utf-8")
@@ -128,7 +128,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
     ):
         """
         We're not working with a full WebAuthn response here so we have to mock out some values
-        because all we really want to test is that a response
+        because all we really want to test is that a response fails the basicIntegrity check
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "NumMA+QH27ik6Mu737RgWg==".encode("utf-8")
