@@ -139,7 +139,7 @@ def verify_android_safetynet(
     # by following the steps in the SafetyNet online documentation.
     x5c = [base64url_to_bytes(cert) for cert in header.x5c]
 
-    if not payload.cts_profile_match:
+    if not payload.basic_integrity:
         raise InvalidRegistrationResponse("Could not verify device integrity (SafetyNet)")
 
     if verify_timestamp_ms:
