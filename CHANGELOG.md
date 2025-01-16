@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.5.0
+
+**Changes:**
+
+- A new `require_user_presence` argument has been added to `verify_registration_response()` to enable verification of WebAuthn responses generated through use of [conditional create](https://w3c.github.io/webauthn/#dom-clientcapability-conditionalcreate) where the `up` bit in `authData.flags` will be `False` ([#236](https://github.com/duo-labs/py_webauthn/pull/236), h/t @bschoenmaeckers)
+- `verify_authentication_response()` has been updated to return `user_verified` as well to indicate whether or not the user performed user verification ([#235](https://github.com/duo-labs/py_webauthn/pull/235), h/t @ggirol-rc)
+- Verification of `"android-key"` attestation statements has been modernized in light of Android's latest observable behavior ([#240](https://github.com/duo-labs/py_webauthn/pull/240))
+- Verification of `"android-safetynet"` attestation statements now enforces the `"basicIntegrity"` flag instead of the `"ctsProfileMatch"` flag when determining device integrity ([#241](https://github.com/duo-labs/py_webauthn/pull/241))
+- The list of known TPM manufacturers has been updated ([#242](https://github.com/duo-labs/py_webauthn/pull/242))
+
 ## v2.4.0
 
 **Changes:**
