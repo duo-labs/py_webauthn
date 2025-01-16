@@ -51,7 +51,7 @@ def verify_android_key(
 
     See https://www.w3.org/TR/webauthn-2/#sctn-android-key-attestation
 
-    Also referenced: https://source.android.com/security/keystore/attestation
+    Also referenced: https://source.android.com/docs/security/features/keystore/attestation
     """
     if not attestation_statement.sig:
         raise InvalidRegistrationResponse(
