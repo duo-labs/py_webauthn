@@ -32,6 +32,8 @@ from webauthn.helpers.exceptions import (
 from webauthn.helpers.known_root_certs import (
     google_hardware_attestation_root_1,
     google_hardware_attestation_root_2,
+    google_hardware_attestation_root_3,
+    google_hardware_attestation_root_4,
 )
 from webauthn.helpers.structs import AttestationStatement
 
@@ -78,6 +80,17 @@ def verify_android_key(
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (Android Key)")
+
+    # Make sure the root cert is one of these
+    pem_root_certs_bytes.append(google_hardware_attestation_root_1)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_2)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_3)
+    pem_root_certs_bytes.append(google_hardware_attestation_root_4)
+
+    if x5c_root_cert_pem not in pem_root_certs_bytes:
+        raise InvalidRegistrationResponse(
+            "x5c root certificate was not a known root certificate (Android Key)"
+        )
 
     # Extract attStmt bytes from attestation_object
     attestation_dict = parse_cbor(attestation_object)
