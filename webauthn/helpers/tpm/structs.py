@@ -381,14 +381,19 @@ TPM_ALG_COSE_ALG_MAP: Mapping[TPM_ALG, COSEAlgorithmIdentifier] = {
 
 
 # Sourced from https://trustedcomputinggroup.org/resource/vendor-id-registry/
-# Latest version: https://trustedcomputinggroup.org/wp-content/uploads/TCG-TPM-Vendor-ID-Registry-Version-1.02-Revision-1.00.pdf
+# Latest version: https://trustedcomputinggroup.org/wp-content/uploads/TCG-TPM-Vendor-ID-Registry-Family-1.2-and-2.0-Version-1.07-Revision-0.02_pub.pdf
 TPM_MANUFACTURERS: Mapping[str, TPMManufacturerInfo] = {
     "id:414D4400": TPMManufacturerInfo(name="AMD", id="AMD"),
+    "id:414E5400": TPMManufacturerInfo(name="Ant Group", id="ANT"),
     "id:41544D4C": TPMManufacturerInfo(name="Atmel", id="ATML"),
     "id:4252434D": TPMManufacturerInfo(name="Broadcom", id="BRCM"),
     "id:4353434F": TPMManufacturerInfo(name="Cisco", id="CSCO"),
     "id:464C5953": TPMManufacturerInfo(name="Flyslice Technologies", id="FLYS"),
+    "id:524F4343": TPMManufacturerInfo(name="Fuzhou Rockchip", id="ROCC"),
+    "id:474F4F47": TPMManufacturerInfo(name="Google", id="GOOG"),
+    "id:48504900": TPMManufacturerInfo(name="HPI", id="HPI"),
     "id:48504500": TPMManufacturerInfo(name="HPE", id="HPE"),
+    "id:48495349": TPMManufacturerInfo(name="Huawei", id="HISI"),
     "id:49424d00": TPMManufacturerInfo(name="IBM", id="IBM"),
     "id:49465800": TPMManufacturerInfo(name="Infineon", id="IFX"),
     "id:494E5443": TPMManufacturerInfo(name="Intel", id="INTC"),
@@ -396,14 +401,15 @@ TPM_MANUFACTURERS: Mapping[str, TPMManufacturerInfo] = {
     "id:4D534654": TPMManufacturerInfo(name="Microsoft", id="MSFT"),
     "id:4E534D20": TPMManufacturerInfo(name="National Semiconductor", id="NSM"),
     "id:4E545A00": TPMManufacturerInfo(name="Nationz", id="NTZ"),
+    "id:4E534700": TPMManufacturerInfo(name="NSING", id="NSG"),
     "id:4E544300": TPMManufacturerInfo(name="Nuvoton Technology", id="NTC"),
     "id:51434F4D": TPMManufacturerInfo(name="Qualcomm", id="QCOM"),
-    "id:534D5343": TPMManufacturerInfo(name="SMSC", id="SMSC"),
-    "id:53544D20": TPMManufacturerInfo(name="ST Microelectronics", id="STM"),
     "id:534D534E": TPMManufacturerInfo(name="Samsung", id="SMSN"),
+    "id:53454345": TPMManufacturerInfo(name="SecEdge", id="SECE"),
     "id:534E5300": TPMManufacturerInfo(name="Sinosun", id="SNS"),
+    "id:534D5343": TPMManufacturerInfo(name="SMSC", id="SMSC"),
+    "id:53544D20": TPMManufacturerInfo(name="STMicroelectronics", id="STM"),
     "id:54584E00": TPMManufacturerInfo(name="Texas Instruments", id="TXN"),
     "id:57454300": TPMManufacturerInfo(name="Winbond", id="WEC"),
-    "id:524F4343": TPMManufacturerInfo(name="Fuzhou Rockchip", id="ROCC"),
-    "id:474F4F47": TPMManufacturerInfo(name="Google", id="GOOG"),
+    "id:5345414C": TPMManufacturerInfo(name="Wisekey", id="SEAL"),
 }
