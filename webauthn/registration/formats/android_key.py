@@ -63,15 +63,18 @@ def verify_android_key(
     if not attestation_statement.x5c:
         raise InvalidRegistrationResponse("Attestation statement was missing x5c (Android Key)")
 
-    # Validate certificate chain
-    try:
-        # Include known root certificates for this attestation format
-        pem_root_certs_bytes.append(google_hardware_attestation_root_1)
-        pem_root_certs_bytes.append(google_hardware_attestation_root_2)
+    # x5c includes a root certificate, so break it up accordingly
+    x5c_no_root = attestation_statement.x5c[:-1]
+    x5c_root_cert = attestation_statement.x5c[-1]
 
+    x5c_root_cert_x509 = x509.load_der_x509_certificate(x5c_root_cert, default_backend())
+    x5c_root_cert_pem = x5c_root_cert_x509.public_bytes(Encoding.PEM)
+
+    # Make sure x509 forms a complete, valid cert chain
+    try:
         validate_certificate_chain(
-            x5c=attestation_statement.x5c,
-            pem_root_certs_bytes=pem_root_certs_bytes,
+            x5c=x5c_no_root,
+            pem_root_certs_bytes=[x5c_root_cert_pem],
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (Android Key)")
