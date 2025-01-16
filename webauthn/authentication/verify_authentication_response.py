@@ -35,6 +35,7 @@ class VerifiedAuthentication:
     new_sign_count: int
     credential_device_type: CredentialDeviceType
     credential_backed_up: bool
+    user_verified: bool
 
 
 expected_token_binding_statuses = [
@@ -180,4 +181,5 @@ def verify_authentication_response(
         new_sign_count=auth_data.sign_count,
         credential_device_type=parsed_backup_flags.credential_device_type,
         credential_backed_up=parsed_backup_flags.credential_backed_up,
+        user_verified=auth_data.flags.uv,
     )
