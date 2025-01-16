@@ -1,5 +1,6 @@
 import json
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import (
     base64url_to_bytes,
@@ -7,6 +8,7 @@ from webauthn.helpers import (
     encode_cbor,
     parse_registration_credential_json,
     parse_cbor,
+    parse_attestation_object,
 )
 from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidCBORData
 from webauthn.helpers.known_root_certs import globalsign_r2
@@ -60,8 +62,54 @@ class TestVerifyRegistrationResponse(TestCase):
         )
         assert verification.credential_type == PublicKeyCredentialType.PUBLIC_KEY
         assert verification.sign_count == 23
-        assert verification.credential_backed_up == False
+        assert verification.credential_backed_up is False
         assert verification.credential_device_type == "single_device"
+
+    @patch("webauthn.registration.verify_registration_response.parse_attestation_object")
+    def test_verifies_response_optional_user_presence(
+        self,
+        mock_parse_attestation_object: MagicMock,
+    ) -> None:
+
+        credential = parse_registration_credential_json(
+            {
+                "id": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+                "rawId": "9y1xA8Tmg1FEmT-c7_fvWZ_uoTuoih3OvR45_oAK-cwHWhAbXrl2q62iLVTjiyEZ7O7n-CROOY494k7Q3xrs_w",
+                "response": {
+                    "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjESZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAFwAAAAAAAAAAAAAAAAAAAAAAQPctcQPE5oNRRJk_nO_371mf7qE7qIodzr0eOf6ACvnMB1oQG165dqutoi1U44shGezu5_gkTjmOPeJO0N8a7P-lAQIDJiABIVggSFbUJF-42Ug3pdM8rDRFu_N5oiVEysPDB6n66r_7dZAiWCDUVnB39FlGypL-qAoIO9xWHtJygo2jfDmHl-_eKFRLDA",
+                    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiVHdON240V1R5R0tMYzRaWS1xR3NGcUtuSE00bmdscXN5VjBJQ0psTjJUTzlYaVJ5RnRya2FEd1V2c3FsLWdrTEpYUDZmbkYxTWxyWjUzTW00UjdDdnciLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                },
+                "type": "public-key",
+                "clientExtensionResults": {},
+                "transports": ["nfc", "usb"],
+            }
+        )
+
+        # Grab the actual authenticator data out of the credential above
+        attestation_object = parse_attestation_object(credential.response.attestation_object)
+        # Pretend this is a conditional create response
+        attestation_object.auth_data.flags.up = False
+        attestation_object.auth_data.flags.uv = False
+
+        mock_parse_attestation_object.return_value = attestation_object
+
+        challenge = base64url_to_bytes(
+            "TwN7n4WTyGKLc4ZY-qGsFqKnHM4nglqsyV0ICJlN2TO9XiRyFtrkaDwUvsql-gkLJXP6fnF1MlrZ53Mm4R7Cvw"
+        )
+        rp_id = "localhost"
+        expected_origin = "http://localhost:5000"
+
+        verification = verify_registration_response(
+            credential=credential,
+            expected_challenge=challenge,
+            expected_origin=expected_origin,
+            expected_rp_id=rp_id,
+            # Be okay with up:False
+            require_user_presence=False,
+            require_user_verification=False,
+        )
+
+        assert verification.fmt == AttestationFormat.NONE
 
     def test_raises_exception_on_unsupported_attestation_type(self) -> None:
         cred_json = {
