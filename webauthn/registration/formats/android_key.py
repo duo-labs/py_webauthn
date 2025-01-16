@@ -1,6 +1,7 @@
 import hashlib
 from typing import List
 
+from asn1crypto.core import OctetString
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -165,6 +166,14 @@ def verify_android_key(
     ext_value_wrapper: UnrecognizedExtension = ext_key_description.value
     ext_value: bytes = ext_value_wrapper.value
     parsed_ext = KeyDescription.load(ext_value)
+
+    # Verify that the attestationChallenge field in the attestation certificate extension data
+    # is identical to clientDataHash.
+    attestation_challenge: OctetString = parsed_ext["attestationChallenge"]
+    if bytes(attestation_challenge) != client_data_hash_bytes:
+        raise InvalidRegistrationResponse(
+            "attestationChallenge field was not the same as the hash of clientDataJSON (Android Key)"
+        )
 
     # Verify the following using the appropriate authorization list from the attestation
     # certificate extension data:
