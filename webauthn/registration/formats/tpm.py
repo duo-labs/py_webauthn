@@ -1,6 +1,5 @@
 from typing import List
 
-import cbor2
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -31,11 +30,10 @@ from webauthn.helpers.exceptions import (
     InvalidRegistrationResponse,
 )
 from webauthn.helpers.structs import AttestationStatement
-from webauthn.helpers.tpm import parse_cert_info, parse_pub_area
+from webauthn.helpers.tpm import map_tpm_manufacturer_id, parse_cert_info, parse_pub_area
 from webauthn.helpers.tpm.structs import (
     TPM_ALG_COSE_ALG_MAP,
     TPM_ECC_CURVE_COSE_CRV_MAP,
-    TPM_MANUFACTURERS,
     TPMPubAreaParametersECC,
     TPMPubAreaParametersRSA,
 )
@@ -255,7 +253,8 @@ def verify_tpm(
         )
 
     try:
-        TPM_MANUFACTURERS[tcg_at_tpm_manufacturer]
+        # Naively try to map the manufacturer hex ID to a known manufacturer
+        map_tpm_manufacturer_id(tcg_at_tpm_manufacturer)
     except KeyError:
         raise InvalidRegistrationResponse(
             f'Unrecognized TPM Manufacturer "{tcg_at_tpm_manufacturer}" (TPM)'
