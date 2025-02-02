@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.1
+
+**Changes:**
+
+- Prevented `"android-key"` attestation tests from failing when it's after February 2nd ([#244](https://github.com/duo-labs/py_webauthn/pull/244))
+
 ## v2.5.0
 
 **Changes:**
