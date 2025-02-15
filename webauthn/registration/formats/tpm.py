@@ -1,4 +1,5 @@
-from typing import List
+import datetime
+from typing import List, Optional
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -46,6 +47,7 @@ def verify_tpm(
     client_data_json: bytes,
     credential_public_key: bytes,
     pem_root_certs_bytes: List[bytes],
+    time: Optional[datetime.datetime] = None,
 ) -> bool:
     """Verify a "tpm" attestation statement
 
@@ -77,6 +79,7 @@ def verify_tpm(
         validate_certificate_chain(
             x5c=attestation_statement.x5c,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (TPM)")

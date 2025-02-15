@@ -1,5 +1,5 @@
+import datetime
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat
@@ -7,13 +7,7 @@ from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseAndroidKey(TestCase):
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_verify_attestation_android_key_hardware_authority(
-        self, mock_verify_certificate: MagicMock
-    ):
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
-
+    def test_verify_attestation_android_key_hardware_authority(self):
         """
         This android-key attestation was generated on a Pixel 8a in January 2025 via an origin
         trial. Google will be sunsetting android-safetynet attestation for android-key attestations
@@ -35,7 +29,7 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
             },
             "authenticatorAttachment": "platform"
         }"""
-
+        time = datetime.datetime(2025, 1, 30, 17, 8, 43, 5353, datetime.timezone.utc)
         challenge = base64url_to_bytes("t4LWI0iYJSTWPl9WXUdNhdHAnrPDLF9eWAP9lHgmHP8")
         rp_id = "localhost"
         expected_origin = "http://localhost:8000"
@@ -45,6 +39,7 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
             expected_challenge=challenge,
             expected_origin=expected_origin,
             expected_rp_id=rp_id,
+            time=time,
         )
 
         assert verification.fmt == AttestationFormat.ANDROID_KEY
