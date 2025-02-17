@@ -1,5 +1,6 @@
+import datetime
 import hashlib
-from typing import List
+from typing import List, Optional
 
 import cbor2
 from cryptography import x509
@@ -33,6 +34,7 @@ def verify_apple(
     client_data_json: bytes,
     credential_public_key: bytes,
     pem_root_certs_bytes: List[bytes],
+    time: Optional[datetime.datetime] = None,
 ) -> bool:
     """
     https://www.w3.org/TR/webauthn-2/#sctn-apple-anonymous-attestation
@@ -49,6 +51,7 @@ def verify_apple(
         validate_certificate_chain(
             x5c=attestation_statement.x5c,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (Apple)")

@@ -1,5 +1,5 @@
+import datetime
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat
@@ -7,13 +7,7 @@ from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseApple(TestCase):
-    # TODO: Revisit these tests when we figure out how to generate dynamic certs that
-    # won't start failing tests 72 hours after creation...
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_verify_attestation_apple_passkey(self, mock_verify_certificate: MagicMock) -> None:
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
-
+    def test_verify_attestation_apple_passkey(self) -> None:
         credential = """{
             "id": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
             "rawId": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
@@ -29,12 +23,14 @@ class TestVerifyRegistrationResponseApple(TestCase):
         )
         rp_id = "dev2.dontneeda.pw"
         expected_origin = "https://dev2.dontneeda.pw:5000"
+        time = datetime.datetime(2021, 9, 1, 0, 39, 28, 5353, datetime.timezone.utc)
 
         verification = verify_registration_response(
             credential=credential,
             expected_challenge=challenge,
             expected_origin=expected_origin,
             expected_rp_id=rp_id,
+            time=time,
         )
 
         assert verification.fmt == AttestationFormat.APPLE

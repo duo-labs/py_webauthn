@@ -1,3 +1,4 @@
+import datetime
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -10,15 +11,7 @@ from webauthn.registration.formats.android_safetynet import (
 
 
 class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
-    # TODO: Revisit these tests when we figure out how to generate dynamic certs that
-    # won't start failing tests 72 hours after creation...
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_verify_attestation_android_safetynet(
-        self, mock_verify_certificate: MagicMock
-    ) -> None:
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
-
+    def test_verify_attestation_android_safetynet(self) -> None:
         credential = parse_registration_credential_json(
             """{
             "id": "AePltP2wAoNYwG5XGc9sfleGgDxQRHdkX8vphNIHv3HylIj_nZo9ncs7bLL65AGmVAc69pS4l64hgOBJU9o2jCQ",
@@ -32,6 +25,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         }
         """
         )
+        time = datetime.datetime(2021, 9, 4, 0, 39, 28, 5353, datetime.timezone.utc)
 
         parsed_attestation_object = parse_attestation_object(
             credential.response.attestation_object
@@ -44,18 +38,17 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
             client_data_json=credential.response.client_data_json,
             pem_root_certs_bytes=[],
             verify_timestamp_ms=False,
+            time=time,
         )
 
         assert verified is True
 
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
     @patch("base64.b64encode")
     @patch("cbor2.loads")
     def test_verify_attestation_android_safetynet_basic_integrity_true_cts_profile_match_false(
         self,
         mock_cbor2_loads: MagicMock,
         mock_b64encode: MagicMock,
-        mock_verify_certificate: MagicMock,
     ):
         """
         We're not working with a full WebAuthn response here so we have to mock out some values
@@ -63,7 +56,6 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "3N7YJmISsFM0cdvMAYcHcw==".encode("utf-8")
-        mock_verify_certificate.return_value = True
 
         # basicIntegrity: True, ctsProfileMatch: False
         jws_result_only_fail_cts_check = (
@@ -101,6 +93,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
             "S2W1MzvpXwq1KMFvrcka7C4t5vyOhMMYwY6BWEnAGcx5_tpJsqegXTgTHSrr4TFQJzsa-H8wb1"
             "YaxlMcRVSqOew"
         )
+        time = datetime.datetime(2021, 9, 4, 0, 39, 28, 5353, datetime.timezone.utc)
 
         attestation_statement = AttestationStatement(
             ver="0",
@@ -113,18 +106,17 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
             client_data_json=bytes(),
             pem_root_certs_bytes=[],
             verify_timestamp_ms=False,
+            time=time,
         )
 
         assert verified is True
 
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
     @patch("base64.b64encode")
     @patch("cbor2.loads")
     def test_raise_attestation_android_safetynet_basic_integrity_false_cts_profile_match_false(
         self,
         mock_cbor2_loads: MagicMock,
         mock_b64encode: MagicMock,
-        mock_verify_certificate: MagicMock,
     ):
         """
         We're not working with a full WebAuthn response here so we have to mock out some values
@@ -132,7 +124,6 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "NumMA+QH27ik6Mu737RgWg==".encode("utf-8")
-        mock_verify_certificate.return_value = True
 
         # basicIntegrity: False, ctsProfileMatch: False
         jws_result_fail = (
@@ -170,6 +161,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
             "4OVdwMd5seh5483VEpqAmzX7NcZ0aoiMl5PhLGgzHZTrsd1Mc-RZqgc3hAYjnubxONN8vOWGzP"
             "gI2Vzgr4VzLOZsWfYwKSR5g"
         )
+        time = datetime.datetime(2019, 10, 20, 0, 39, 28, 5353, datetime.timezone.utc)
 
         attestation_statement = AttestationStatement(
             ver="0",
@@ -186,4 +178,5 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
                 client_data_json=bytes(),
                 pem_root_certs_bytes=[],
                 verify_timestamp_ms=False,
+                time=time,
             )
