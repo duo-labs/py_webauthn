@@ -1,5 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from datetime import datetime
+
+from OpenSSL.crypto import X509Store
 
 from webauthn.helpers import parse_attestation_object, parse_registration_credential_json
 from webauthn.helpers.structs import AttestationStatement
@@ -10,14 +13,21 @@ from webauthn.registration.formats.android_safetynet import (
 
 
 class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
-    # TODO: Revisit these tests when we figure out how to generate dynamic certs that
-    # won't start failing tests 72 hours after creation...
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
+    def setUp(self):
+        self.cert_store = X509Store()
+
+    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
     def test_verify_attestation_android_safetynet(
-        self, mock_verify_certificate: MagicMock
+        self, mock_generate_new_cert_store: MagicMock
     ) -> None:
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
+        # Setting the time to something that satisfies all these:
+        # (Leaf) 20210719131342Z <-> 20211017131341Z <- Earliest expiration
+        # (Int.) 20200813000042Z <-> 20270930000042Z
+        # (Int.) 20200619000042Z <-> 20280128000042Z
+        # (Root) 20061215080000Z <-> 20211215080000Z
+        # (Root) 19980901120000Z <-> 20280128120000Z
+        self.cert_store.set_time(datetime(2021, 9, 1, 0, 0, 0))
+        mock_generate_new_cert_store.return_value = self.cert_store
 
         credential = parse_registration_credential_json(
             """{
@@ -63,6 +73,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "3N7YJmISsFM0cdvMAYcHcw==".encode("utf-8")
+        # Cert chain validation is not important to this test
         mock_verify_certificate.return_value = True
 
         # basicIntegrity: True, ctsProfileMatch: False
@@ -132,6 +143,7 @@ class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
         """
         mock_cbor2_loads.return_value = {"authData": bytes()}
         mock_b64encode.return_value = "NumMA+QH27ik6Mu737RgWg==".encode("utf-8")
+        # Cert chain validation is not important to this test
         mock_verify_certificate.return_value = True
 
         # basicIntegrity: False, ctsProfileMatch: False

@@ -1,5 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from datetime import datetime
+
+from OpenSSL.crypto import X509Store
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat
@@ -7,13 +10,14 @@ from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseAndroidKey(TestCase):
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_verify_attestation_android_key_hardware_authority(
-        self, mock_verify_certificate: MagicMock
-    ):
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
+    def setUp(self):
+        self.cert_store = X509Store()
 
+    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
+    def test_verify_attestation_android_key_hardware_authority(
+        self,
+        mock_generate_new_cert_store: MagicMock,
+    ) -> None:
         """
         This android-key attestation was generated on a Pixel 8a in January 2025 via an origin
         trial. Google will be sunsetting android-safetynet attestation for android-key attestations
@@ -39,6 +43,15 @@ class TestVerifyRegistrationResponseAndroidKey(TestCase):
         challenge = base64url_to_bytes("t4LWI0iYJSTWPl9WXUdNhdHAnrPDLF9eWAP9lHgmHP8")
         rp_id = "localhost"
         expected_origin = "http://localhost:8000"
+
+        # Setting the time to something that satisfies all these:
+        # (Leaf) 19700101000000Z <-> 20480101000000Z
+        # (Int.) 20250107170843Z <-> 20250202103527Z <- Earliest expiration
+        # (Int.) 20241209062853Z <-> 20250217062852Z
+        # (Int.) 20220126224945Z <-> 20370122224945Z
+        # (Root) 20191122203758Z <-> 20341118203758Z
+        self.cert_store.set_time(datetime(2025, 1, 8, 0, 0, 0))
+        mock_generate_new_cert_store.return_value = self.cert_store
 
         verification = verify_registration_response(
             credential=credential,

@@ -1,5 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from datetime import datetime
+
+from OpenSSL.crypto import X509Store
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat
@@ -7,12 +10,18 @@ from webauthn import verify_registration_response
 
 
 class TestVerifyRegistrationResponseApple(TestCase):
-    # TODO: Revisit these tests when we figure out how to generate dynamic certs that
-    # won't start failing tests 72 hours after creation...
-    @patch("OpenSSL.crypto.X509StoreContext.verify_certificate")
-    def test_verify_attestation_apple_passkey(self, mock_verify_certificate: MagicMock) -> None:
-        # Mocked because these certs actually expired and started failing this test
-        mock_verify_certificate.return_value = True
+    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
+    def test_verify_attestation_apple_passkey(
+        self,
+        mock_generate_new_cert_store: MagicMock,
+    ) -> None:
+        cert_store = X509Store()
+        # Setting the time to something that satisfies all these:
+        # (Leaf) 20210831230207Z <-> 20210903230207Z <- Earliest expiration
+        # (Int.) 20200318183801Z <-> 20300313000000Z
+        # (Root) 20200318182132Z <-> 20450315000000Z
+        cert_store.set_time(datetime(2021, 9, 1, 0, 0, 0))
+        mock_generate_new_cert_store.return_value = cert_store
 
         credential = """{
             "id": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
