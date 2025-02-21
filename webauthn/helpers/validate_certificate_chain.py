@@ -51,16 +51,16 @@ def validate_certificate_chain(
         raise InvalidCertificateChain(f"Could not prepare intermediate certs: {err}")
 
     # Prepare a collection of possible root certificates
-    root_certs_store = X509Store()
+    cert_store = _generate_new_cert_store()
     try:
         for cert in pem_root_certs_bytes:
-            root_certs_store.add_cert(pem_cert_bytes_to_open_ssl_x509(cert))
+            cert_store.add_cert(pem_cert_bytes_to_open_ssl_x509(cert))
     except Exception as err:
         raise InvalidCertificateChain(f"Could not prepare root certs: {err}")
 
     # Load certs into a "context" for validation
     context = X509StoreContext(
-        store=root_certs_store,
+        store=cert_store,
         certificate=leaf_cert,
         chain=intermediate_certs,
     )
@@ -72,3 +72,14 @@ def validate_certificate_chain(
         raise InvalidCertificateChain("Certificate chain could not be validated")
 
     return True
+
+
+def _generate_new_cert_store() -> X509Store:
+    """
+    Something that can be patched during testing to return an X509Store instance with its time
+    adjusted to some datetime in the past. This allows full certificate validity checks even after
+    cert expiration in the real world. See here:
+
+    https://www.pyopenssl.org/en/stable/api/crypto.html#OpenSSL.crypto.X509Store.set_time
+    """
+    return X509Store()
