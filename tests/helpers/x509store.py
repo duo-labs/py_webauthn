@@ -30,7 +30,7 @@ def patch_validate_certificate_chain_x509store_getter(func):
     ```
     """
 
-    def wrapper_inner(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         """
         Using `inspect.getmodule(...)` below helps deal with the fact that, in Python 3.9 and
         Python 3.10, `@patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")`
@@ -45,4 +45,4 @@ def patch_validate_certificate_chain_x509store_getter(func):
             mock_generate_new_cert_store.return_value = new_cert_store
             return func(*args, new_cert_store, **kwargs)
 
-    return wrapper_inner
+    return wrapper
