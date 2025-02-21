@@ -11,23 +11,19 @@ from webauthn.registration.formats.android_safetynet import (
     verify_android_safetynet,
 )
 
+from .helpers.x509store import patch_validate_certificate_chain_x509store_getter
+
 
 class TestVerifyRegistrationResponseAndroidSafetyNet(TestCase):
-    def setUp(self):
-        self.cert_store = X509Store()
-
-    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
-    def test_verify_attestation_android_safetynet(
-        self, mock_generate_new_cert_store: MagicMock
-    ) -> None:
+    @patch_validate_certificate_chain_x509store_getter
+    def test_verify_attestation_android_safetynet(self, patched_x509store: X509Store) -> None:
         # Setting the time to something that satisfies all these:
         # (Leaf) 20210719131342Z <-> 20211017131341Z <- Earliest expiration
         # (Int.) 20200813000042Z <-> 20270930000042Z
         # (Int.) 20200619000042Z <-> 20280128000042Z
         # (Root) 20061215080000Z <-> 20211215080000Z
         # (Root) 19980901120000Z <-> 20280128120000Z
-        self.cert_store.set_time(datetime(2021, 9, 1, 0, 0, 0))
-        mock_generate_new_cert_store.return_value = self.cert_store
+        patched_x509store.set_time(datetime(2021, 9, 1, 0, 0, 0))
 
         credential = parse_registration_credential_json(
             """{

@@ -1,7 +1,6 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 from datetime import datetime
-import inspect
+from OpenSSL.crypto import X509Store
 
 from webauthn.helpers.exceptions import InvalidCertificateChain
 from webauthn.helpers.known_root_certs import (
@@ -11,7 +10,8 @@ from webauthn.helpers.known_root_certs import (
 from webauthn.helpers.validate_certificate_chain import (
     validate_certificate_chain,
 )
-from OpenSSL.crypto import X509Store
+
+from .helpers.x509store import patch_validate_certificate_chain_x509store_getter
 
 apple_x5c_certs = [
     # 2021-08-31 @ 23:02:07Z <-> 2021-09-03 @ 23:02:07Z
@@ -27,16 +27,15 @@ apple_x5c_certs = [
 
 class TestValidateCertificateChain(TestCase):
     def setUp(self):
-        self.cert_store = X509Store()
         # Setting the time to something that satisfies all these:
         # (Leaf) 20210831230207Z <-> 20210903230207Z <- Earliest expiration
         # (Int.) 20200318183801Z <-> 20300313000000Z
         # (Root) 20200318182132Z <-> 20450315000000Z
-        self.cert_store.set_time(datetime(2021, 9, 1, 0, 0, 0))
+        self.x509store_time = datetime(2021, 9, 1, 0, 0, 0)
 
-    @patch.object(inspect.getmodule(validate_certificate_chain), "_generate_new_cert_store")
-    def test_validates_certificate_chain(self, _mock_generate_new_cert_store: MagicMock) -> None:
-        _mock_generate_new_cert_store.return_value = self.cert_store
+    @patch_validate_certificate_chain_x509store_getter
+    def test_validates_certificate_chain(self, patched_x509store: X509Store) -> None:
+        patched_x509store.set_time(self.x509store_time)
 
         try:
             validate_certificate_chain(
@@ -47,9 +46,9 @@ class TestValidateCertificateChain(TestCase):
             print(err)
             self.fail("validate_certificate_chain failed when it should have succeeded")
 
-    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
-    def test_throws_on_bad_root_cert(self, _mock_generate_new_cert_store: MagicMock) -> None:
-        _mock_generate_new_cert_store.return_value = self.cert_store
+    @patch_validate_certificate_chain_x509store_getter
+    def test_throws_on_bad_root_cert(self, patched_x509store: X509Store) -> None:
+        patched_x509store.set_time(self.x509store_time)
 
         with self.assertRaises(InvalidCertificateChain):
             validate_certificate_chain(
