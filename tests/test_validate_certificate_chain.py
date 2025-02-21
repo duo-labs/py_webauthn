@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from datetime import datetime
+import inspect
 
 from webauthn.helpers.exceptions import InvalidCertificateChain
 from webauthn.helpers.known_root_certs import (
@@ -33,7 +34,7 @@ class TestValidateCertificateChain(TestCase):
         # (Root) 20200318182132Z <-> 20450315000000Z
         self.cert_store.set_time(datetime(2021, 9, 1, 0, 0, 0))
 
-    @patch("webauthn.helpers.validate_certificate_chain._generate_new_cert_store")
+    @patch.object(inspect.getmodule(validate_certificate_chain), "_generate_new_cert_store")
     def test_validates_certificate_chain(self, _mock_generate_new_cert_store: MagicMock) -> None:
         _mock_generate_new_cert_store.return_value = self.cert_store
 
