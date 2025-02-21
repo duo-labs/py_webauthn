@@ -7,17 +7,17 @@ from webauthn.helpers import validate_certificate_chain
 
 def patch_validate_certificate_chain_x509store_getter(func):
     """
-    This is a very purpose-built decorator to help set a fixed time for X.509 certificate validation
-    in unittests. It makes the following assumptions, all of which must be true for this to
+    This is a very purpose-built decorator to help set a fixed time for X.509 certificate chain
+    validation in unittests. It makes the following assumptions, all of which must be true for this
     decorator to remain useful:
 
-    - x5c certificate chain validation occurs in **webauthn/helpers/validate_certificate_chain.py::**`validate_certificate_chain`
+    - X.509 certificate chain validation occurs in **webauthn/helpers/validate_certificate_chain.py::**`validate_certificate_chain`
     - `validate_certificate_chain(...)` uses `OpenSSL.crypto.X509Store` to verify certificate chains
     - **webauthn/helpers/__init__.py** continues to re-export `validate_certificate_chain`
 
     Usage:
 
-    ```py
+    ```
     from unittest import TestCase
     from datetime import datetime
     from OpenSSL.crypto import X509Store
