@@ -4,7 +4,6 @@ from typing import List
 from asn1crypto.core import OctetString
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from cryptography.x509 import (
     Extension,
@@ -70,7 +69,7 @@ def verify_android_key(
     x5c_no_root = attestation_statement.x5c[:-1]
     x5c_root_cert = attestation_statement.x5c[-1]
 
-    x5c_root_cert_x509 = x509.load_der_x509_certificate(x5c_root_cert, default_backend())
+    x5c_root_cert_x509 = x509.load_der_x509_certificate(x5c_root_cert)
     x5c_root_cert_pem = x5c_root_cert_x509.public_bytes(Encoding.PEM)
 
     # Make sure x509 forms a complete, valid cert chain
@@ -113,7 +112,7 @@ def verify_android_key(
     # and clientDataHash using the public key in the first certificate in x5c with the
     # algorithm specified in alg.
     attestation_cert_bytes = attestation_statement.x5c[0]
-    attestation_cert = x509.load_der_x509_certificate(attestation_cert_bytes, default_backend())
+    attestation_cert = x509.load_der_x509_certificate(attestation_cert_bytes)
     attestation_cert_pub_key = attestation_cert.public_key()
 
     try:
