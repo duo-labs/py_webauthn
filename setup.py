@@ -49,7 +49,7 @@ setup(
     install_requires=[
         "asn1crypto>=1.5.1",
         "cbor2>=5.6.5",
-        "cryptography>=43.0.3",
-        "pyOpenSSL>=24.2.1",
+        "cryptography>=44.0.2",
+        "pyOpenSSL>=25.0.0",
     ],
 )
