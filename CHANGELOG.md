@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.2
+
+**Changes:**
+
+- Update project to `cryptography==44.0.2` and `pyOpenSSL==25.0.0` ([#250](https://github.com/duo-labs/py_webauthn/pull/250))
+
 ## v2.5.1
 
 **Changes:**
