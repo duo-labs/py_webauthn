@@ -3,7 +3,7 @@ black==24.8.0
 cbor2==5.6.5
 cffi==1.17.1
 click==8.1.7
-cryptography==43.0.3
+cryptography==44.0.2
 mccabe==0.7.0
 mypy==1.11.2
 mypy-extensions==1.0.0
@@ -12,7 +12,7 @@ platformdirs==4.3.6
 pycodestyle==2.12.1
 pycparser==2.22
 pyflakes==3.2.0
-pyOpenSSL==24.2.1
+pyOpenSSL==25.0.0
 regex==2024.11.6
 six==1.16.0
 toml==0.10.2
