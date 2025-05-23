@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "webauthn"
+dynamic = ["version"]
+description = "Pythonic WebAuthn"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+keywords = ["webauthn", "fido2"]
+authors = [{ name = "Duo Labs", email = "labs@duo.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "asn1crypto>=1.5.1",
+    "cbor2>=5.6.5",
+    "cryptography>=44.0.2",
+    "pyOpenSSL>=25.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/duo-labs/py_webauthn"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["webauthn", "webauthn.*"]
+
+[tool.setuptools.package-data]
+webauthn = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = { attr = "webauthn.__version__" }
