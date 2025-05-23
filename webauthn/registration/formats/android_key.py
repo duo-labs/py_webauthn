@@ -1,5 +1,6 @@
+import datetime
 import hashlib
-from typing import List
+from typing import List, Optional
 
 from asn1crypto.core import OctetString
 from cryptography import x509
@@ -45,6 +46,7 @@ def verify_android_key(
     client_data_json: bytes,
     credential_public_key: bytes,
     pem_root_certs_bytes: List[bytes],
+    time: Optional[datetime.datetime] = None,
 ) -> bool:
     """Verify an "android-key" attestation statement
 
@@ -77,6 +79,7 @@ def verify_android_key(
         validate_certificate_chain(
             x5c=x5c_no_root,
             pem_root_certs_bytes=[x5c_root_cert_pem],
+            time=time,
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (Android Key)")

@@ -1,6 +1,5 @@
+import datetime
 from unittest import TestCase
-from datetime import datetime
-from OpenSSL.crypto import X509Store
 
 from webauthn.helpers.exceptions import InvalidCertificateChain
 from webauthn.helpers.known_root_certs import (
@@ -11,8 +10,8 @@ from webauthn.helpers.validate_certificate_chain import (
     validate_certificate_chain,
 )
 
-from .helpers.x509store import patch_validate_certificate_chain_x509store_getter
-
+# Not Valid Before: 2021-08-31 23:02:07+00:00
+# Not Valid After:  2021-09-03 23:02:07+00:00
 apple_x5c_certs = [
     # 2021-08-31 @ 23:02:07Z <-> 2021-09-03 @ 23:02:07Z
     bytes.fromhex(
@@ -26,35 +25,30 @@ apple_x5c_certs = [
 
 
 class TestValidateCertificateChain(TestCase):
-    def setUp(self):
+    def test_validates_certificate_chain(self) -> None:
         # Setting the time to something that satisfies all these:
         # (Leaf) 20210831230207Z <-> 20210903230207Z <- Earliest expiration
         # (Int.) 20200318183801Z <-> 20300313000000Z
         # (Root) 20200318182132Z <-> 20450315000000Z
-        self.x509store_time = datetime(2021, 9, 1, 0, 0, 0)
-
-    @patch_validate_certificate_chain_x509store_getter
-    def test_validates_certificate_chain(self, patched_x509store: X509Store) -> None:
-        patched_x509store.set_time(self.x509store_time)
-
+        time = datetime.datetime(2021, 9, 1, 13, 5, 3, 5353, datetime.timezone.utc)
         try:
             validate_certificate_chain(
                 x5c=apple_x5c_certs,
                 pem_root_certs_bytes=[apple_webauthn_root_ca],
+                time=time,
             )
         except Exception as err:
             print(err)
             self.fail("validate_certificate_chain failed when it should have succeeded")
 
-    @patch_validate_certificate_chain_x509store_getter
-    def test_throws_on_bad_root_cert(self, patched_x509store: X509Store) -> None:
-        patched_x509store.set_time(self.x509store_time)
-
+    def test_throws_on_bad_root_cert(self) -> None:
+        time = datetime.datetime(2021, 9, 1, 13, 5, 3, 5353, datetime.timezone.utc)
         with self.assertRaises(InvalidCertificateChain):
             validate_certificate_chain(
                 x5c=apple_x5c_certs,
                 # An obviously invalid root cert for these x5c certs
                 pem_root_certs_bytes=[globalsign_root_ca],
+                time=time,
             )
 
     def test_passes_on_no_root_certs(self):

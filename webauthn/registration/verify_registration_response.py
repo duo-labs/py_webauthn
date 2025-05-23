@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 from dataclasses import dataclass, asdict
 from typing import List, Mapping, Optional, Union
@@ -74,6 +75,7 @@ def verify_registration_response(
     require_user_verification: bool = False,
     supported_pub_key_algs: List[COSEAlgorithmIdentifier] = default_supported_pub_key_algs,
     pem_root_certs_bytes_by_fmt: Optional[Mapping[AttestationFormat, List[bytes]]] = None,
+    time: Optional[datetime.datetime] = None,
 ) -> VerifiedRegistration:
     """Verify an authenticator's response to navigator.credentials.create()
 
@@ -94,6 +96,8 @@ def verify_registration_response(
           restrict support to. Defaults to all supported algorithm IDs.
         - (optional) `pem_root_certs_bytes_by_fmt`: A list of root certificates, in PEM format, to
           be used to validate the certificate chains for specific attestation statement formats.
+        - (optional) `time`: The time to use for verifying assertions. This can be useful for
+          testing. Defaults to the current time.
 
     Returns:
         Information about the authenticator and registration
@@ -224,6 +228,7 @@ def verify_registration_response(
             credential_public_key=attested_credential_data.credential_public_key,
             aaguid=attested_credential_data.aaguid,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     elif attestation_object.fmt == AttestationFormat.PACKED:
         verified = verify_packed(
@@ -232,6 +237,7 @@ def verify_registration_response(
             client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     elif attestation_object.fmt == AttestationFormat.TPM:
         verified = verify_tpm(
@@ -240,6 +246,7 @@ def verify_registration_response(
             client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     elif attestation_object.fmt == AttestationFormat.APPLE:
         verified = verify_apple(
@@ -248,6 +255,7 @@ def verify_registration_response(
             client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     elif attestation_object.fmt == AttestationFormat.ANDROID_SAFETYNET:
         verified = verify_android_safetynet(
@@ -255,6 +263,7 @@ def verify_registration_response(
             attestation_object=attestation_object_bytes,
             client_data_json=client_data_bytes,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     elif attestation_object.fmt == AttestationFormat.ANDROID_KEY:
         verified = verify_android_key(
@@ -263,6 +272,7 @@ def verify_registration_response(
             client_data_json=client_data_bytes,
             credential_public_key=attested_credential_data.credential_public_key,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     else:
         # Raise exception on an attestation format we're not prepared to verify

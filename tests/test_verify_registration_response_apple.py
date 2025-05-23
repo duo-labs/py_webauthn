@@ -1,27 +1,13 @@
+import datetime
 from unittest import TestCase
-from datetime import datetime
-
-from OpenSSL.crypto import X509Store
 
 from webauthn.helpers import base64url_to_bytes
 from webauthn.helpers.structs import AttestationFormat
 from webauthn import verify_registration_response
 
-from .helpers.x509store import patch_validate_certificate_chain_x509store_getter
-
 
 class TestVerifyRegistrationResponseApple(TestCase):
-    @patch_validate_certificate_chain_x509store_getter
-    def test_verify_attestation_apple_passkey(
-        self,
-        patched_x509store: X509Store,
-    ) -> None:
-        # Setting the time to something that satisfies all these:
-        # (Leaf) 20210831230207Z <-> 20210903230207Z <- Earliest expiration
-        # (Int.) 20200318183801Z <-> 20300313000000Z
-        # (Root) 20200318182132Z <-> 20450315000000Z
-        patched_x509store.set_time(datetime(2021, 9, 1, 0, 0, 0))
-
+    def test_verify_attestation_apple_passkey(self) -> None:
         credential = """{
             "id": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
             "rawId": "0yhsKG_gCzynIgNbvXWkqJKL8Uc",
@@ -37,12 +23,18 @@ class TestVerifyRegistrationResponseApple(TestCase):
         )
         rp_id = "dev2.dontneeda.pw"
         expected_origin = "https://dev2.dontneeda.pw:5000"
+        # Setting the time to something that satisfies all these:
+        # (Leaf) 20210831230207Z <-> 20210903230207Z <- Earliest expiration
+        # (Int.) 20200318183801Z <-> 20300313000000Z
+        # (Root) 20200318182132Z <-> 20450315000000Z
+        time = datetime.datetime(2021, 9, 1, 0, 39, 28, 5353, datetime.timezone.utc)
 
         verification = verify_registration_response(
             credential=credential,
             expected_challenge=challenge,
             expected_origin=expected_origin,
             expected_rp_id=rp_id,
+            time=time,
         )
 
         assert verification.fmt == AttestationFormat.APPLE

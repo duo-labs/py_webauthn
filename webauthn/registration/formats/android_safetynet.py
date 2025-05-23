@@ -1,8 +1,9 @@
+import datetime
 import base64
 from dataclasses import dataclass
 import hashlib
 import json
-from typing import List
+from typing import List, Optional
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -56,6 +57,7 @@ def verify_android_safetynet(
     client_data_json: bytes,
     pem_root_certs_bytes: List[bytes],
     verify_timestamp_ms: bool = True,
+    time: Optional[datetime.datetime] = None,
 ) -> bool:
     """Verify an "android-safetynet" attestation statement
 
@@ -143,7 +145,7 @@ def verify_android_safetynet(
 
     if verify_timestamp_ms:
         try:
-            verify_safetynet_timestamp(payload.timestamp_ms)
+            verify_safetynet_timestamp(payload.timestamp_ms, time=time)
         except ValueError as err:
             raise InvalidRegistrationResponse(f"{err} (SafetyNet)")
 
@@ -168,6 +170,7 @@ def verify_android_safetynet(
         validate_certificate_chain(
             x5c=x5c,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (SafetyNet)")
