@@ -1,5 +1,6 @@
+import datetime
 import hashlib
-from typing import List
+from typing import List, Optional
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -34,6 +35,7 @@ def verify_fido_u2f(
     credential_public_key: bytes,
     aaguid: bytes,
     pem_root_certs_bytes: List[bytes],
+    time: Optional[datetime.datetime] = None,
 ) -> bool:
     """Verify a "fido-u2f" attestation statement
 
@@ -57,6 +59,7 @@ def verify_fido_u2f(
         validate_certificate_chain(
             x5c=attestation_statement.x5c,
             pem_root_certs_bytes=pem_root_certs_bytes,
+            time=time,
         )
     except InvalidCertificateChain as err:
         raise InvalidRegistrationResponse(f"{err} (FIDO-U2F)")
