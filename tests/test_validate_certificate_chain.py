@@ -1,6 +1,7 @@
 from unittest import TestCase
+from unittest.mock import patch
 from datetime import datetime
-from OpenSSL.crypto import X509Store
+from OpenSSL.crypto import X509, X509Store, X509StoreContextError
 
 from webauthn.helpers.exceptions import InvalidCertificateChain
 from webauthn.helpers.known_root_certs import (
@@ -75,3 +76,23 @@ class TestValidateCertificateChain(TestCase):
         except Exception as err:
             print(err)
             self.fail("validate_certificate_chain failed when it should have succeeded")
+
+    def test_includes_original_exception_when_raising(self):
+        """
+        A low-effort attempt at ensuring that the attempt to validate a certificate chain will
+        include the original exception raised by the X509 validation library, instead of just its
+        message.
+        """
+        custom_exception = X509StoreContextError(message="Oops", certificate=X509(), errors=[])
+
+        with patch(
+            "OpenSSL.crypto.X509StoreContext.verify_certificate", side_effect=custom_exception
+        ):
+            with self.assertRaises(InvalidCertificateChain) as ctx:
+                validate_certificate_chain(
+                    x5c=apple_x5c_certs,
+                    pem_root_certs_bytes=[apple_webauthn_root_ca],
+                )
+
+            cause = ctx.exception.__cause__
+            self.assertEqual(cause, custom_exception)
