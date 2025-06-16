@@ -14,9 +14,9 @@ def options_to_json_dict(
     ],
 ) -> Dict[str, Any]:
     """
-    Convert registration or authentication options into a simple JSON dictionary. Alternatively use
-    `webauthn.helpers.options_to_json` to perform this conversion _and_ stringify the resulting
-    `dict` before sending it to the front end.
+    Convert registration or authentication options into a simple JSON dictionary. Alternatively, use
+    `webauthn.helpers.options_to_json` to perform this conversion and then stringify the resulting
+    `dict` to make it easier to send to the front end.
     """
     if isinstance(options, PublicKeyCredentialCreationOptions):
         _rp = {"name": options.rp.name}
