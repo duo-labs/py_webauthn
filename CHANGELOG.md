@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.3
+
+**Changes:**
+
+- More X.509 validation exceptions will include the cause of the exception as reported by the third-party library handling the validation ([#255](https://github.com/duo-labs/py_webauthn/pull/255))
+
 ## v2.5.2
 
 **Changes:**
