@@ -164,7 +164,9 @@ def verify_registration_response(
         raise InvalidRegistrationResponse("Unexpected RP ID hash")
 
     if require_user_presence and not auth_data.flags.up:
-        raise InvalidRegistrationResponse("User presence was required, but was not present during attestation")
+        raise InvalidRegistrationResponse(
+            "User presence was required, but was not present during attestation"
+        )
 
     if require_user_verification and not auth_data.flags.uv:
         raise InvalidRegistrationResponse(
