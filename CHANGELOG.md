@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.0
+
+**Changes:**
+
+- The new `webauthn.helpers.options_to_json_dict` helper can be used to simplify registration and authentication options into a simple `Dict[str, Any]` value ([#256](https://github.com/duo-labs/py_webauthn/pull/256))
+
 ## v2.5.3
 
 **Changes:**
