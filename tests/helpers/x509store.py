@@ -22,6 +22,8 @@ def patch_validate_certificate_chain_x509store_getter(func):
     from datetime import datetime
     from OpenSSL.crypto import X509Store
 
+    from .helpers.x509store import patch_validate_certificate_chain_x509store_getter
+
     class TestX509Validation(TestCase):
         @patch_validate_certificate_chain_x509store_getter
         def test_validate_x509_chain(self, patched_x509store: X509Store):
