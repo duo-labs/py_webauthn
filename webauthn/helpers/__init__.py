@@ -9,6 +9,7 @@ from .generate_challenge import generate_challenge
 from .generate_user_handle import generate_user_handle
 from .hash_by_alg import hash_by_alg
 from .options_to_json import options_to_json
+from .options_to_json_dict import options_to_json_dict
 from .parse_attestation_object import parse_attestation_object
 from .parse_authentication_credential_json import parse_authentication_credential_json
 from .parse_authentication_options_json import parse_authentication_options_json
@@ -34,6 +35,7 @@ __all__ = [
     "generate_user_handle",
     "hash_by_alg",
     "options_to_json",
+    "options_to_json_dict",
     "parse_attestation_object",
     "parse_authenticator_data",
     "parse_authentication_credential_json",
