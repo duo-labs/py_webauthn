@@ -77,7 +77,7 @@ class TestValidateCertificateChain(TestCase):
             print(err)
             self.fail("validate_certificate_chain failed when it should have succeeded")
 
-    def test_includes_original_exception_when_throwing(self):
+    def test_includes_original_exception_when_raising(self):
         """
         A low-effort attempt at ensuring that the attempt to validate a certificate chain will
         include the original exception raised by the X509 validation library, instead of just its
