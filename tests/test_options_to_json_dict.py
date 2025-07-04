@@ -91,3 +91,28 @@ class TestWebAuthnOptionsToJSON(TestCase):
                 "userVerification": "discouraged",
             },
         )
+
+    def test_converts_authentication_options_to_JSON_custom_bytes_encoder(self) -> None:
+        options = generate_authentication_options(
+            rp_id="example.com",
+            challenge=b"1234567890",
+            allow_credentials=[
+                PublicKeyCredentialDescriptor(id=b"1234567890"),
+            ],
+            timeout=120000,
+            user_verification=UserVerificationRequirement.DISCOURAGED,
+        )
+
+        # Return a representation with the bytes left as-is
+        output = options_to_json_dict(options, bytes_encoder=lambda x: x)
+
+        self.assertEqual(
+            output,
+            {
+                "rpId": "example.com",
+                "challenge": b"1234567890",
+                "allowCredentials": [{"type": "public-key", "id": b"1234567890"}],
+                "timeout": 120000,
+                "userVerification": "discouraged",
+            },
+        )
