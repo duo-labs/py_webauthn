@@ -14,6 +14,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialHint,
 )
 
+from webauthn.helpers.mldsa import isML_DSA_available
 
 def _generate_pub_key_cred_params(
     supported_algs: List[COSEAlgorithmIdentifier],
@@ -23,6 +24,10 @@ def _generate_pub_key_cred_params(
     """
     return [PublicKeyCredentialParameters(type="public-key", alg=alg) for alg in supported_algs]
 
+ml_dsa_algs = [
+    COSEAlgorithmIdentifier.ML_DSA_44,
+    COSEAlgorithmIdentifier.ML_DSA_65,
+]
 
 default_supported_pub_key_algs = [
     COSEAlgorithmIdentifier.ECDSA_SHA_256,
@@ -35,6 +40,10 @@ default_supported_pub_key_algs = [
     COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_384,
     COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_512,
 ]
+
+if isML_DSA_available():
+    default_supported_pub_key_algs=ml_dsa_algs+default_supported_pub_key_algs
+
 default_supported_pub_key_params = _generate_pub_key_cred_params(
     default_supported_pub_key_algs,
 )

@@ -14,7 +14,9 @@ from .decode_credential_public_key import (
     DecodedEC2PublicKey,
     DecodedOKPPublicKey,
     DecodedRSAPublicKey,
+    DecodedMLDSAPublicKey,
 )
+from .mldsa import ML_DSAPublicKey
 from .exceptions import UnsupportedPublicKey
 
 
@@ -61,5 +63,15 @@ def decoded_public_key_to_cryptography(
         okp_pub_key = Ed25519PublicKey.from_public_bytes(public_key.x)
 
         return okp_pub_key
+    elif isinstance(public_key, DecodedMLDSAPublicKey):
+        """
+        alg is -48, -49 (ML-DSA)
+        """
+        if public_key.alg != COSEAlgorithmIdentifier.ML_DSA_44 and public_key.alg !=COSEAlgorithmIdentifier.ML_DSA_65:
+            raise UnsupportedPublicKey(
+                f"ML-DSA Public key with unsupported algorithms"
+            )
+        return ML_DSAPublicKey(public_key.alg, public_key.pub)
+
     else:
         raise UnsupportedPublicKey(f"Unrecognized decoded public key: {public_key}")

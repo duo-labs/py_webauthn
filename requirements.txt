@@ -18,3 +18,4 @@ six==1.16.0
 toml==0.10.2
 tomli==2.0.1
 typing_extensions==4.12.2
+liboqs-python==0.14.0

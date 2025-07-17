@@ -32,14 +32,20 @@ class DecodedRSAPublicKey:
     n: bytes
     e: bytes
 
+@dataclass
+class DecodedMLDSAPublicKey:
+    kty: COSEKTY
+    alg: COSEAlgorithmIdentifier
+    pub: bytes
+
 
 def decode_credential_public_key(
     key: bytes,
-) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey]:
+) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey, DecodedMLDSAPublicKey]:
     """
     Decode a CBOR-encoded public key and turn it into a data structure.
 
-    Supports OKP, EC2, and RSA public keys
+    Supports OKP, EC2, and RSA, ML-DSA public keys
     """
     # Occasionally we might be given a public key in an "uncompressed" format,
     # typically from older U2F security keys. As per the FIDO spec this is indicated by
@@ -115,6 +121,18 @@ def decode_credential_public_key(
             alg=alg,
             n=n,
             e=e,
+        )
+    
+    elif kty == COSEKTY.MLDSA:
+        pub = decoded_key[COSEKey.PUB]
+
+        if not pub:
+            raise InvalidPublicKeyStructure("ML-DSA credential public key mising pub")
+        
+        return DecodedMLDSAPublicKey(
+            kty=kty,
+            alg=alg,
+            pub=pub,
         )
 
     raise UnsupportedPublicKeyType(f'Unsupported credential public key type "{kty}"')

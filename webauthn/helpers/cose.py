@@ -30,6 +30,8 @@ class COSEAlgorithmIdentifier(int, Enum):
     RSASSA_PKCS1_v1_5_SHA_384 = -258
     RSASSA_PKCS1_v1_5_SHA_512 = -259
     RSASSA_PKCS1_v1_5_SHA_1 = -65535  # Deprecated; here for legacy support
+    ML_DSA_44 = -48
+    ML_DSA_65 = -49
 
 
 class COSEKTY(int, Enum):
@@ -43,6 +45,7 @@ class COSEKTY(int, Enum):
     OKP = 1
     EC2 = 2
     RSA = 3
+    MLDSA = 7
 
 
 class COSECRV(int, Enum):
@@ -77,3 +80,5 @@ class COSEKey(int, Enum):
     # RSA
     N = -1
     E = -2
+    #ML-DSA
+    PUB = -1
