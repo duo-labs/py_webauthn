@@ -16,10 +16,16 @@ class ML_DSAPublicKey:
         import oqs
         assert self.verifier.verify(data, signature, self.pub)
 
+_ml_dsa_available=None
 
 def isML_DSA_available():
+    global _ml_dsa_available
+    if _ml_dsa_available is not None:
+        return _ml_dsa_available
     try:
         import oqs
-        return True
+        _ml_dsa_available=True
     except Exception as e:
-        return False
+        _ml_dsa_available=False
+
+    return _ml_dsa_available

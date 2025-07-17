@@ -1,4 +1,3 @@
-import json
 from webauthn import (
     generate_authentication_options,
     verify_authentication_response,
