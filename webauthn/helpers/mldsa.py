@@ -18,7 +18,7 @@ class ML_DSAPublicKey:
 
 _ml_dsa_available=None
 
-def isML_DSA_available():
+def is_ml_dsa_available():
     global _ml_dsa_available
     if _ml_dsa_available is not None:
         return _ml_dsa_available
