@@ -41,8 +41,8 @@ default_supported_pub_key_algs = [
     COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_512,
 ]
 
-if isML_DSA_available():
-    default_supported_pub_key_algs=ml_dsa_algs+default_supported_pub_key_algs
+if is_ml_dsa_available():
+    default_supported_pub_key_algs = ml_dsa_algs + default_supported_pub_key_algs
 
 default_supported_pub_key_params = _generate_pub_key_cred_params(
     default_supported_pub_key_algs,
