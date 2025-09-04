@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any
+from typing import Callable, Union, Dict, Any
 
 from .structs import (
     PublicKeyCredentialCreationOptions,
@@ -12,11 +12,16 @@ def options_to_json_dict(
         PublicKeyCredentialCreationOptions,
         PublicKeyCredentialRequestOptions,
     ],
+    bytes_encoder: Callable[[bytes], Any] = bytes_to_base64url,
 ) -> Dict[str, Any]:
     """
     Convert registration or authentication options into a simple JSON dictionary. Alternatively, use
     `webauthn.helpers.options_to_json` to perform this conversion and then stringify the resulting
     `dict` to make it easier to send to the front end.
+
+    Args:
+        `options`: Registration or authentication options to turn into a simple `dict`.
+        `bytes_encoder`: A custom method to encode bytes values however makes sense for the RP. Defaults to encoding bytes to Base64URL strings.
     """
     if isinstance(options, PublicKeyCredentialCreationOptions):
         _rp = {"name": options.rp.name}
@@ -24,7 +29,7 @@ def options_to_json_dict(
             _rp["id"] = options.rp.id
 
         _user: Dict[str, Any] = {
-            "id": bytes_to_base64url(options.user.id),
+            "id": bytes_encoder(options.user.id),
             "name": options.user.name,
             "displayName": options.user.display_name,
         }
@@ -32,7 +37,7 @@ def options_to_json_dict(
         reg_to_return: Dict[str, Any] = {
             "rp": _rp,
             "user": _user,
-            "challenge": bytes_to_base64url(options.challenge),
+            "challenge": bytes_encoder(options.challenge),
             "pubKeyCredParams": [
                 {"type": param.type, "alg": param.alg} for param in options.pub_key_cred_params
             ],
@@ -49,7 +54,7 @@ def options_to_json_dict(
 
             for cred in _excluded:
                 json_excluded_cred: Dict[str, Any] = {
-                    "id": bytes_to_base64url(cred.id),
+                    "id": bytes_encoder(cred.id),
                     "type": cred.type.value,
                 }
 
@@ -91,7 +96,7 @@ def options_to_json_dict(
         return reg_to_return
 
     if isinstance(options, PublicKeyCredentialRequestOptions):
-        auth_to_return: Dict[str, Any] = {"challenge": bytes_to_base64url(options.challenge)}
+        auth_to_return: Dict[str, Any] = {"challenge": bytes_encoder(options.challenge)}
 
         if options.timeout is not None:
             auth_to_return["timeout"] = options.timeout
@@ -105,7 +110,7 @@ def options_to_json_dict(
 
             for cred in _allowed:
                 json_allowed_cred: Dict[str, Any] = {
-                    "id": bytes_to_base64url(cred.id),
+                    "id": bytes_encoder(cred.id),
                     "type": cred.type.value,
                 }
 
