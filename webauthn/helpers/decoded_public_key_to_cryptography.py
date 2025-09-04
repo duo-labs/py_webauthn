@@ -67,9 +67,13 @@ def decoded_public_key_to_cryptography(
         """
         alg is -48, -49 (ML-DSA)
         """
-        if public_key.alg != COSEAlgorithmIdentifier.ML_DSA_44 and public_key.alg !=COSEAlgorithmIdentifier.ML_DSA_65:
+        supported_ml_dsa_algs = (
+            COSEAlgorithmIdentifier.ML_DSA_44,
+            COSEAlgorithmIdentifier.ML_DSA_65,
+        )
+        if public_key.alg not in supported_ml_dsa_algs:
             raise UnsupportedPublicKey(
-                f"ML-DSA Public key with unsupported algorithms"
+                f"ML-DSA Public key with unsupported algorithm {public_key.alg}"
             )
         return ML_DSAPublicKey(public_key.alg, public_key.pub)
 
