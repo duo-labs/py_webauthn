@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.7.0
+
+**Changes:**
+
+- The `webauthn.helpers.options_to_json_dict` helper has a new, optional `bytes_encoder` argument that accepts a `Callable[[bytes], Any]` method. This enables the use of custom encoding logic when serializing `bytes` values. When this argument is unspecified, `bytes` values will continue to be encoded into Base64URL ([#257](https://github.com/duo-labs/py_webauthn/pull/257))
+
 ## v2.6.0
 
 **Changes:**
