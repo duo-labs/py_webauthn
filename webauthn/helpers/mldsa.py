@@ -1,6 +1,6 @@
 from .cose import COSEAlgorithmIdentifier
 
-class ML_DSAPublicKey:
+class MLDSAPublicKey:
     def __init__(self, alg, pub) -> None:
         if not isML_DSA_available():
             raise Exception("OQS Not installed")
