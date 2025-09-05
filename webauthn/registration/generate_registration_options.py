@@ -14,7 +14,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialHint,
 )
 
-from webauthn.helpers.mldsa import isML_DSA_available
+from webauthn.helpers.mldsa import is_ml_dsa_available
 
 def _generate_pub_key_cred_params(
     supported_algs: List[COSEAlgorithmIdentifier],

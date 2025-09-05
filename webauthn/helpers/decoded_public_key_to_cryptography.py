@@ -16,7 +16,7 @@ from .decode_credential_public_key import (
     DecodedRSAPublicKey,
     DecodedMLDSAPublicKey,
 )
-from .mldsa import ML_DSAPublicKey
+from .mldsa import MLDSAPublicKey
 from .exceptions import UnsupportedPublicKey
 
 
@@ -75,7 +75,7 @@ def decoded_public_key_to_cryptography(
             raise UnsupportedPublicKey(
                 f"ML-DSA Public key with unsupported algorithm {public_key.alg}"
             )
-        return ML_DSAPublicKey(public_key.alg, public_key.pub)
+        return MLDSAPublicKey(public_key.alg, public_key.pub)
 
     else:
         raise UnsupportedPublicKey(f"Unrecognized decoded public key: {public_key}")

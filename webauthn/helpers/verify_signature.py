@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PublicKey
 from cryptography.hazmat.primitives.asymmetric.x448 import X448PublicKey
 from cryptography.hazmat.primitives.asymmetric.padding import MGF1, PSS, PKCS1v15
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
-from webauthn.helpers.mldsa import ML_DSAPublicKey
+from webauthn.helpers.mldsa import MLDSAPublicKey
 
 from .algorithms import (
     get_ec2_sig_alg,
@@ -31,7 +31,7 @@ def verify_signature(
         Ed448PublicKey,
         X25519PublicKey,
         X448PublicKey,
-        ML_DSAPublicKey,
+        MLDSAPublicKey,
     ],
     signature_alg: COSEAlgorithmIdentifier,
     signature: bytes,
@@ -68,7 +68,7 @@ def verify_signature(
             raise UnsupportedAlgorithm(f"Unrecognized RSA signature alg {signature_alg}")
     elif isinstance(public_key, Ed25519PublicKey):
         public_key.verify(signature, data)
-    elif isinstance(public_key, ML_DSAPublicKey):
+    elif isinstance(public_key, MLDSAPublicKey):
         public_key.verify(signature, data)
 
     else:

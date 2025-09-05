@@ -1,9 +1,10 @@
 from .cose import COSEAlgorithmIdentifier
+from .exceptions import MldsaAttemptedWithoutInstall
 
 class MLDSAPublicKey:
     def __init__(self, alg, pub) -> None:
-        if not isML_DSA_available():
-            raise Exception("OQS Not installed")
+        if not is_ml_dsa_available():
+            raise MldsaAttemptedWithoutInstall()
         import oqs
         self.alg=alg
         self.pub=pub

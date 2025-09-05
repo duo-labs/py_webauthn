@@ -68,3 +68,6 @@ class InvalidBackupFlags(WebAuthnException):
 
 class InvalidCBORData(WebAuthnException):
     pass
+
+class MldsaAttemptedWithoutInstall(WebAuthnException):
+    pass

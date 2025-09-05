@@ -123,7 +123,7 @@ def decode_credential_public_key(
             e=e,
         )
     
-    elif kty == COSEKTY.MLDSA:
+    elif kty == COSEKTY.ML_DSA:
         pub = decoded_key[COSEKey.PUB]
 
         if not pub:

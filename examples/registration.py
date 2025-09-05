@@ -84,7 +84,7 @@ assert registration_verification.credential_id == base64url_to_bytes(
     "ZoIKP1JQvKdrYj1bTUPJ2eTUsbLeFkv-X5xJQNr4k6s"
 )
 
-if mldsa.isML_DSA_available():
+if mldsa.is_ml_dsa_available():
 
     mldsa_reg_options= generate_registration_options(
         rp_id='localhost',
