@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-
+import warnings
 from webauthn.helpers import (
     base64url_to_bytes,
     bytes_to_base64url,
@@ -9,6 +9,7 @@ from webauthn.helpers import (
     parse_registration_credential_json,
     parse_cbor,
     parse_attestation_object,
+    mldsa
 )
 from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidCBORData
 from webauthn.helpers.known_root_certs import globalsign_r2
@@ -64,6 +65,37 @@ class TestVerifyRegistrationResponse(TestCase):
         assert verification.sign_count == 23
         assert verification.credential_backed_up is False
         assert verification.credential_device_type == "single_device"
+
+    def test_verifies_mldsa_attestation_response(self) -> None:
+        if not mldsa.is_ml_dsa_available():
+            warnings.warn('ML-DSA not installed. Test skipped')
+            return
+        credential="""{
+           "type": "public-key",
+            "id": "ZAm5To5dRDuoBHlOoo5Fl19jcnlwdGFuZQ",
+            "rawId": "ZAm5To5dRDuoBHlOoo5Fl19jcnlwdGFuZQ",
+            "authenticatorAttachment": "cross-platform",
+            "response": {
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiQTB1RHlWTkN1Qk9vbmstTDVWZDBxVmtDOXRxNzJfUms2S09kcEF4eF9OWSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+                "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVkFekmWDeWIDoxodDQXD2R2YFuP5K65ooYyx5lc87qDHZdjRQAAAAAAAAAAAAAAAAAAAAAAAAAAABlkCblOjl1EO6gEeU6ijkWXX2NyeXB0YW5lowEHAzgvIFkFILCau9eCTbGwd15c9JemK6obEtvxDREnBm_KMEPyiKpO8Z-MmvkhJzLO62SOHHPLxnLcsgpQ_rmCY-Yb2VKDfREPyZdXAoVEkBYfvVReEac6cPI3rpfLyJRCpTNhaTziAjfmvgAKiO62I-d6cvGYkp-LZhuW-qBIkYOUxf-Flg3aWKNGYGIymVtNnG7wa0NeUXYnuPWsbYAsjwFvbKtJcmJX9sx1WPmI79u_m73hPK2XWGogFa6ngTG0KETf9lIruZBsZLSOi4YWkRLYZ9JISTziZeze3eknIUSssJ-JvU7GyB0YwhXfNfcC4tDl9AAST451_OjFvRY_xIs1LSKwf6t6nsaZQjKJGo6lMDO78WofyEQecAs7yv7DIWdB2oUt9ysT_w1Q5OfYDTuA0k1JxrE74yq6JFEZ6oLFeWczQNjJpnQ3UKIYat454XEZsxF47_fBuwV4HuiRj9lRJhOxCiDTkZ874VtItD2ESgCf9ADrfNyzDWXWuU8SuJ_xc292N1iTeBK3XkoGHDzyaCF-hQPLsW2LBL8bfa8z8V0kfpjvqkJmR1N4aEAyYDiW_L_AA4pZ8tUqWWnMXL9YtfU2osuUjMm-nnNdgvl_ScR5gVeuzj_Et1srG1iGisPi-zGxOtoOex2_hZ1UvXIsP_5szIMGgJoVgok-hNgJLj0jJ9QP9txIfv0zhpiRGiZy1UyZ7NBNMYcWevmif1RESqulcAh6GEvgdaS0nROZUsB-_qT8W4CaJA89DfbdqJEiw2CntCJEnbR6ZpOHYSEFWJVMIz4i1pHsnipFLIMxfpi9afSzO8RqPqXnkYghFQO33IuywxUhVQlxWlH_13Y58leHKqAYFW1TJ6JtY8b-8D5Yb4b46gOwEQpA8iFDgeFMSj8MHEr31OUchoG4skw0uGQ2PSfZQGn_EjdNaRaJeNz4C8Rz8EhPvkQ7MR2s40dKcE6_Sn_YciSA9XWHYpnGlDlNgeZ7WGjQpIjCtX1w33LYYJ26ov1sv7E9qN2ffydEN1S6mysEkS88ogKJQJNYkG8MLeWqAjGgHJAVcMAwTuG3pLu_PPse4ZZ7yphSOjgldoVv6nSD_14VafXPC4-RjgnHKNimIalipUuT3gcT__wjcMAUsa04QNRx-cmijvy6No0ZA5J5YZ3SOIxpjdkGZ6G1L666aiy8oLdxnzKfEbcm-4j-TybuKgRKCzpf2q1FLB2ddLDYa6mk4cYH0ABggNaL8AT0n72W40RSEF78Tbo33PSsqTD9CXBIJ1lZ9tI513v-A4iw02v7buOXd56p0vnCO75lJhcJfu18G8wGcgPx41ZEEYpzjEkPWO8vlMC_Edx1Tb8pS2Jrx_XOLejBV80dDng9n5EAlxveoWL2dxoozSYgvp47okDRTcm7s4YQLQDuKeCckjl5wOUoFDjBt9-PB26U3RNsc9nlxXu5y6YNcrfK3G2qF92mrMYxaNk-6MOHsWRK_JWD2gG8eiA5QmvvNmUYyUpmCFLiJOnlJBv22ucHHJRyHbslQbwtnGsZZXNQhWrd50m9eBWM_11mys9WnI8Yj669a1wKu7F0ab--nHWpJwGMdZRFkCklL5mm-ZJFSToj8S9BjfUeNwrx8t9NVy-d6RYKU1lFBKxYKP3w24AMLre9O0Yd8QH9YMwM0RNsk21Tzpb-xqqONfRUDpfbbjo9N-9fKZD-Ax0yyWcYHWs5BBc6OosjuYDr1mRa0gJMM4OcnjDFOjfutK2ExLFH13Y",
+                "transports": []
+            },
+            "clientExtensionResults": {}
+        }"""
+   
+        challenge=base64url_to_bytes('A0uDyVNCuBOonk-L5Vd0qVkC9tq72_Rk6KOdpAxx_NY')
+        rp_id='localhost'
+        expected_origin='http://localhost:5000'
+
+        verification = verify_registration_response(
+            credential=credential,
+            expected_challenge=challenge,
+            expected_origin=expected_origin,
+            expected_rp_id=rp_id,
+        )
+
+        assert verification.credential_type == PublicKeyCredentialType.PUBLIC_KEY
+        assert verification.sign_count == 0  
 
     @patch("webauthn.registration.verify_registration_response.parse_attestation_object")
     def test_verifies_response_optional_user_presence(

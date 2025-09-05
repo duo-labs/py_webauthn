@@ -12,6 +12,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialUserEntity,
     ResidentKeyRequirement,
 )
+from webauthn.helpers import mldsa
 from webauthn import generate_registration_options
 
 
@@ -38,10 +39,16 @@ class TestGenerateRegistrationOptions(TestCase):
             name="lee",
             display_name="lee",
         )
-        assert options.pub_key_cred_params[0] == PublicKeyCredentialParameters(
-            type="public-key",
-            alg=COSEAlgorithmIdentifier.ECDSA_SHA_256,
-        )
+        if mldsa.is_ml_dsa_available():
+            assert options.pub_key_cred_params[0] == PublicKeyCredentialParameters(
+                type="public-key",
+                alg=COSEAlgorithmIdentifier.ML_DSA_44,
+            )    
+        else:
+            assert options.pub_key_cred_params[0] == PublicKeyCredentialParameters(
+                type="public-key",
+                alg=COSEAlgorithmIdentifier.ECDSA_SHA_256,
+            )
         assert options.timeout == 60000
         assert options.exclude_credentials == []
         assert options.authenticator_selection is None
