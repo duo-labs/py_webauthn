@@ -21,8 +21,8 @@ from .exceptions import UnsupportedPublicKey
 
 
 def decoded_public_key_to_cryptography(
-    public_key: Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey]
-) -> Union[Ed25519PublicKey, EllipticCurvePublicKey, RSAPublicKey]:
+    public_key: Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey, DecodedMLDSAPublicKey]
+) -> Union[Ed25519PublicKey, EllipticCurvePublicKey, RSAPublicKey, MLDSAPublicKey]:
     """Convert raw decoded public key parameters (crv, x, y, n, e, etc...) into
     public keys using primitives from the cryptography.io library
     """
