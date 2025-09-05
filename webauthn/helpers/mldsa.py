@@ -7,7 +7,7 @@ class MLDSAPublicKey:
             raise MldsaAttemptedWithoutInstall()
         import oqs
         self.alg=alg
-        self.pub=pub
+        self.public_bytes=pub
         if alg==COSEAlgorithmIdentifier.ML_DSA_44:
             self.verifier=oqs.Signature('ML-DSA-44')
         if alg==COSEAlgorithmIdentifier.ML_DSA_65:
@@ -15,7 +15,7 @@ class MLDSAPublicKey:
 
     def verify(self, signature, data) -> None:
         import oqs
-        assert self.verifier.verify(data, signature, self.pub)
+        assert self.verifier.verify(data, signature, self.public_bytes)
 
 _ml_dsa_available=None
 
