@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from webauthn.helpers import generate_challenge, generate_user_handle, byteslike_to_bytes
+from webauthn.helpers import generate_challenge, generate_user_handle
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from webauthn.helpers.structs import (
     AttestationConveyancePreference,

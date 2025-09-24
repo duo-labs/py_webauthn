@@ -1,8 +1,6 @@
 from typing import Union
 from dataclasses import dataclass
 
-import cbor2
-
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
 from .parse_cbor import parse_cbor
