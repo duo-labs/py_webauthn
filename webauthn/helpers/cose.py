@@ -49,7 +49,7 @@ class COSEKTY(int, Enum):
     OKP = 1
     EC2 = 2
     RSA = 3
-    AKP = 7
+    ML_DSA = 7
 
 
 class COSECRV(int, Enum):

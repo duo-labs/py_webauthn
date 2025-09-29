@@ -3,16 +3,16 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from .cose import COSEAlgorithmIdentifier
 from .exceptions import PQCNotSupported
-from .decode_credential_public_key import DecodedAKPPublicKey
+from .decode_credential_public_key import DecodedMLDSAPublicKey
 
 
-class AlgorithmKeyPairPublicKey(DecodedAKPPublicKey):
+class MLDSAPublicKey(DecodedMLDSAPublicKey):
     """
     Something vaguely shaped like other PublicKey classes in cryptography. Going with something
     like this till the cryptography library itself supports PQC directly.
     """
 
-    def __init__(self, decoded_public_key: DecodedAKPPublicKey) -> None:
+    def __init__(self, decoded_public_key: DecodedMLDSAPublicKey) -> None:
         try:
             import dilithium_py
         except Exception:
