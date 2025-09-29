@@ -17,7 +17,7 @@ from .decode_credential_public_key import (
     DecodedMLDSAPublicKey,
 )
 from .exceptions import UnsupportedPublicKey
-from .pqc import MLDSAPublicKey
+from .ml_dsa import MLDSAPublicKey
 
 
 def decoded_public_key_to_cryptography(

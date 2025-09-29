@@ -18,7 +18,7 @@ from .algorithms import (
 )
 from .cose import COSEAlgorithmIdentifier
 from .exceptions import UnsupportedAlgorithm, UnsupportedPublicKey
-from .pqc import MLDSAPublicKey
+from .ml_dsa import MLDSAPublicKey
 
 
 def verify_signature(

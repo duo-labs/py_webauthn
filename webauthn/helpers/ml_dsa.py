@@ -2,7 +2,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from .cose import COSEAlgorithmIdentifier
-from .exceptions import PQCNotSupported
+from .exceptions import MLDSANotSupported
 from .decode_credential_public_key import DecodedMLDSAPublicKey
 
 
@@ -16,7 +16,9 @@ class MLDSAPublicKey(DecodedMLDSAPublicKey):
         try:
             import dilithium_py
         except Exception:
-            raise PQCNotSupported()
+            raise MLDSANotSupported(
+                "Please install https://pypi.org/project/dilithium-py to verify ML-DSA responses with py_webauthn"
+            )
 
         super().__init__(
             kty=decoded_public_key.kty,

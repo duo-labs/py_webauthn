@@ -70,5 +70,5 @@ class InvalidCBORData(WebAuthnException):
     pass
 
 
-class PQCNotSupported(WebAuthnException):
+class MLDSANotSupported(WebAuthnException):
     pass
