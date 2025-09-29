@@ -68,3 +68,7 @@ class InvalidBackupFlags(WebAuthnException):
 
 class InvalidCBORData(WebAuthnException):
     pass
+
+
+class PQCNotSupported(WebAuthnException):
+    pass

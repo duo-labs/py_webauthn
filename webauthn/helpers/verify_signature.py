@@ -18,6 +18,8 @@ from .algorithms import (
 )
 from .cose import COSEAlgorithmIdentifier
 from .exceptions import UnsupportedAlgorithm, UnsupportedPublicKey
+from .decode_credential_public_key import DecodedAKPPublicKey
+from .pqc import AlgorithmKeyPairPublicKey
 
 
 def verify_signature(
@@ -30,6 +32,7 @@ def verify_signature(
         Ed448PublicKey,
         X25519PublicKey,
         X448PublicKey,
+        DecodedAKPPublicKey,
     ],
     signature_alg: COSEAlgorithmIdentifier,
     signature: bytes,
@@ -66,6 +69,9 @@ def verify_signature(
             raise UnsupportedAlgorithm(f"Unrecognized RSA signature alg {signature_alg}")
     elif isinstance(public_key, Ed25519PublicKey):
         public_key.verify(signature, data)
+    elif isinstance(public_key, DecodedAKPPublicKey):
+        _public_key = AlgorithmKeyPairPublicKey(public_key)
+        _public_key.verify(signature, data)
     else:
         raise UnsupportedPublicKey(
             f"Unsupported public key for signature verification: {public_key}"
