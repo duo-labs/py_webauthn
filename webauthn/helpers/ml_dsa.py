@@ -13,12 +13,7 @@ class MLDSAPublicKey(DecodedMLDSAPublicKey):
     """
 
     def __init__(self, decoded_public_key: DecodedMLDSAPublicKey) -> None:
-        try:
-            import dilithium_py
-        except Exception:
-            raise MLDSANotSupported(
-                "Please install https://pypi.org/project/dilithium-py to verify ML-DSA responses with py_webauthn"
-            )
+        assert_ml_dsa_dependencies()
 
         super().__init__(
             kty=decoded_public_key.kty,
@@ -54,3 +49,19 @@ class MLDSAPublicKey(DecodedMLDSAPublicKey):
         method right now.
         """
         return self.pub
+
+
+def assert_ml_dsa_dependencies() -> None:
+    """
+    Check that necessary dependencies are present for handling responses containing ML-DSA public
+    keys.
+
+    Raises:
+        `webauthn.helpers.exceptions.MLDSANotSupported` if those dependencies are missing
+    """
+    try:
+        import dilithium_py
+    except Exception:
+        raise MLDSANotSupported(
+            "Please install https://pypi.org/project/dilithium-py to verify ML-DSA responses with py_webauthn"
+        )
