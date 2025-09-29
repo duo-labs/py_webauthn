@@ -31,9 +31,16 @@ class DecodedRSAPublicKey:
     e: bytes
 
 
+@dataclass
+class DecodedAKPPublicKey:
+    kty: COSEKTY
+    alg: COSEAlgorithmIdentifier
+    pub: bytes
+
+
 def decode_credential_public_key(
     key: bytes,
-) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey]:
+) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey, DecodedAKPPublicKey]:
     """
     Decode a CBOR-encoded public key and turn it into a data structure.
 
@@ -113,6 +120,17 @@ def decode_credential_public_key(
             alg=alg,
             n=n,
             e=e,
+        )
+    elif kty == COSEKTY.AKP:
+        pub = decoded_key[COSEKey.PUB]
+
+        if not pub:
+            raise InvalidPublicKeyStructure("AKP credential public key missing pub")
+
+        return DecodedAKPPublicKey(
+            kty=kty,
+            alg=alg,
+            pub=pub,
         )
 
     raise UnsupportedPublicKeyType(f'Unsupported credential public key type "{kty}"')
