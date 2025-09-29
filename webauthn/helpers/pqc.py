@@ -41,4 +41,14 @@ class MLDSAPublicKey(DecodedMLDSAPublicKey):
             raise InvalidSignature()
 
     def public_bytes(self, encoding: Encoding, format: PublicFormat) -> bytes:
+        """
+        From https://datatracker.ietf.org/doc/draft-ietf-cose-dilithium/09/:
+
+        "The "pub" parameter is the ML-DSA public key, as described in
+        Section 5.3 of FIPS-204."
+
+        This method simply returns the bytes, with no support for other encodings or formats.
+        Nothing that A) provides attestation, and B) uses PQC for public keys will use this
+        method right now.
+        """
         return self.pub
