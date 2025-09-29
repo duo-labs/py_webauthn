@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.8.0 (alpha1)
+
+**Changes:**
+
+- `verify_registration_response()` and `verify_authentication_response()` now support use of ML-DSA public keys for authenticators with PQC support. Run `pip install dilithium-py` to enable this capability ([#260](https://github.com/duo-labs/py_webauthn/pull/260))
+
 ## v2.7.0
 
 **Changes:**
