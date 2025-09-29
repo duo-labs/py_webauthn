@@ -18,6 +18,7 @@ from .algorithms import (
 )
 from .cose import COSEAlgorithmIdentifier
 from .exceptions import UnsupportedAlgorithm, UnsupportedPublicKey
+from .ml_dsa import MLDSAPublicKey
 
 
 def verify_signature(
@@ -30,6 +31,7 @@ def verify_signature(
         Ed448PublicKey,
         X25519PublicKey,
         X448PublicKey,
+        MLDSAPublicKey,
     ],
     signature_alg: COSEAlgorithmIdentifier,
     signature: bytes,
@@ -65,6 +67,8 @@ def verify_signature(
         else:
             raise UnsupportedAlgorithm(f"Unrecognized RSA signature alg {signature_alg}")
     elif isinstance(public_key, Ed25519PublicKey):
+        public_key.verify(signature, data)
+    elif isinstance(public_key, MLDSAPublicKey):
         public_key.verify(signature, data)
     else:
         raise UnsupportedPublicKey(

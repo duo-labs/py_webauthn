@@ -1,8 +1,6 @@
 from typing import Union
 from dataclasses import dataclass
 
-import cbor2
-
 from .cose import COSECRV, COSEKTY, COSEAlgorithmIdentifier, COSEKey
 from .exceptions import InvalidPublicKeyStructure, UnsupportedPublicKeyType
 from .parse_cbor import parse_cbor
@@ -33,9 +31,16 @@ class DecodedRSAPublicKey:
     e: bytes
 
 
+@dataclass
+class DecodedMLDSAPublicKey:
+    kty: COSEKTY
+    alg: COSEAlgorithmIdentifier
+    pub: bytes
+
+
 def decode_credential_public_key(
     key: bytes,
-) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey]:
+) -> Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey, DecodedMLDSAPublicKey]:
     """
     Decode a CBOR-encoded public key and turn it into a data structure.
 
@@ -115,6 +120,17 @@ def decode_credential_public_key(
             alg=alg,
             n=n,
             e=e,
+        )
+    elif kty == COSEKTY.ML_DSA:
+        pub = decoded_key[COSEKey.PUB]
+
+        if not pub:
+            raise InvalidPublicKeyStructure("ML-DSA credential public key missing pub")
+
+        return DecodedMLDSAPublicKey(
+            kty=kty,
+            alg=alg,
+            pub=pub,
         )
 
     raise UnsupportedPublicKeyType(f'Unsupported credential public key type "{kty}"')

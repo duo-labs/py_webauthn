@@ -14,13 +14,20 @@ from .decode_credential_public_key import (
     DecodedEC2PublicKey,
     DecodedOKPPublicKey,
     DecodedRSAPublicKey,
+    DecodedMLDSAPublicKey,
 )
 from .exceptions import UnsupportedPublicKey
+from .ml_dsa import MLDSAPublicKey
 
 
 def decoded_public_key_to_cryptography(
-    public_key: Union[DecodedOKPPublicKey, DecodedEC2PublicKey, DecodedRSAPublicKey]
-) -> Union[Ed25519PublicKey, EllipticCurvePublicKey, RSAPublicKey]:
+    public_key: Union[
+        DecodedOKPPublicKey,
+        DecodedEC2PublicKey,
+        DecodedRSAPublicKey,
+        DecodedMLDSAPublicKey,
+    ],
+) -> Union[Ed25519PublicKey, EllipticCurvePublicKey, RSAPublicKey, MLDSAPublicKey]:
     """Convert raw decoded public key parameters (crv, x, y, n, e, etc...) into
     public keys using primitives from the cryptography.io library
     """
@@ -61,5 +68,7 @@ def decoded_public_key_to_cryptography(
         okp_pub_key = Ed25519PublicKey.from_public_bytes(public_key.x)
 
         return okp_pub_key
+    elif isinstance(public_key, DecodedMLDSAPublicKey):
+        return MLDSAPublicKey(public_key)
     else:
         raise UnsupportedPublicKey(f"Unrecognized decoded public key: {public_key}")

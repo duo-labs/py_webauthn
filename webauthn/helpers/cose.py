@@ -15,6 +15,9 @@ class COSEAlgorithmIdentifier(int, Enum):
         `RSASSA_PKCS1_v1_5_SHA_384`
         `RSASSA_PKCS1_v1_5_SHA_512`
         `RSASSA_PKCS1_v1_5_SHA_1`
+        `ML_DSA_44`
+        `ML_DSA_65`
+        `ML_DSA_87`
 
     https://www.w3.org/TR/webauthn-2/#sctn-alg-identifier
     https://www.iana.org/assignments/cose/cose.xhtml#algorithms
@@ -30,6 +33,9 @@ class COSEAlgorithmIdentifier(int, Enum):
     RSASSA_PKCS1_v1_5_SHA_384 = -258
     RSASSA_PKCS1_v1_5_SHA_512 = -259
     RSASSA_PKCS1_v1_5_SHA_1 = -65535  # Deprecated; here for legacy support
+    ML_DSA_44 = -48
+    ML_DSA_65 = -49
+    ML_DSA_87 = -50
 
 
 class COSEKTY(int, Enum):
@@ -43,6 +49,7 @@ class COSEKTY(int, Enum):
     OKP = 1
     EC2 = 2
     RSA = 3
+    ML_DSA = 7
 
 
 class COSECRV(int, Enum):
@@ -77,3 +84,5 @@ class COSEKey(int, Enum):
     # RSA
     N = -1
     E = -2
+    # ML-DSA
+    PUB = -1
