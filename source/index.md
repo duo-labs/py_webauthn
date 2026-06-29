@@ -16,7 +16,7 @@ pip install webauthn
 
 ## Requirements
 
-- Python 3.8 and up
+- Python 3.10 and up
 
 ```{toctree}
 :hidden:
