@@ -8,18 +8,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+            # Install a specific version of uv.
+            version: "0.11.21"
+            python-version: "3.12"
+            enable-cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r ./requirements.txt
+          uv sync --locked --all-extras --dev
+      
       - name: Build site
         run: |
-          make html
+          uv run make html
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
