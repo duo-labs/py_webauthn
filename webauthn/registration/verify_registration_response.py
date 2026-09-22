@@ -206,6 +206,9 @@ def verify_registration_response(
             f'Unsupported credential public key alg "{decoded_credential_public_key.alg}", expected one of: {supported_pub_key_algs}'
         )
 
+    if not isinstance(attestation_object.fmt, str):
+        raise InvalidRegistrationResponse("malformed attestation type")
+
     # Prepare a list of possible root certificates for certificate chain validation
     pem_root_certs_bytes: List[bytes] = []
     if pem_root_certs_bytes_by_fmt:
