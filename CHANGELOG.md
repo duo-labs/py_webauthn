@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.1
+
+**Changes:**
+
+- `verify_registration_response()` now rejects responses with attestation statement formats that are not strings ([#288](https://github.com/duo-labs/py_webauthn/pull/288), h/t @DarkaMaul)
+
 ## v3.0.0
 
 **Changes:**
