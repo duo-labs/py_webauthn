@@ -115,7 +115,7 @@ class TestVerifyRegistrationResponse(TestCase):
 
         assert verification.fmt == AttestationFormat.NONE
 
-    def test_raises_exception_on_unsupported_attestation_type(self) -> None:
+    def test_raises_exception_on_invalid_attestation_type(self) -> None:
         cred_json = {
             "id": "FsWBrFcw8yRjxV8z18Egh91o1AScNRYkIuUoY6wIlIhslDpP7eydKi1q5s9g1ugDP9mqBlPDDFPRbH6YLwHbtg",
             "rawId": "FsWBrFcw8yRjxV8z18Egh91o1AScNRYkIuUoY6wIlIhslDpP7eydKi1q5s9g1ugDP9mqBlPDDFPRbH6YLwHbtg",
@@ -128,30 +128,36 @@ class TestVerifyRegistrationResponse(TestCase):
             "transports": ["nfc", "usb"],
         }
 
-        # Take the otherwise legitimate credential and mangle its attestationObject's
-        # "fmt" to something it could never actually be
         parsed_atte_obj: dict = parse_cbor(
             base64url_to_bytes(cred_json["response"]["attestationObject"])  # type: ignore
         )
-        parsed_atte_obj["fmt"] = "not_real_fmt"
-        cred_json["response"]["attestationObject"] = bytes_to_base64url(  # type: ignore
-            encode_cbor(parsed_atte_obj)
-        )
-
-        credential = json.dumps(cred_json)
         challenge = base64url_to_bytes(
             "pDRmkdduAi-AU2x6o-FqqhI3XK2nlVlsCSr04zWkNtv84JwrMHtElRHHUWLEDhkrEaQ8B1lBcIH_VSRqp_RAAw"
         )
         rp_id = "localhost"
         expected_origin = "http://localhost:5000"
 
-        with self.assertRaises(InvalidRegistrationResponse):
-            verify_registration_response(
-                credential=credential,
-                expected_challenge=challenge,
-                expected_origin=expected_origin,
-                expected_rp_id=rp_id,
-            )
+        cases = (
+            ("not_real_fmt", 'Unsupported attestation type "not_real_fmt"'),
+            (0, "malformed attestation type"),
+            (["none"], "malformed attestation type"),
+        )
+        for fmt, expected_message in cases:
+            with self.subTest(fmt=fmt):
+                parsed_atte_obj["fmt"] = fmt
+                cred_json["response"]["attestationObject"] = bytes_to_base64url(  # type: ignore
+                    encode_cbor(parsed_atte_obj)
+                )
+
+                with self.assertRaises(InvalidRegistrationResponse) as raised:
+                    verify_registration_response(
+                        credential=json.dumps(cred_json),
+                        expected_challenge=challenge,
+                        expected_origin=expected_origin,
+                        expected_rp_id=rp_id,
+                    )
+
+                self.assertEqual(str(raised.exception), expected_message)
 
     def test_supports_multiple_expected_origins(self) -> None:
         credential = """{
