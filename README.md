@@ -117,3 +117,15 @@ venv $> uv run -m black webauthn --line-length=99
 All done! ✨ 🍰 ✨
 52 files left unchanged.
 ```
+
+## Publishing to PyPI
+
+A GitHub action is defined in [publish.yml](.github/workflows/publish.yml) to publish a new version of [the `webauthn` library on PyPI](https://pypi.org/project/webauthn/) when a Release is created on GitHub:
+
+1. Update [CHANGELOG.md](CHANGELOG.md) with changes for the new release version
+2. Increment `__version__` in [webauthn/__init__.py](webauthn/__init__.py) to the same release version
+3. Commit the change
+4. Create a git tag on the commit above with the same release version
+5. Push the tag up to GitHub
+6. Go to [Releases > Tags](https://github.com/duo-labs/py_webauthn/tags) and create a release from the new tag
+7. Check [Actions > Upload Package to PyPI](https://github.com/duo-labs/py_webauthn/actions/workflows/publish.yml) to confirm a new version of the package made it to PyPI
