@@ -66,6 +66,12 @@ class AuthorizationList(Sequence):
             ),
         ),
         OptionalNamedType(
+            "blockMode",
+            Integers().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 4)
+            ),
+        ),
+        OptionalNamedType(
             "digest",
             Integers().subtype(
                 explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5)
@@ -78,9 +84,27 @@ class AuthorizationList(Sequence):
             ),
         ),
         OptionalNamedType(
+            "callerNonce",
+            Null().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 7)
+            ),
+        ),
+        OptionalNamedType(
+            "minMacLength",
+            Integer().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 8)
+            ),
+        ),
+        OptionalNamedType(
             "ecCurve",
             Integer().subtype(
                 explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 10)
+            ),
+        ),
+        OptionalNamedType(
+            "mlDsaVariant",
+            Integer().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 11)
             ),
         ),
         OptionalNamedType(
@@ -90,9 +114,21 @@ class AuthorizationList(Sequence):
             ),
         ),
         OptionalNamedType(
+            "mgfDigest",
+            Integers().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 203)
+            ),
+        ),
+        OptionalNamedType(
             "rollbackResistance",
             Null().subtype(
                 explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 303)
+            ),
+        ),
+        OptionalNamedType(
+            "earlyBootOnly",
+            Null().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 305)
             ),
         ),
         OptionalNamedType(
@@ -111,6 +147,18 @@ class AuthorizationList(Sequence):
             "usageExpireDateTime",
             Integer().subtype(
                 explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 402)
+            ),
+        ),
+        OptionalNamedType(
+            "usageCountLimit",
+            Integer().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 405)
+            ),
+        ),
+        OptionalNamedType(
+            "userSecureId",
+            Integer().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 502)
             ),
         ),
         OptionalNamedType(
