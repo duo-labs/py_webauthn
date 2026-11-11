@@ -1,8 +1,8 @@
 import hashlib
-from typing import List
+from typing import List, cast
 
-from cryptography import x509
 from cryptography.exceptions import InvalidSignature
+from OpenSSL.crypto import _PublicKey, load_certificate, FILETYPE_ASN1
 
 from webauthn.helpers import (
     decode_credential_public_key,
@@ -62,9 +62,21 @@ def verify_packed(
         except InvalidCertificateChain as err:
             raise InvalidRegistrationResponse(f"{err} (Packed)")
 
-        attestation_cert_bytes = attestation_statement.x5c[0]
-        attestation_cert = x509.load_der_x509_certificate(attestation_cert_bytes)
-        attestation_cert_pub_key = attestation_cert.public_key()
+        # Parse the attestation certificate with OpenSSL (as `validate_certificate_chain()` above
+        # already did) instead of cryptography's x509 module. Some authenticators ship certificates
+        # that encode explicit NULL parameters in their ECDSA signature AlgorithmIdentifier, which
+        # RFC 5758 forbids and cryptography >= 49.0.0 rejects outright with a ValueError.
+        try:
+            attestation_cert_bytes = attestation_statement.x5c[0]
+            attestation_cert = load_certificate(FILETYPE_ASN1, attestation_cert_bytes)
+            attestation_cert_pub_key = attestation_cert.get_pubkey().to_cryptography_key()
+            # to_cryptography_key() is of type _Key which includes _PrivateKey types as well. But we
+            # know this is the _PublicKey subset of _Key so help type checking understand that
+            attestation_cert_pub_key = cast(_PublicKey, attestation_cert_pub_key)
+        except Exception as exc:
+            raise InvalidRegistrationResponse(
+                "Could not parse attestation certificate public key. See __cause__ for more info (Packed)"
+            ) from exc
 
         try:
             verify_signature(

@@ -70,3 +70,41 @@ class TestVerifyRegistrationResponsePacked(TestCase):
         assert verification.credential_id == base64url_to_bytes(
             "WlHiMqH6UhUs-d43z-aGlE3nsXuEOQpa9P9pwpqb4tmvtBMBfGvAV2wUrqBCDENjkkxd6kIRzZQKcluyOFlyW_vXVZSAEgod1xj-1QmFpuwyBVnlkQGefRbmUjbEt5iE4q3tdjy65EWIekO0SNjCQx3LxIJMzi25fgUkI9Y-gg0"
         )
+
+    def test_verify_attestation_from_samsung_pass(self) -> None:
+        """
+        Samsung Pass' attestation certificate ("Samsung Electronics FIDO2 Attestation") encodes
+        explicit NULL parameters in its ecdsa-with-SHA256 signature AlgorithmIdentifier, which
+        cryptography >= 49.0.0 refuses to load.
+        """
+        credential = """{
+            "id": "2HSjHnh6MJpYWpxZRwaRklp0QYA6W7NepLha6aIOBP0",
+            "rawId": "2HSjHnh6MJpYWpxZRwaRklp0QYA6W7NepLha6aIOBP0",
+            "response": {
+                "attestationObject": "o2NmbXRmcGFja2VkZ2F0dFN0bXSjY2FsZyZjc2lnWEcwRQIhAL7ldm4jSI32yNkyM_aFp7bdZT51LWfhG38v1U7gVYivAiBdOay8A_wcvo3K-nMI3V0qA2mXA_1-QOtl273yihvyyWN4NWOBWQJmMIICYjCCAgegAwIBAgIIQIptBvvKZAAwDAYIKoZIzj0EAwIFADCBpjEfMB0GA1UEAxMWU2Ftc3VuZyBFbGVjdHJvbmljcyBDQTEcMBoGA1UEChMTU2Ftc3VuZyBFbGVjdHJvbmljczEXMBUGA1UECxMOU2Ftc3VuZyBNb2JpbGUxEzARBgNVBAcTClN1d29uIGNpdHkxCzAJBgNVBAYTAktSMSowKAYKCZImiZPyLGQBAQwaU2Ftc3VuZ0RldmljZVJvb3RDQUtleV9FQ0MwHhcNMjUwNDEwMDY1ODM1WhcNNDUwNDA1MDY1ODM1WjB_MQswCQYDVQQGEwJLUjEcMBoGA1UECgwTU2Ftc3VuZyBFbGVjdHJvbmljczEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvbjEuMCwGA1UEAwwlU2Ftc3VuZyBFbGVjdHJvbmljcyBGSURPMiBBdHRlc3RhdGlvbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABHovNTTnrWQgvDY9HlpStEiockEL-_5oosaZYIfCqYhg6cfGhlleglfhLj_Kmtfs8fXnMN0BH00kjQUVt2hX0NajQzBBMAwGA1UdEwEB_wQCMAAwDgYDVR0PAQH_BAQDAgbAMCEGCysGAQQBguUcAQEEBBIEEFNBTVNVTkcAAAAAAAAAAAAwDAYIKoZIzj0EAwIFAANHADBEAiBk3HNHtSccCRMd0Jv2WkpVgjqgr8IoWW139Icx-Tr-bQIgE_n8ep5JDLPuslua4qbJNFUfhGAOMtt-rrBzfqz-SjFoYXV0aERhdGFYpOmoiJnw46ubmPaT4HOKN3JaPvgTDzaWsk3d2xRQJIgNXQAAAABTQU1TVU5HAAAAAAAAAAAAACDYdKMeeHowmlhanFlHBpGSWnRBgDpbs16kuFrpog4E_aUBAgMmIAEhWCAd1rcFACPhirsSbTMTwkKUnIcH0yWHHWc_Uvsf7BRvXyJYIHTe07nX-7gWB92aw4JxajTAGtK7n7sX48JlAtR-OgpH",
+                "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiQzl1LTFKdjdWTDNKY2V5cFNQUDVON09xanlZdUpBOGxpX1BPOXM3TVEwQSIsIm9yaWdpbiI6Imh0dHBzOi8vd3d3LndlYmF1dGhuLm1lIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ"
+            },
+            "type": "public-key",
+            "clientExtensionResults": {},
+            "authenticatorAttachment": "platform",
+            "transports": [
+                "hybrid",
+                "internal"
+            ]
+        }"""
+        challenge = base64url_to_bytes("C9u-1Jv7VL3JceypSPP5N7OqjyYuJA8li_PO9s7MQ0A")
+        rp_id = "www.webauthn.me"
+        expected_origin = "https://www.webauthn.me"
+
+        verification = verify_registration_response(
+            credential=credential,
+            expected_challenge=challenge,
+            expected_origin=expected_origin,
+            expected_rp_id=rp_id,
+        )
+
+        assert verification.fmt == AttestationFormat.PACKED
+        assert verification.credential_id == base64url_to_bytes(
+            "2HSjHnh6MJpYWpxZRwaRklp0QYA6W7NepLha6aIOBP0"
+        )
+        assert verification.aaguid == "53414d53-554e-4700-0000-000000000000"
